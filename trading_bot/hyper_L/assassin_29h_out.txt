@@ -1,0 +1,60 @@
+﻿python : 2026-05-20 04:02:24,224 - AssassinBot - INFO - ≡ƒô¥ PAPER MODE: No real orders will be placed.
+At line:1 char:32
++ ... IOENCODING='utf-8'; python check_assassin_19h_binance.py 2>&1 | Out-F ...
++                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (2026-05-20 04:0...will be placed.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+2026-05-20 04:02:24,283 - CapitalManager - INFO - ≡ƒôé Loaded previous state: 0 trades, $10.00 balance
+2026-05-20 04:02:24,283 - CapitalManager - INFO - ≡ƒÆ░ Capital Manager Initialized
+2026-05-20 04:02:24,284 - CapitalManager - INFO -    Balance:   $10.00
+2026-05-20 04:02:24,284 - CapitalManager - INFO -    Risk:      25.0% per trade
+2026-05-20 04:02:24,284 - CapitalManager - INFO -    Leverage:  50x
+2026-05-20 04:02:24,285 - CapitalManager - INFO -    Strategy:  The Assassin
+2026-05-20 04:02:31,309 - AssassinBot - INFO - ≡ƒÄ» INVERTED VCP FAKEOUT DETECTED: SHORT | Vol: 1.6x Spike | TP: +$0.4 
+| SL: -$0.4
+2026-05-20 04:02:31,432 - AssassinBot - INFO - ≡ƒÄ» INVERTED VCP FAKEOUT DETECTED: LONG | Vol: 1.8x Spike | TP: +$0.4 
+| SL: -$0.4
+2026-05-20 04:02:38,788 - AssassinBot - INFO - ≡ƒÄ» INVERTED VCP FAKEOUT DETECTED: LONG | Vol: 4.7x Spike | TP: +$8.5 
+| SL: -$8.5
+2026-05-20 04:02:42,116 - AssassinBot - INFO - ≡ƒÄ» INVERTED VCP FAKEOUT DETECTED: SHORT | Vol: 2.3x Spike | TP: +$0.0 
+| SL: -$0.0
+2026-05-20 04:02:47,167 - AssassinBot - INFO - ≡ƒÄ» INVERTED VCP FAKEOUT DETECTED: SHORT | Vol: 2.0x Spike | TP: +$0.0 
+| SL: -$0.0
+2026-05-20 04:02:47,472 - AssassinBot - INFO - ≡ƒÄ» INVERTED VCP FAKEOUT DETECTED: LONG | Vol: 5.7x Spike | TP: +$0.0 
+| SL: -$0.0
+2026-05-20 04:03:03,748 - AssassinBot - INFO - ≡ƒÄ» INVERTED VCP FAKEOUT DETECTED: LONG | Vol: 4.2x Spike | TP: 
++$203.3 | SL: -$203.3
+Initializing API for Binance...
+
+Fetching SOLUSDT candles for past 19 hours...
+Loaded 448 candles. Scanning...
+  [SIGNAL FIRE] SOLUSDT SHORT @ 2026-05-19 21:10:00 UTC
+    Entry: 84.5900 | TP: 84.2200 | SL: 84.9600
+  [SIGNAL FIRE] SOLUSDT LONG @ 2026-05-19 22:00:00 UTC
+    Entry: 84.3000 | TP: 84.6600 | SL: 83.9400
+
+Fetching ETHUSDT candles for past 19 hours...
+Loaded 448 candles. Scanning...
+  [SIGNAL FIRE] ETHUSDT LONG @ 2026-05-19 22:00:00 UTC
+    Entry: 2112.0900 | TP: 2120.5900 | SL: 2103.5900
+
+Fetching DOGEUSDT candles for past 19 hours...
+Loaded 448 candles. Scanning...
+  [SIGNAL FIRE] DOGEUSDT SHORT @ 2026-05-19 07:35:00 UTC
+    Entry: 0.1048 | TP: 0.1041 | SL: 0.1054
+  [SIGNAL FIRE] DOGEUSDT SHORT @ 2026-05-19 21:10:00 UTC
+    Entry: 0.1037 | TP: 0.1032 | SL: 0.1043
+  [SIGNAL FIRE] DOGEUSDT LONG @ 2026-05-19 22:00:00 UTC
+    Entry: 0.1032 | TP: 0.1038 | SL: 0.1027
+
+Fetching WIFUSDT candles for past 19 hours...
+Loaded 448 candles. Scanning...
+  No signals for WIFUSDT in the past 19 hours.
+
+Fetching BTCUSDT candles for past 19 hours...
+Loaded 448 candles. Scanning...
+  [SIGNAL FIRE] BTCUSDT LONG @ 2026-05-19 22:00:00 UTC
+    Entry: 76837.5100 | TP: 77040.8300 | SL: 76634.1900
+
+Total signals across all targets in 19h: 7
