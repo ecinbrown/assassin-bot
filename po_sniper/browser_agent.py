@@ -74,11 +74,11 @@ class BrowserAgent:
         
         # Block media to save memory
         async def block_media(route):
-            if route.request.resource_type in ["image", "media", "font", "stylesheet"]:
+            if route.request.resource_type in ["image", "media"]:
                 await route.abort()
             else:
                 await route.continue_()
-        await self.primary_page.route("**/*", block_media)
+        await self.context.route("**/*", block_media)
         
         await self._inject_price_interceptor()
         
@@ -180,7 +180,7 @@ class BrowserAgent:
                 page = await self.context.new_page()
                 
                 async def block_media(route):
-                    if route.request.resource_type in ["image", "media", "font", "stylesheet"]:
+                    if route.request.resource_type in ["image", "media"]:
                         await route.abort()
                     else:
                         await route.continue_()
