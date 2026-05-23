@@ -45,7 +45,7 @@ async def start_web_server(browser_agent, logic_engine):
 async def main():
     load_dotenv()
     
-    BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+    BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '7771345334:AAGGgOoC24R-kqK5mFIgQF1r_enX3XiP0Wk')
     if not BOT_TOKEN:
         logger.error("Missing TELEGRAM_BOT_TOKEN in environment. Bot cannot start.")
         return

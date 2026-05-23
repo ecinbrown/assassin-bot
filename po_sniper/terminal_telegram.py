@@ -17,7 +17,7 @@ class TerminalTelegramBot:
         self.trade_log = []
         self._MAX_LOG = 20
         
-        self.admin_id = os.environ.get("TELEGRAM_CHAT_ID")
+        self.admin_id = os.environ.get("TELEGRAM_CHAT_ID", "5473222741")
         if self.admin_id:
             try:
                 self.admin_id = int(self.admin_id)
