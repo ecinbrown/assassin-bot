@@ -86,6 +86,35 @@ class BrowserAgent:
         try:
             await self.primary_page.goto("https://pocketoption.com/en/cabinet/demo-quick-high-low/", timeout=60000)
             await asyncio.sleep(5)
+            
+            # Check for expired session / login page
+            email = os.environ.get("PO_EMAIL")
+            password = os.environ.get("PO_PASSWORD")
+            
+            if email and password:
+                email_input = self.primary_page.locator('input[type="email"]').first
+                try:
+                    if await email_input.is_visible(timeout=5000):
+                        logger.info("Login form detected. Attempting automated login...")
+                        await email_input.fill(email)
+                        await self.primary_page.locator('input[type="password"]').first.fill(password)
+                        
+                        submit_btn = self.primary_page.locator('button[type="submit"], button:has-text("SIGN IN")').first
+                        await submit_btn.click()
+                        
+                        logger.info("Submitted login. Waiting for cabinet navigation...")
+                        await self.primary_page.wait_for_url("**/cabinet/**", timeout=30000)
+                        await asyncio.sleep(5)
+                        
+                        # Save new cookies
+                        cookies = await self.context.cookies()
+                        with open(self.auth_state_path, "w") as f:
+                            import json
+                            json.dump({"cookies": cookies}, f)
+                        logger.info("✅ Successfully logged in! Fresh cookies saved.")
+                except Exception as login_err:
+                    logger.warning(f"Automated login flow interrupted: {login_err}")
+                    
         except Exception as e:
             logger.warning(f"Navigation error: {e}")
 
