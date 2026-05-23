@@ -114,7 +114,7 @@ class BrowserAgent:
         ''')
 
     async def select_top_assets(self, max_assets=5, logic_engine=None):
-        logger.info(f"Scanning for top {max_assets} assets with >=85% payout...")
+        logger.info(f"Scanning for top {max_assets} assets with >=92% payout...")
         
         for attempt in range(3):
             try:
@@ -124,13 +124,13 @@ class BrowserAgent:
                     }''')
                 except: pass
                 
-                asset_button = self.primary_page.locator(".pair-number-wrap").first
-                await asset_button.click(timeout=8000)
-                await asyncio.sleep(2)
+                asset_button = self.primary_page.locator(".pair-number-wrap, .current-symbol, .asset-info-wrap").first
+                await asset_button.click(timeout=15000)
+                await asyncio.sleep(3)
                 break
             except Exception as e:
                 logger.warning(f"Asset selector attempt {attempt+1} failed: {e}")
-                await asyncio.sleep(3)
+                await asyncio.sleep(5)
                 
         top_raw_symbols = []
         try:
