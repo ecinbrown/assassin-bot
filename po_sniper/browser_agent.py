@@ -64,11 +64,26 @@ class BrowserAgent:
             args=args
         )
         
+        storage_state = self.auth_state_path if os.path.exists(self.auth_state_path) else None
+        
         self.context = await self.browser.new_context(
             viewport={'width': 1280, 'height': 800},
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             storage_state=storage_state
         )
+        
+        session_id = os.environ.get("PO_SESSION_ID")
+        if session_id:
+            await self.context.add_cookies([{
+                "name": "session_id",
+                "value": session_id,
+                "domain": ".pocketoption.com",
+                "path": "/",
+                "httpOnly": True,
+                "secure": True,
+                "sameSite": "Lax"
+            }])
+            logger.info("✅ Injected PO_SESSION_ID from environment variables!")
         
         self.primary_page = await self.context.new_page()
         
