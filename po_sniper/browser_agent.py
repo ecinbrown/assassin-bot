@@ -238,6 +238,74 @@ class BrowserAgent:
                     logger.error("Browser crashed! Attempting recovery...")
                     await self.recover_browser()
 
+    async def change_pair_on_page(self, page, old_symbol, logic_engine):
+        try:
+            # Open asset menu
+            try:
+                await page.evaluate('''() => { document.querySelectorAll('.close-button, .modal-close, [data-action="close"], .btn-close').forEach(b => b.click()); }''')
+            except: pass
+            
+            asset_button = page.locator(".pair-number-wrap").first
+            await asset_button.click(timeout=8000)
+            await asyncio.sleep(2)
+            
+            # Scrape pairs
+            elements = await page.evaluate('''() => {
+                let results = [];
+                document.querySelectorAll("a.alist__link").forEach(el => {
+                    let text = el.innerText || "";
+                    let match = text.match(/\\+?(\\d+)%/);
+                    if (match) {
+                        if (parseInt(match[1]) >= 92) {
+                            let parts = text.split("\\n");
+                            if(parts.length > 0) results.push(parts[0].trim());
+                        }
+                    }
+                });
+                return results;
+            }''')
+            
+            if not elements:
+                logger.warning("No assets with >=92% payout found to swap to.")
+                await page.keyboard.press("Escape")
+                return False
+                
+            new_sym = None
+            for raw_sym in elements:
+                formatted_sym = raw_sym.replace("/", "").replace(" ", "_").replace("OTC", "otc")
+                if formatted_sym not in self.pages and formatted_sym != old_symbol:
+                    new_sym = raw_sym
+                    break
+                    
+            if not new_sym:
+                logger.warning("No NEW unused assets with >=92% payout found.")
+                await page.keyboard.press("Escape")
+                return False
+                
+            # Click the new asset
+            target_item = page.locator(f"a.alist__link:has(span:has-text('{new_sym}'))").first
+            await target_item.click(timeout=5000)
+            await asyncio.sleep(2)
+            
+            formatted_new = new_sym.replace("/", "").replace(" ", "_").replace("OTC", "otc")
+            del self.pages[old_symbol]
+            self.pages[formatted_new] = page
+            
+            if hasattr(logic_engine, 'target_symbols'):
+                if old_symbol in logic_engine.target_symbols:
+                    logic_engine.target_symbols.remove(old_symbol)
+                if formatted_new not in logic_engine.target_symbols:
+                    logic_engine.target_symbols.append(formatted_new)
+                    
+            logger.info(f"🔄 Swapped dead pair {old_symbol} -> {formatted_new}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to change pair for {old_symbol}: {e}")
+            try: await page.keyboard.press("Escape")
+            except: pass
+            return False
+
     async def payout_watchdog(self, logic_engine):
         while self.is_running:
             await asyncio.sleep(30)
@@ -256,11 +324,12 @@ class BrowserAgent:
                     
                     if val:
                         if val < 92:
-                            logger.warning(f"⚠️ Payout for {symbol} dropped to {val}%! (Below 92% threshold)")
-                            # We can set a flag on logic_engine to temporarily block trades for this symbol
-                            if not hasattr(logic_engine, 'blocked_symbols'):
-                                logic_engine.blocked_symbols = set()
-                            logic_engine.blocked_symbols.add(symbol)
+                            logger.warning(f"⚠️ Payout for {symbol} dropped to {val}%! Swapping pair...")
+                            success = await self.change_pair_on_page(page, symbol, logic_engine)
+                            if not success:
+                                if not hasattr(logic_engine, 'blocked_symbols'):
+                                    logic_engine.blocked_symbols = set()
+                                logic_engine.blocked_symbols.add(symbol)
                         else:
                             if hasattr(logic_engine, 'blocked_symbols') and symbol in logic_engine.blocked_symbols:
                                 logic_engine.blocked_symbols.remove(symbol)
