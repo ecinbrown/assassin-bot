@@ -30,10 +30,17 @@ async def start_web_server(browser_agent, logic_engine):
             "risk_strategy": "Kelly Optimal"
         })
 
+    async def handle_debug(request):
+        try:
+            return web.FileResponse('debug.png')
+        except:
+            return web.Response(text="No debug screenshot yet.")
+
     app = web.Application()
     app.router.add_get('/', handle_ping)
     app.router.add_get('/health', handle_ping)
     app.router.add_get('/telemetry', handle_telemetry)
+    app.router.add_get('/debug.png', handle_debug)
     
     runner = web.AppRunner(app)
     await runner.setup()

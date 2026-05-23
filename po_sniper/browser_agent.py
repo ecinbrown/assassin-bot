@@ -130,6 +130,10 @@ class BrowserAgent:
                 break
             except Exception as e:
                 logger.warning(f"Asset selector attempt {attempt+1} failed: {e}")
+                try:
+                    await self.primary_page.screenshot(path="debug.png")
+                    logger.info("Saved debug screenshot to debug.png")
+                except: pass
                 await asyncio.sleep(5)
                 
         top_raw_symbols = []
