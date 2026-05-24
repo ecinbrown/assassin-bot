@@ -1,5 +1,5 @@
-# Use the official Microsoft Playwright Python image
-FROM mcr.microsoft.com/playwright/python:v1.44.0-jammy
+# Lightweight Python image — NO Chromium needed!
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all bot files (including auth_state.json)
+# Copy all bot files
 COPY . .
 
 # Set environment variables for Python

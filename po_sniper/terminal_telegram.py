@@ -77,20 +77,14 @@ class TerminalTelegramBot:
             await self._send_trades(query.message)
 
     async def _send_status(self, message):
-        balance_str = "UNKNOWN"
-        payout = getattr(self.browser_agent, 'last_known_payout', 85)
-        sym = getattr(self.browser_agent, 'active_symbol', 'None')
+        payout = getattr(self.browser_agent, 'last_known_payout', 92)
+        sym = ", ".join(self.browser_agent.pages.keys()) if self.browser_agent.pages else 'None'
         
-        if self.browser_agent and self.browser_agent.primary_page:
-            try:
-                balance_val = await self.browser_agent.primary_page.evaluate('''() => {
-                    let b = document.querySelector(".balance-info-block, .balance-info, .js-balance-value, .balance-value");
-                    return b ? b.innerText : null;
-                }''')
-                if balance_val:
-                    balance_str = balance_val
-            except Exception as e:
-                balance_str = f"Error: {e}"
+        # Get balance from WSS agent
+        if hasattr(self.browser_agent, 'demo_balance'):
+            balance_str = f"${self.browser_agent.demo_balance:.2f}"
+        else:
+            balance_str = "UNKNOWN"
         
         # Engine stats
         le = self.logic_engine
