@@ -83,7 +83,20 @@ class BrowserAgent:
                 "secure": True,
                 "sameSite": "Lax"
             }])
-            logger.info("✅ Injected PO_SESSION_ID from environment variables!")
+            
+            # Extract auto-login cookie if provided via environment
+            auto_login = os.environ.get("PO_AUTO_LOGIN")
+            if auto_login:
+                await self.context.add_cookies([{
+                    "name": "autologin",
+                    "value": auto_login,
+                    "domain": ".pocketoption.com",
+                    "path": "/",
+                    "httpOnly": True,
+                    "secure": True,
+                    "sameSite": "Lax"
+                }])
+            logger.info("✅ Injected PO_SESSION_ID and Cookies from environment variables!")
         
         self.primary_page = await self.context.new_page()
         
