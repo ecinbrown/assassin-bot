@@ -38,6 +38,7 @@ class TerminalTelegramBot:
         self.app = Application.builder().token(self.bot_token).build()
         
         self.app.add_handler(CommandHandler("start", self.handle_start))
+        self.app.add_handler(CommandHandler("token", self.handle_token))
         self.app.add_handler(CallbackQueryHandler(self.button_handler))
         
         # Handle persistent keyboard text buttons
@@ -61,7 +62,9 @@ class TerminalTelegramBot:
             "🎯 <b>TERMINAL VELOCITY BOT (POCKETOPTION)</b> 🎯\n\n"
             "I am connected and monitoring OTC markets.\n\n"
             "📊 <b>Strategy:</b> VIP 15M Reversal\n"
-            "📡 <b>Mode:</b> Pure WebSocket (no browser)\n"
+            "📡 <b>Mode:</b> Pure WebSocket (no browser)\n\n"
+            "🔑 <i>To update your session token:</i>\n"
+            "<code>/token YOUR_SESSION_TOKEN YOUR_UID</code>"
         )
         
         await update.message.reply_text(
@@ -69,6 +72,30 @@ class TerminalTelegramBot:
             parse_mode='HTML',
             reply_markup=self._get_menu_keyboard()
         )
+
+    async def handle_token(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if self.admin_id and update.message.chat_id != self.admin_id:
+            return
+            
+        args = context.args
+        if not args:
+            await update.message.reply_text(
+                "❌ <b>Usage:</b> <code>/token YOUR_SESSION_TOKEN [YOUR_UID]</code>\n\n"
+                "Example:\n<code>/token 575ffe383eba9e4bbb90d4f3edf8f707 113865054</code>",
+                parse_mode='HTML'
+            )
+            return
+            
+        new_token = args[0]
+        new_uid = args[1] if len(args) > 1 else None
+        
+        if hasattr(self.browser_agent, 'update_token'):
+            self.browser_agent.update_token(new_token, new_uid)
+            msg = f"✅ Session token updated!\n🔄 WebSocket is reconnecting..."
+        else:
+            msg = "❌ Error: WSS Agent not found or doesn't support hot-update."
+            
+        await update.message.reply_text(msg)
 
     # ─── Persistent keyboard text handlers ───
 
