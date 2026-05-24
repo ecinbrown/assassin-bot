@@ -452,7 +452,12 @@ class WSSAgent:
             logger.error(f"Cannot find asset_id for {symbol}")
             return 0.0
 
-        stake = amount if amount > 0 else self.base_stake
+        # Position sizing: 34% of current balance
+        balance = self.demo_balance if self.demo_balance > 0 else self.base_stake
+        stake = round(balance * 0.34, 2)
+        stake = max(stake, 1.0)  # Minimum $1
+        stake = min(stake, balance)  # Never exceed balance
+        
         request_id = int(time.time() * 1000) + random.randint(100, 999)
 
         order_payload = json.dumps([
@@ -469,7 +474,7 @@ class WSSAgent:
         ])
 
         await self.ws.send_str(f"42{order_payload}")
-        logger.info(f"✅ WSS Trade: {action.upper()} ${stake:.2f} on {symbol} (asset_id={asset_id})")
+        logger.info(f"✅ WSS Trade: {action.upper()} ${stake:.2f} (34% of ${balance:.2f}) on {symbol} (asset_id={asset_id})")
         return stake
 
     async def recover_browser(self):
