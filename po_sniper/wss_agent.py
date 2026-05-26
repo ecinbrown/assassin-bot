@@ -1,9 +1,8 @@
 """
 WSS Agent — Pure WebSocket replacement for BrowserAgent.
 
-Connects directly to PocketOption's Socket.IO WebSocket.
+Connects directly to PocketOption's Socket.IO (EIO=4) WebSocket.
 Uses ~30MB RAM instead of ~800MB (no Chromium needed).
-Handles: auth, price streaming, asset selection, payout monitoring, trade execution.
 """
 import asyncio
 import json
@@ -15,54 +14,17 @@ import aiohttp
 
 logger = logging.getLogger(__name__)
 
-# PocketOption WebSocket endpoint
-PO_WSS_URL = "wss://api-l.po.market/socket.io/?EIO=4&transport=websocket"
-
-# OTC asset IDs mapping (symbol_name -> asset_id)
-# These are the standard OTC pairs available on PocketOption
-OTC_ASSETS = {
-    "EURUSD_otc": {"id": 1, "name": "EUR/USD OTC"},
-    "EURGBP_otc": {"id": 2, "name": "EUR/GBP OTC"},
-    "GBPJPY_otc": {"id": 3, "name": "GBP/JPY OTC"},
-    "AUDUSD_otc": {"id": 4, "name": "AUD/USD OTC"},
-    "GBPUSD_otc": {"id": 5, "name": "GBP/USD OTC"},
-    "USDJPY_otc": {"id": 6, "name": "USD/JPY OTC"},
-    "USDCHF_otc": {"id": 7, "name": "USD/CHF OTC"},
-    "EURJPY_otc": {"id": 8, "name": "EUR/JPY OTC"},
-    "NZDUSD_otc": {"id": 9, "name": "NZD/USD OTC"},
-    "USDCAD_otc": {"id": 10, "name": "USD/CAD OTC"},
-    "AUDCAD_otc": {"id": 14, "name": "AUD/CAD OTC"},
-    "AUDCHF_otc": {"id": 15, "name": "AUD/CHF OTC"},
-    "AUDJPY_otc": {"id": 16, "name": "AUD/JPY OTC"},
-    "CADCHF_otc": {"id": 17, "name": "CAD/CHF OTC"},
-    "CADJPY_otc": {"id": 18, "name": "CAD/JPY OTC"},
-    "CHFJPY_otc": {"id": 19, "name": "CHF/JPY OTC"},
-    "EURAUD_otc": {"id": 20, "name": "EUR/AUD OTC"},
-    "EURCAD_otc": {"id": 21, "name": "EUR/CAD OTC"},
-    "EURCHF_otc": {"id": 22, "name": "EUR/CHF OTC"},
-    "EURNZD_otc": {"id": 23, "name": "EUR/NZD OTC"},
-    "GBPAUD_otc": {"id": 24, "name": "GBP/AUD OTC"},
-    "GBPCAD_otc": {"id": 25, "name": "GBP/CAD OTC"},
-    "GBPCHF_otc": {"id": 26, "name": "GBP/CHF OTC"},
-    "GBPNZD_otc": {"id": 27, "name": "GBP/NZD OTC"},
-    "NZDCAD_otc": {"id": 28, "name": "NZD/CAD OTC"},
-    "NZDCHF_otc": {"id": 29, "name": "NZD/CHF OTC"},
-    "NZDJPY_otc": {"id": 30, "name": "NZD/JPY OTC"},
-    "#AXP_otc":   {"id": 31, "name": "American Express OTC"},
-    "#AAPL_otc":  {"id": 32, "name": "Apple OTC"},
-    "#BA_otc":    {"id": 33, "name": "Boeing OTC"},
-    "#CSCO_otc":  {"id": 34, "name": "Cisco OTC"},
-    "#INTC_otc":  {"id": 35, "name": "Intel OTC"},
-    "#MSFT_otc":  {"id": 36, "name": "Microsoft OTC"},
-    "#TSLA_otc":  {"id": 37, "name": "Tesla OTC"},
-    "Bitcoin_otc":  {"id": 40, "name": "Bitcoin OTC"},
-    "Ethereum_otc": {"id": 41, "name": "Ethereum OTC"},
-}
+# Multiple PocketOption WebSocket endpoints (tried in order)
+PO_WSS_URLS = [
+    "wss://api-l.po.market/socket.io/?EIO=4&transport=websocket",
+    "wss://api-l.po.trade/socket.io/?EIO=4&transport=websocket",
+    "wss://demo-api-l.po.market/socket.io/?EIO=4&transport=websocket",
+]
 
 
 class WSSAgent:
     """
-    Pure WebSocket agent — no browser, no Chromium, no captcha, no login page.
+    Pure WebSocket agent — no browser, no Chromium, no captcha.
     Connects directly to PocketOption's WebSocket API using a session token.
     """
 
@@ -73,394 +35,504 @@ class WSSAgent:
         self.ws = None
         self._session = None
 
-        # Mimic BrowserAgent interface
-        self.pages = {}  # symbol -> {"payout": int}
+        self.pages = {}          # symbol -> {"payout": int, "asset_id": int}
         self.last_known_payout = 92
         self.base_stake = 10.0
-        self.primary_page = None  # Not used, but keeps telegram bot happy
+        self.primary_page = None
         self.active_symbol = None
+        self.MAX_PAIRS = 8
 
-        # Auth
+        # Auth — from env vars
         self.session_token = os.environ.get("PO_SESSION_TOKEN", "")
         self.uid = os.environ.get("PO_UID", "")
         self.demo_balance = 0.0
 
-        # Asset payouts received from server
-        self._asset_payouts = {}  # asset_id -> payout_percent
+        # Server data
+        self._asset_payouts = {}    # asset_id (int) -> payout (int)
+        self._asset_catalog = {}    # asset_id (int) -> {"name": ..., ...}
         self._subscribed_assets = set()
 
-        # Connection state
+        # Connection
         self._authenticated = False
         self._reconnect_delay = 5
+        self._url_idx = 0
+        self._connect_attempts = 0
+
+    # ─── Public Interface ─────────────────────────────────
 
     async def start(self):
-        """Connect to PocketOption WebSocket and authenticate."""
         self.is_running = True
-
         if not self.session_token or not self.uid:
             logger.error(
-                "❌ Missing PO_SESSION_TOKEN or PO_UID environment variables!\n"
-                "   Set them in Render Environment:\n"
-                "   PO_SESSION_TOKEN = your sessionToken from WebSocket auth message\n"
-                "   PO_UID = your uid from WebSocket auth message"
+                "❌ PO_SESSION_TOKEN or PO_UID not set!\n"
+                "   Option 1: Set them in Render Environment Variables.\n"
+                "   Option 2: Send /token <TOKEN> <UID> in Telegram."
             )
-            return
+            # Don't return — keep running so /token command can fix it
+            while self.is_running and (not self.session_token or not self.uid):
+                await asyncio.sleep(5)
 
-        logger.info("🔌 Connecting to PocketOption WebSocket (NO BROWSER)...")
-        await self._connect()
+        logger.info(f"🔌 WSS Agent starting (uid={self.uid}, token={self.session_token[:8]}...)")
+        await self._connect_loop()
 
-    async def _connect(self):
-        """Establish WebSocket connection with auto-reconnect."""
+    def update_token(self, new_token: str, new_uid: str = None):
+        """Hot-update session token from Telegram /token command."""
+        self.session_token = new_token.strip()
+        if new_uid:
+            self.uid = new_uid.strip()
+        self._authenticated = False
+        self._reconnect_delay = 2
+        self._url_idx = 0
+        logger.info(f"🔑 Token updated! Reconnecting...")
+        if self.ws and not self.ws.closed:
+            asyncio.create_task(self.ws.close())
+
+    async def stop(self):
+        self.is_running = False
+        if self.ws and not self.ws.closed:
+            await self.ws.close()
+        if self._session and not self._session.closed:
+            await self._session.close()
+        logger.info("🛑 WSS Agent stopped.")
+
+    # ─── Connection Loop ──────────────────────────────────
+
+    async def _connect_loop(self):
         while self.is_running:
+            url = PO_WSS_URLS[self._url_idx % len(PO_WSS_URLS)]
             try:
+                if self._session and not self._session.closed:
+                    await self._session.close()
+
                 self._session = aiohttp.ClientSession()
+                self._connect_attempts += 1
+                logger.info(f"📡 Attempt #{self._connect_attempts}: {url}")
+
                 self.ws = await self._session.ws_connect(
-                    PO_WSS_URL,
+                    url,
                     headers={
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                        "Origin": "https://po.trade",
+                        "User-Agent": (
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                            "AppleWebKit/537.36 (KHTML, like Gecko) "
+                            "Chrome/148.0.0.0 Safari/537.36"
+                        ),
+                        "Origin": "https://pocketoption.com",
                     },
-                    heartbeat=25,
-                    timeout=aiohttp.ClientWSMsgType(total=30),
+                    heartbeat=30,
+                    timeout=aiohttp.ClientTimeout(total=20),
                 )
-                logger.info("✅ WebSocket connected!")
+                logger.info("✅ WebSocket TCP connected!")
 
-                # Socket.IO handshake: wait for '0{...}' open packet
-                async for msg in self.ws:
-                    if msg.type == aiohttp.WSMsgType.TEXT:
-                        if msg.data.startswith("0"):
-                            logger.info(f"Socket.IO handshake received")
-                            # Send '40' to connect to default namespace
-                            await self.ws.send_str("40")
-                            break
+                # ── EIO=4 Handshake ──
+                # Step 1: Server sends open packet: 0{"sid":"...","pingInterval":...}
+                open_pkt = await self._recv_text(timeout=15)
+                if not open_pkt or not open_pkt.startswith("0"):
+                    raise ConnectionError(f"Expected '0{{...}}' open packet, got: {open_pkt[:60] if open_pkt else 'None'}")
 
-                # Wait for '40' acknowledgement
-                async for msg in self.ws:
-                    if msg.type == aiohttp.WSMsgType.TEXT:
-                        if msg.data.startswith("40"):
-                            logger.info("Socket.IO namespace connected!")
-                            break
+                try:
+                    eio_config = json.loads(open_pkt[1:])
+                    self._ping_interval = eio_config.get("pingInterval", 25000) / 1000
+                    self._ping_timeout = eio_config.get("pingTimeout", 20000) / 1000
+                    logger.info(f"EIO handshake OK: sid={eio_config.get('sid','?')}, pingInterval={self._ping_interval}s")
+                except json.JSONDecodeError:
+                    self._ping_interval = 25
+                    self._ping_timeout = 20
 
-                # Send authentication
+                # Step 2: Send '40' to join default Socket.IO namespace
+                await self.ws.send_str("40")
+
+                # Step 3: Wait for '40' namespace connect acknowledgement
+                ns_pkt = await self._recv_text(timeout=10)
+                if not ns_pkt or not ns_pkt.startswith("40"):
+                    raise ConnectionError(f"Expected '40' namespace ack, got: {ns_pkt[:60] if ns_pkt else 'None'}")
+                logger.info("Socket.IO namespace connected!")
+
+                # Step 4: Authenticate — EXACT format from user's browser capture
                 auth_payload = json.dumps([
                     "auth",
                     {
-                        "session": self.session_token,
-                        "isDemo": 1,
+                        "sessionToken": self.session_token,
                         "uid": self.uid,
                         "lang": "en",
-                        "platform": 2
+                        "currentUrl": "cabinet/demo-quick-high-low",
+                        "isChart": 1
                     }
                 ])
                 await self.ws.send_str(f"42{auth_payload}")
-                logger.info(f"📤 Auth sent for uid={self.uid}")
+                logger.info(f"📤 Auth sent (sessionToken format)")
 
-                self._authenticated = True
                 self._reconnect_delay = 5
-                
-                # Start message processing loop
+                self._url_idx = 0
+
+                # Enter message loop (blocks until disconnect)
                 await self._message_loop()
 
+            except asyncio.TimeoutError:
+                logger.error(f"⏱️ Connection timed out on {url}")
             except Exception as e:
-                logger.error(f"WebSocket error: {e}")
-                self._authenticated = False
-                
-            finally:
-                if self._session and not self._session.closed:
-                    await self._session.close()
-                    self._session = None
-                self.ws = None
+                logger.error(f"❌ WebSocket error: {type(e).__name__}: {e}")
+
+            # Cleanup
+            self._authenticated = False
+            if self._session and not self._session.closed:
+                await self._session.close()
+            self._session = None
+            self.ws = None
 
             if self.is_running:
-                logger.info(f"🔄 Reconnecting in {self._reconnect_delay}s...")
-                await asyncio.sleep(self._reconnect_delay)
-                self._reconnect_delay = min(self._reconnect_delay * 2, 60)
+                self._url_idx += 1  # Try next URL
+                wait = min(self._reconnect_delay, 60)
+                logger.info(f"🔄 Reconnecting in {wait}s (next URL idx: {self._url_idx % len(PO_WSS_URLS)})...")
+                await asyncio.sleep(wait)
+                self._reconnect_delay = min(self._reconnect_delay * 1.5, 60)
+
+    async def _recv_text(self, timeout=10):
+        """Receive next TEXT WebSocket message with timeout."""
+        try:
+            end = time.time() + timeout
+            async for msg in self.ws:
+                if msg.type == aiohttp.WSMsgType.TEXT:
+                    return msg.data
+                elif msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
+                    return None
+                if time.time() > end:
+                    return None
+        except Exception:
+            return None
+
+    # ─── Message Loop ─────────────────────────────────────
 
     async def _message_loop(self):
-        """Process incoming WebSocket messages."""
-        ping_task = asyncio.create_task(self._keep_alive())
-
         try:
             async for msg in self.ws:
                 if msg.type == aiohttp.WSMsgType.TEXT:
                     data = msg.data
 
-                    # Socket.IO ping/pong
+                    # EIO=4: Server sends ping '2', we respond pong '3'
                     if data == "2":
                         await self.ws.send_str("3")
                         continue
                     if data == "3":
                         continue
 
-                    # Socket.IO event messages
+                    # Socket.IO event: 42["event", data]
                     if data.startswith("42"):
                         try:
                             payload = json.loads(data[2:])
-                            event = payload[0]
-                            event_data = payload[1] if len(payload) > 1 else {}
-                            await self._handle_event(event, event_data)
-                        except (json.JSONDecodeError, IndexError) as e:
-                            pass
+                            event = payload[0] if len(payload) > 0 else ""
+                            edata = payload[1] if len(payload) > 1 else {}
+                            await self._handle_event(event, edata)
+                        except (json.JSONDecodeError, IndexError, KeyError):
+                            logger.debug(f"Unparseable: {data[:80]}")
+
+                    # Log any other unexpected packet types
+                    elif not data.startswith("4"):
+                        logger.debug(f"EIO pkt: {data[:60]}")
 
                 elif msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
-                    logger.warning(f"WebSocket closed/error: {msg.type}")
+                    logger.warning(f"WebSocket closed: {msg.type}")
                     break
-        finally:
-            ping_task.cancel()
+        except Exception as e:
+            logger.error(f"Message loop error: {e}")
 
-    async def _keep_alive(self):
-        """Send Socket.IO pings every 25s."""
-        while self.is_running:
-            try:
-                await asyncio.sleep(25)
-                if self.ws and not self.ws.closed:
-                    await self.ws.send_str("2")
-            except Exception:
-                break
+    # ─── Event Handler ────────────────────────────────────
 
     async def _handle_event(self, event: str, data):
-        """Route incoming Socket.IO events."""
 
         if event == "successauth":
-            logger.info(f"🔐 Authentication successful! isDemo={data.get('isDemo')}")
-            self.demo_balance = data.get('demoBalance', 0)
-            logger.info(f"💰 Demo Balance: ${self.demo_balance}")
+            self._authenticated = True
+            self.demo_balance = float(data.get("demoBalance", data.get("balance", 0)))
+            logger.info(f"🔐 AUTH SUCCESS! Demo Balance: ${self.demo_balance:.2f}")
+            # Request market data immediately after auth
+            await self._request_market_data()
 
-        elif event == "updateStream":
-            # Real-time tick data
-            symbol_raw = data.get("symbol", data.get("asset", ""))
-            price = data.get("price", data.get("close", data.get("value", 0)))
-            ts = data.get("time", data.get("timestamp", time.time()))
+        elif event == "failauth" or event == "unauthorized":
+            logger.error(f"❌ AUTH FAILED: {data}")
+            logger.error("   Send /token <NEW_TOKEN> <UID> in Telegram to update.")
+            self._authenticated = False
 
-            if price and price > 0:
-                # Normalize the symbol name
-                symbol = self._normalize_symbol(symbol_raw)
-                if symbol in self.pages or not self.pages:
-                    await self.tick_queue.put({
-                        "symbol": symbol,
-                        "price": float(price),
-                        "timestamp": float(ts),
-                    })
-
-        elif event == "updateHistoryNew":
-            # Candle/history update (same format browser intercepted)
-            symbol_raw = data.get("symbol", data.get("asset", ""))
-            price = data.get("price", data.get("close", data.get("value", 0)))
-            ts = data.get("time", data.get("timestamp", time.time()))
-
-            if price and price > 0:
-                symbol = self._normalize_symbol(symbol_raw)
-                if symbol in self.pages or not self.pages:
-                    await self.tick_queue.put({
-                        "symbol": symbol,
-                        "price": float(price),
-                        "timestamp": float(ts),
-                    })
-
-        elif event == "candles":
-            # Batch candle data
-            if isinstance(data, list):
-                for candle in data[-5:]:  # Only process recent candles
-                    price = candle.get("close", candle.get("price", 0))
-                    ts = candle.get("time", time.time())
-                    symbol = self._normalize_symbol(candle.get("symbol", candle.get("asset", "")))
-                    if price and price > 0 and symbol in self.pages:
-                        await self.tick_queue.put({
-                            "symbol": symbol,
-                            "price": float(price),
-                            "timestamp": float(ts),
-                        })
-
-        elif event == "payout":
-            # Payout updates for assets
+        elif event == "assets":
             if isinstance(data, dict):
-                for asset_id_str, payout in data.items():
+                for aid_str, info in data.items():
                     try:
-                        self._asset_payouts[int(asset_id_str)] = int(payout)
+                        self._asset_catalog[int(aid_str)] = info
                     except (ValueError, TypeError):
                         pass
+                logger.info(f"📦 Received {len(data)} assets from server")
+            elif isinstance(data, list):
+                for asset in data:
+                    aid = asset.get("id", asset.get("asset_id"))
+                    if aid is not None:
+                        self._asset_catalog[int(aid)] = asset
+                logger.info(f"📦 Received {len(data)} assets from server (list)")
+
+        elif event == "payout":
+            if isinstance(data, dict):
+                count = 0
+                for aid_str, payout_val in data.items():
+                    try:
+                        self._asset_payouts[int(aid_str)] = int(payout_val)
+                        count += 1
+                    except (ValueError, TypeError):
+                        pass
+                if count > 0:
+                    # Log assets with >=92% payout
+                    good = {k: v for k, v in self._asset_payouts.items() if v >= 92}
+                    logger.info(f"📊 Payouts received: {count} total, {len(good)} with >=92%")
+
+        elif event in ("updateStream", "updateHistoryNew"):
+            await self._process_tick(data)
+
+        elif event == "candles":
+            if isinstance(data, list):
+                for c in data[-5:]:
+                    await self._process_tick(c)
 
         elif event == "updateBalance":
-            self.demo_balance = data.get("demoBalance", self.demo_balance)
-
-        elif event == "successcloseOrder":
-            logger.info(f"📋 Order closed: profit={data.get('profit', 0)}")
+            new_bal = float(data.get("demoBalance", data.get("balance", self.demo_balance)))
+            if new_bal != self.demo_balance:
+                logger.info(f"💰 Balance: ${self.demo_balance:.2f} → ${new_bal:.2f}")
+                self.demo_balance = new_bal
 
         elif event == "successopenOrder":
-            logger.info(f"📋 Order opened successfully: id={data.get('id', '?')}")
+            logger.info(f"📋 Order OPENED: id={data.get('id','?')} amount=${data.get('amount','?')}")
 
-        elif event in ("timeSync", "signal", "notification"):
-            pass  # Ignore noisy events
+        elif event == "successcloseOrder":
+            profit = data.get("profit", 0)
+            win = float(profit) > 0 if profit else False
+            logger.info(f"📋 Order CLOSED: profit=${profit} {'✅' if win else '❌'}")
+
+        elif event in ("timeSync", "signal", "notification", "loadHistoryPeriod"):
+            pass  # Noisy, ignore
 
         else:
-            # Log unknown events for debugging (truncated)
-            data_str = str(data)[:150]
-            logger.debug(f"[WSS] {event}: {data_str}")
+            logger.info(f"[WSS] {event}: {str(data)[:150]}")
+
+    async def _process_tick(self, data):
+        """Extract price from tick/candle data and push to queue."""
+        if not isinstance(data, dict):
+            return
+
+        symbol_raw = data.get("symbol", data.get("asset", ""))
+        price = data.get("price", data.get("close", data.get("value", 0)))
+        ts = data.get("time", data.get("timestamp", time.time()))
+
+        if not price or float(price) <= 0:
+            return
+
+        symbol = self._normalize_symbol(symbol_raw)
+        # Accept ticks for subscribed symbols, or all if no subscriptions yet
+        if self.pages and symbol not in self.pages:
+            return
+
+        await self.tick_queue.put({
+            "symbol": symbol,
+            "price": float(price),
+            "timestamp": float(ts),
+        })
+
+    async def _request_market_data(self):
+        """Request assets and payouts from server after auth."""
+        if not self.ws or self.ws.closed:
+            return
+        try:
+            await self.ws.send_str('42["assets"]')
+            await self.ws.send_str('42["payouts"]')
+            logger.info("📡 Requested assets & payouts from server")
+        except Exception as e:
+            logger.error(f"Failed to request market data: {e}")
 
     def _normalize_symbol(self, raw):
-        """Convert server symbol format to our internal format."""
+        """Normalize symbol names to a consistent internal format."""
         if isinstance(raw, (int, float)):
-            # Reverse lookup from asset ID
-            for sym, info in OTC_ASSETS.items():
-                if info["id"] == int(raw):
+            raw_int = int(raw)
+            if raw_int in self._asset_catalog:
+                info = self._asset_catalog[raw_int]
+                name = info.get("name", info.get("symbol", f"asset_{raw_int}"))
+                return self._clean_name(name)
+            # Check existing pages
+            for sym, info in self.pages.items():
+                if info.get("asset_id") == raw_int:
                     return sym
-            return f"asset_{raw}"
-        
-        s = str(raw)
-        # Handle formats like "EURUSD_otc", "EUR/USD OTC", "#AAPL_otc", etc.
-        s = s.replace("/", "").replace(" ", "_").replace("OTC", "otc")
-        if not s.endswith("_otc") and "otc" in s.lower():
-            s = s.replace("otc", "_otc")
+            return f"asset_{raw_int}"
+
+        return self._clean_name(str(raw))
+
+    def _clean_name(self, s):
+        s = s.replace("/", "").replace(" ", "_")
+        # Normalize OTC suffix
+        if "OTC" in s:
+            s = s.replace("OTC", "otc")
+        if "otc" in s.lower() and not s.endswith("_otc"):
+            s = s.rstrip("_") + "_otc" if "_otc" not in s else s
         return s
 
-    async def select_top_assets(self, max_assets=5, logic_engine=None):
-        """
-        Subscribe to top OTC assets with highest payouts.
-        Pure WebSocket — no browser clicks needed.
-        """
-        logger.info(f"🔍 Scanning for top {max_assets} assets with >=92% payout (via WebSocket)...")
+    # ─── Asset Selection ──────────────────────────────────
 
-        # Request payout data from server
-        if self.ws and not self.ws.closed:
-            await self.ws.send_str('42["payouts"]')
-            # Give server time to respond
-            await asyncio.sleep(3)
+    async def select_top_assets(self, max_assets=None, logic_engine=None):
+        """
+        Subscribe to top OTC assets with >=92% payout.
+        FULLY DYNAMIC — no hardcoded pair list. Whatever the server says is >=92% gets picked.
+        """
+        if max_assets is None:
+            max_assets = self.MAX_PAIRS
 
-        # Filter assets with >= 92% payout
-        valid_assets = []
-        for sym, info in OTC_ASSETS.items():
-            asset_id = info["id"]
-            payout = self._asset_payouts.get(asset_id, 0)
+        logger.info(f"🔍 Selecting top {max_assets} assets with >=92% payout...")
+
+        # Request fresh data
+        await self._request_market_data()
+        await asyncio.sleep(5)
+
+        # Build candidates from ALL payouts received
+        candidates = []
+        for asset_id, payout in self._asset_payouts.items():
             if payout >= 92:
-                valid_assets.append((sym, payout, asset_id))
+                name = self._get_asset_name(asset_id)
+                candidates.append((name, payout, asset_id))
 
-        # If no payout data yet, subscribe to ALL OTC pairs and use defaults
-        if not valid_assets:
-            logger.warning("No payout data received yet. Subscribing to top OTC pairs with assumed 92% payout...")
-            default_pairs = ["EURUSD_otc", "EURGBP_otc", "GBPJPY_otc", "AUDUSD_otc", "GBPUSD_otc"]
-            for sym in default_pairs[:max_assets]:
-                valid_assets.append((sym, 92, OTC_ASSETS[sym]["id"]))
+        if candidates:
+            logger.info(f"Found {len(candidates)} assets with >=92% payout")
+        else:
+            logger.warning("No payout data from server yet. Will retry after ticks arrive.")
+            # Subscribe to a few common IDs to bootstrap tick data
+            # These are just IDs (numbers), NOT hardcoded pair names
+            # The server will tell us what they are
+            bootstrap_ids = list(range(1, 9))  # asset IDs 1-8
+            for aid in bootstrap_ids:
+                name = self._get_asset_name(aid)
+                candidates.append((name, 92, aid))
 
         # Sort by payout descending, take top N
-        valid_assets.sort(key=lambda x: x[1], reverse=True)
-        selected = valid_assets[:max_assets]
+        candidates.sort(key=lambda x: x[1], reverse=True)
+        selected = candidates[:max_assets]
 
         self.pages = {}
         for sym, payout, asset_id in selected:
             self.pages[sym] = {"payout": payout, "asset_id": asset_id}
             self._subscribed_assets.add(asset_id)
-            logger.info(f"✅ Subscribed to {sym} (payout: {payout}%, id: {asset_id})")
 
-            # Subscribe to this asset's stream
+            # Subscribe to price stream for this asset
             if self.ws and not self.ws.closed:
-                subscribe_msg = json.dumps(["subscribeSymbol", {"asset": asset_id}])
-                await self.ws.send_str(f"42{subscribe_msg}")
+                try:
+                    await self.ws.send_str(f'42{json.dumps(["subscribeSymbol", {"asset": asset_id}])}')
+                except Exception:
+                    pass
 
         if selected:
             self.active_symbol = selected[0][0]
             self.last_known_payout = selected[0][1]
 
+        pair_summary = [f"{s[0]}({s[1]}%)" for s in selected]
+        logger.info(f"🎯 Subscribed to {len(selected)} pairs: {pair_summary}")
         return list(self.pages.keys())
 
+    def _get_asset_name(self, asset_id):
+        """Get human-readable name for an asset ID."""
+        if asset_id in self._asset_catalog:
+            info = self._asset_catalog[asset_id]
+            name = info.get("name", info.get("symbol", f"asset_{asset_id}"))
+            return self._clean_name(name)
+        return f"asset_{asset_id}"
+
+    # ─── Tick Heartbeat ───────────────────────────────────
+
     async def poll_ticks(self):
-        """
-        No-op for WSS mode — ticks arrive via _handle_event automatically.
-        This method exists for interface compatibility with main.py.
-        """
+        """Heartbeat logger — ticks arrive via _handle_event automatically."""
         while self.is_running:
             await asyncio.sleep(60)
-            if self._authenticated:
-                logger.info(
-                    f"📡 WSS alive | Subscribed: {list(self.pages.keys())} | "
-                    f"Balance: ${self.demo_balance:.2f}"
-                )
+            status = "CONNECTED ✅" if self._authenticated else "DISCONNECTED ❌"
+            logger.info(
+                f"💓 {status} | Pairs: {len(self.pages)} | "
+                f"Balance: ${self.demo_balance:.2f} | "
+                f"Payouts tracked: {len(self._asset_payouts)}"
+            )
+
+    # ─── Payout Watchdog ──────────────────────────────────
 
     async def payout_watchdog(self, logic_engine):
-        """Monitor payouts via WebSocket data and swap pairs if needed."""
+        """Swap pairs that drop below 92% for better ones."""
         while self.is_running:
             await asyncio.sleep(30)
+            if not self._authenticated:
+                continue
             try:
+                current_ids = {info["asset_id"] for info in self.pages.values()}
+
                 for symbol in list(self.pages.keys()):
                     info = self.pages[symbol]
                     asset_id = info.get("asset_id", 0)
                     current_payout = self._asset_payouts.get(asset_id, info.get("payout", 92))
-                    
-                    if current_payout < 92:
-                        logger.warning(f"⚠️ Payout for {symbol} dropped to {current_payout}%! Swapping...")
-                        
-                        # Find a replacement
-                        best_replacement = None
-                        best_payout = 0
-                        for sym, sym_info in OTC_ASSETS.items():
-                            if sym not in self.pages:
-                                p = self._asset_payouts.get(sym_info["id"], 0)
-                                if p >= 92 and p > best_payout:
-                                    best_replacement = sym
-                                    best_payout = p
 
-                        if best_replacement:
-                            new_info = OTC_ASSETS[best_replacement]
+                    if current_payout < 92:
+                        logger.warning(f"⚠️ {symbol} dropped to {current_payout}%!")
+
+                        # Find best replacement from ALL server assets
+                        best_name, best_payout, best_id = None, 0, None
+                        for aid, payout in self._asset_payouts.items():
+                            if aid not in current_ids and payout >= 92 and payout > best_payout:
+                                best_payout = payout
+                                best_id = aid
+                                best_name = self._get_asset_name(aid)
+
+                        if best_name and best_id:
                             del self.pages[symbol]
-                            self.pages[best_replacement] = {"payout": best_payout, "asset_id": new_info["id"]}
-                            
-                            # Subscribe to new asset
+                            current_ids.discard(asset_id)
+                            self.pages[best_name] = {"payout": best_payout, "asset_id": best_id}
+                            current_ids.add(best_id)
+
                             if self.ws and not self.ws.closed:
-                                sub_msg = json.dumps(["subscribeSymbol", {"asset": new_info["id"]}])
-                                await self.ws.send_str(f"42{sub_msg}")
-                            
+                                await self.ws.send_str(
+                                    f'42{json.dumps(["subscribeSymbol", {"asset": best_id}])}'
+                                )
+
                             if hasattr(logic_engine, 'target_symbols'):
                                 if symbol in logic_engine.target_symbols:
                                     logic_engine.target_symbols.remove(symbol)
-                                if best_replacement not in logic_engine.target_symbols:
-                                    logic_engine.target_symbols.append(best_replacement)
+                                if best_name not in logic_engine.target_symbols:
+                                    logic_engine.target_symbols.append(best_name)
 
-                            logger.info(f"🔄 Swapped {symbol} -> {best_replacement} (payout: {best_payout}%)")
+                            logger.info(f"🔄 Swapped {symbol} → {best_name} ({best_payout}%)")
                         else:
-                            logger.warning(f"No replacement found for {symbol}. Blocking.")
                             if not hasattr(logic_engine, 'blocked_symbols'):
                                 logic_engine.blocked_symbols = set()
                             logic_engine.blocked_symbols.add(symbol)
+                            logger.warning(f"🚫 No >=92% replacement for {symbol}. Blocked.")
                     else:
-                        # Update stored payout
                         info["payout"] = current_payout
                         self.last_known_payout = current_payout
                         if hasattr(logic_engine, 'blocked_symbols') and symbol in logic_engine.blocked_symbols:
                             logic_engine.blocked_symbols.remove(symbol)
-                            logger.info(f"✅ Payout for {symbol} recovered to {current_payout}%. Resuming trades.")
             except Exception as e:
                 logger.error(f"Payout watchdog error: {e}")
 
+    # ─── Trade Execution ──────────────────────────────────
+
     async def execute_trade(self, action: str, amount: float, symbol: str = None):
-        """Execute a trade via WebSocket — no browser button clicking."""
+        """Execute trade via WebSocket. Stake = 34% of balance."""
         if not self.ws or self.ws.closed or not self._authenticated:
-            logger.error("Cannot trade: WebSocket not connected!")
+            logger.error("Cannot trade: not connected!")
             return 0.0
 
-        # Find the asset ID
         asset_id = None
         if symbol and symbol in self.pages:
             asset_id = self.pages[symbol].get("asset_id")
-        elif symbol and symbol in OTC_ASSETS:
-            asset_id = OTC_ASSETS[symbol]["id"]
         else:
-            # Use first subscribed asset
-            for sym, info in self.pages.items():
+            for _, info in self.pages.items():
                 asset_id = info.get("asset_id")
                 break
 
         if asset_id is None:
-            logger.error(f"Cannot find asset_id for {symbol}")
+            logger.error(f"No asset_id for {symbol}")
             return 0.0
 
-        # Position sizing: 34% of current balance
         balance = self.demo_balance if self.demo_balance > 0 else self.base_stake
         stake = round(balance * 0.34, 2)
-        stake = max(stake, 1.0)  # Minimum $1
-        stake = min(stake, balance)  # Never exceed balance
-        
+        stake = max(stake, 1.0)
+        stake = min(stake, balance)
+
         request_id = int(time.time() * 1000) + random.randint(100, 999)
 
-        order_payload = json.dumps([
+        order = json.dumps([
             "openOrder",
             {
                 "asset": asset_id,
@@ -469,26 +541,16 @@ class WSSAgent:
                 "isDemo": 1,
                 "requestId": request_id,
                 "optionType": 100,
-                "time": 60  # 60 second expiry (server will use the closest valid expiry)
+                "time": 60
             }
         ])
 
-        await self.ws.send_str(f"42{order_payload}")
-        logger.info(f"✅ WSS Trade: {action.upper()} ${stake:.2f} (34% of ${balance:.2f}) on {symbol} (asset_id={asset_id})")
+        await self.ws.send_str(f"42{order}")
+        logger.info(f"✅ TRADE: {action.upper()} ${stake:.2f} (34% of ${balance:.2f}) on {symbol}")
         return stake
 
     async def recover_browser(self):
-        """Reconnect WebSocket on failure."""
-        logger.info("🔄 Reconnecting WebSocket...")
+        """Force reconnect."""
+        logger.info("🔄 Forcing WebSocket reconnect...")
         if self.ws and not self.ws.closed:
             await self.ws.close()
-        # _connect loop will handle reconnection
-
-    async def stop(self):
-        """Clean shutdown."""
-        self.is_running = False
-        if self.ws and not self.ws.closed:
-            await self.ws.close()
-        if self._session and not self._session.closed:
-            await self._session.close()
-        logger.info("🛑 WSS Agent stopped.")
