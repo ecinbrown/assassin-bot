@@ -104,7 +104,9 @@ class WSSAgent:
                 if self._session and not self._session.closed:
                     await self._session.close()
 
-                self._session = aiohttp.ClientSession()
+                self._session = aiohttp.ClientSession(
+                    timeout=aiohttp.ClientTimeout(total=30)
+                )
                 self._connect_attempts += 1
                 logger.info(f"📡 Attempt #{self._connect_attempts}: {url}")
 
@@ -119,7 +121,7 @@ class WSSAgent:
                         "Origin": "https://pocketoption.com",
                     },
                     heartbeat=30,
-                    timeout=aiohttp.ClientTimeout(total=20),
+                    ssl=False,
                 )
                 logger.info("✅ WebSocket TCP connected!")
 
@@ -187,17 +189,17 @@ class WSSAgent:
                 self._reconnect_delay = min(self._reconnect_delay * 1.5, 60)
 
     async def _recv_text(self, timeout=10):
-        """Receive next TEXT WebSocket message with timeout."""
+        """Receive next TEXT WebSocket message with a real timeout."""
         try:
-            end = time.time() + timeout
-            async for msg in self.ws:
-                if msg.type == aiohttp.WSMsgType.TEXT:
-                    return msg.data
-                elif msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
-                    return None
-                if time.time() > end:
-                    return None
-        except Exception:
+            msg = await asyncio.wait_for(self.ws.receive(), timeout=timeout)
+            if msg.type == aiohttp.WSMsgType.TEXT:
+                return msg.data
+            return None
+        except asyncio.TimeoutError:
+            logger.warning(f"_recv_text timed out after {timeout}s")
+            return None
+        except Exception as e:
+            logger.warning(f"_recv_text error: {e}")
             return None
 
     # ─── Message Loop ─────────────────────────────────────

@@ -1,17 +1,15 @@
-# Use the official Microsoft Playwright Python image
-FROM mcr.microsoft.com/playwright/python:v1.44.0-jammy
+# Lightweight Python — NO Playwright, NO Chromium
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy requirements and install
+# Copy and install requirements
 COPY po_sniper/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all bot files (including auth_state.json)
+# Copy bot files
 COPY po_sniper/ /app/
 
-# Set environment variables for Python
 ENV PYTHONUNBUFFERED=1
 
-# Command to run the bot
 CMD ["python", "main.py"]

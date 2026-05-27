@@ -49,7 +49,20 @@ class TerminalTelegramBot:
         
         await self.app.initialize()
         await self.app.start()
-        await self.app.updater.start_polling(drop_pending_updates=True)
+        
+        # Delete any stale webhook to prevent conflicts
+        await self.app.bot.delete_webhook(drop_pending_updates=True)
+        logger.info("🗑️ Cleared webhook & pending updates")
+        
+        # Small delay to let any old instance die
+        import asyncio
+        await asyncio.sleep(3)
+        
+        await self.app.updater.start_polling(
+            drop_pending_updates=True,
+            allowed_updates=["message", "callback_query"],
+            poll_interval=2.0,
+        )
 
     async def handle_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         chat_id = update.message.chat_id
