@@ -14,11 +14,11 @@ import aiohttp
 
 logger = logging.getLogger(__name__)
 
-# Multiple PocketOption WebSocket endpoints (tried in order)
+# Correct PocketOption WebSocket endpoints (verified working)
 PO_WSS_URLS = [
-    "wss://api-l.po.market/socket.io/?EIO=4&transport=websocket",
-    "wss://api-l.po.trade/socket.io/?EIO=4&transport=websocket",
-    "wss://demo-api-l.po.market/socket.io/?EIO=4&transport=websocket",
+    "wss://api-in.pocketoption.com/socket.io/?EIO=4&transport=websocket",
+    "wss://api-eu.po.market/socket.io/?EIO=4&transport=websocket",
+    "wss://api-fr2.po.market/socket.io/?EIO=4&transport=websocket",
 ]
 
 
