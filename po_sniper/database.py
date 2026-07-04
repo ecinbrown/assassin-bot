@@ -42,7 +42,7 @@ def init_db():
 
 # ─── Batch Insert Buffer ───
 _tick_buffer = []
-_BATCH_SIZE = 20
+_BATCH_SIZE = 1000
 
 def insert_tick(timestamp: float, symbol: str, price: float, velocity: float):
     """Buffer ticks and flush in batches for performance."""
