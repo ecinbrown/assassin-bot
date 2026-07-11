@@ -115,3 +115,14 @@ KILL_SWITCH = {
 
 EXPIRY_MULTIPLIER = 1  # expiry = candle_window_minutes * EXPIRY_MULTIPLIER
 COOLDOWN_MULTIPLIER = 1  # cooldown = expiry_seconds * COOLDOWN_MULTIPLIER
+
+# ═══════════════════════════════════════════════════
+# TRADE SIZING PER TIER
+# Tier 3 (untested pairs) trades at half size as a safety net
+# ═══════════════════════════════════════════════════
+
+TIER_TRADE_SIZE = {
+    1: 1.0,    # Full size — proven 83-93% WR
+    2: 1.0,    # Full size — proven 76-87% WR
+    3: 0.5,    # Half size — unproven, scout mode
+}

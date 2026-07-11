@@ -9,7 +9,8 @@ from collections import deque
 from database import insert_tick
 from velocity_config import (
     get_tier, TIER_CANDLE_WINDOWS, TIER_STRATEGIES,
-    KILL_SWITCH, EXPIRY_MULTIPLIER, COOLDOWN_MULTIPLIER
+    KILL_SWITCH, EXPIRY_MULTIPLIER, COOLDOWN_MULTIPLIER,
+    TIER_TRADE_SIZE
 )
 
 logger = logging.getLogger(__name__)
@@ -536,9 +537,10 @@ class LogicEngine:
             target_time = now + expiry_seconds
             
             self.signals_fired += 1
+            size_mult = TIER_TRADE_SIZE.get(tier, 0.5)
             logger.critical(
                 f"SIGNAL #{self.signals_fired}: {action.upper()} | {symbol} | "
-                f"{trigger_name} | Expiry: {trigger_window}min"
+                f"{trigger_name} | Expiry: {trigger_window}min | Size: {size_mult}x"
             )
             
             self.active_trades[symbol] = {
@@ -548,6 +550,7 @@ class LogicEngine:
                 'symbol': symbol,
                 'tier': tier,
                 'stake': 0.0,
+                'size_mult': size_mult,
                 'placed_at': now,
                 'trigger': trigger_name
             }
