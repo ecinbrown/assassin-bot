@@ -4,9 +4,44 @@ import time
 import csv
 import os
 import logging
+import secrets
+import math
 from database import insert_tick
 
 logger = logging.getLogger(__name__)
+
+class CSPRNGEngine:
+    """
+    Cryptographically Secure Pseudo-Random Number Generator (CSPRNG) Engine
+    Provides:
+    1. OS-level Cryptographic Randomness (secrets.SystemRandom).
+    2. Shannon Entropy calculation over rolling tick velocity streams.
+    3. Cryptographic order execution jitter to obfuscate automated bot timing.
+    """
+    def __init__(self):
+        self.sys_random = secrets.SystemRandom()
+
+    def calc_shannon_entropy(self, velocities: list) -> float:
+        if len(velocities) < 10:
+            return 0.5
+        events = [1 if v > 0 else (-1 if v < 0 else 0) for v in velocities]
+        total = len(events)
+        counts = {}
+        for ev in events:
+            counts[ev] = counts.get(ev, 0) + 1
+        entropy = 0.0
+        for ev, count in counts.items():
+            p = count / total
+            if p > 0:
+                entropy -= p * math.log2(p)
+        max_entropy = math.log2(3)
+        return float(entropy / max_entropy)
+
+    async def apply_jitter(self, min_ms: float = 0.05, max_ms: float = 0.18) -> float:
+        """Inject cryptographically random delay to obfuscate execution timing from broker engines."""
+        delay = self.sys_random.uniform(min_ms, max_ms)
+        await asyncio.sleep(delay)
+        return delay
 
 # Tick logger - appends every tick to CSV for analysis
 TICK_LOG_PATH = os.path.join(os.path.dirname(__file__), "tick_log.csv")
@@ -23,6 +58,9 @@ class LogicEngine:
         self.notifier = notifier
         self.paused = False
         self.last_prices = {}
+        
+        # CSPRNG Engine Instance
+        self.csprng = CSPRNGEngine()
         
         # Tracking arrays by symbol
         self.recent_velocities = {} 
@@ -214,9 +252,13 @@ class LogicEngine:
                 self.last_trade_time[symbol] = now
                 
                 if browser_agent:
-                    # Execute the trade first, THEN notify on success
-                    async def _execute_and_notify(ba, act, pr, sym, notif, active_ref):
+                    # Execute the trade first (with CSPRNG execution jitter), THEN notify on success
+                    async def _execute_and_notify(ba, act, pr, sym, notif, active_ref, engine_ref):
                         try:
+                            # Apply CSPRNG sub-second cryptographic execution jitter (50ms - 180ms)
+                            jitter_s = await engine_ref.csprng.apply_jitter(0.05, 0.18)
+                            logger.info(f"🎲 [{sym}] CSPRNG Jitter applied: +{jitter_s*1000:.1f}ms order delay")
+                            
                             stake = await ba.execute_trade(act, pr)
                             if stake > 0 and active_ref.get('action'):
                                 active_ref['stake'] = stake
@@ -228,7 +270,7 @@ class LogicEngine:
                             logger.error(f"[{sym}] Trade execution failed: {e} — NOT notifying.")
                     
                     asyncio.create_task(_execute_and_notify(
-                        browser_agent, action, price, symbol, self.notifier, self.active_trade
+                        browser_agent, action, price, symbol, self.notifier, self.active_trade, self
                     ))
                 elif self.notifier:
                     # No browser agent (headless/sim mode) — notify immediately
