@@ -224,6 +224,21 @@ class LogicEngine:
                 action = potential_action
                 trigger_name = f"CORE 2: MEGA PIP BOMB [{mode_label}] (Z={z_score:.2f}, PC10={pc10:.1f}pips, TTB={ttb:.0f}s)"
 
+            # ═══════════════════════════════════════════════
+            # CORE 3: CSPRNG PRNG-RUN ANOMALY (Cryptographic Feed Strategy)
+            # ═══════════════════════════════════════════════
+            # Low Shannon Entropy (< 0.65) indicates non-random PRNG algorithmic concentration.
+            else:
+                csprng_entropy = self.csprng.calc_shannon_entropy(vels[-20:])
+                if csprng_entropy < 0.65:
+                    net_20 = sum(vels[-20:])
+                    if abs(net_20) > 0.00020:
+                        if self.strategy_mode == 'reversal':
+                            action = "put" if net_20 > 0 else "call"
+                        else:
+                            action = "call" if net_20 > 0 else "put"
+                        trigger_name = f"CORE 3: CSPRNG PRNG-RUN [{mode_label}] (Entropy={csprng_entropy:.3f}, Net={net_20:.5f})"
+
             if action:
                 now = time.time()
                 elapsed = now - self.last_trade_time.get(symbol, 0)
