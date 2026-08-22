@@ -220,26 +220,47 @@ class AssassinTelegramBot:
         sim_mode = getattr(c, 'simulation_mode', True)
         mode_str = "🧪 DEMO (Simulation)" if sim_mode else "🟢 REAL (Live Web3 Contract)"
         symbols_str = ", ".join(getattr(c, 'symbols', []))
-        stake = getattr(c, 'stake_native', 0.01)
         paused = getattr(c, 'paused', False)
 
-        # Get round info from agent
+        # Get round info and balance from agent
         round_text = "N/A"
+        balance_text = "10.0000 Native"
+        stake_text = "0.0100 Native (5%)"
+        total_entered = 0
+
         if hasattr(c, 'prdt_agent') and c.prdt_agent:
-            epoch = c.prdt_agent.get_current_epoch()
-            r_info = c.prdt_agent.get_round_info(epoch)
+            agent = c.prdt_agent
+            epoch = agent.get_current_epoch()
+            r_info = agent.get_round_info(epoch)
             time_left = r_info.get("time_to_lock_seconds", 0)
             round_text = f"Epoch #{epoch} ({time_left}s remaining)"
+
+            if sim_mode:
+                balance_text = f"{agent.simulated_balance:.4f} Native (Demo)"
+                cur_stake = agent.calculate_stake()
+                stake_text = f"{cur_stake:.4f} Native (5% of balance)"
+            elif agent.account and agent.w3 and agent.w3.is_connected():
+                try:
+                    bal = agent.w3.from_wei(agent.w3.eth.get_balance(agent.account.address), 'ether')
+                    balance_text = f"{float(bal):.4f} Native (Wallet)"
+                    cur_stake = agent.calculate_stake()
+                    stake_text = f"{cur_stake:.4f} Native (5% of wallet)"
+                except Exception:
+                    pass
+
+            total_entered = len(agent.entered_rounds)
 
         msg = (
             "📊 <b>ASSASSIN BOT DASHBOARD</b> 📊\n\n"
             f"⚙️ <b>Mode:</b> <b>{mode_str}</b>\n"
-            f"🚦 <b>Engine State:</b> {'🛑 PAUSED' if paused else '🟢 ACTIVE'}\n"
+            f"🚦 <b>Engine:</b> {'🛑 PAUSED' if paused else '🟢 ACTIVE'}\n"
+            f"💰 <b>Balance:</b> <code>{balance_text}</code>\n"
+            f"💵 <b>Current Stake:</b> <code>{stake_text}</code>\n"
+            f"📈 <b>Trades Placed:</b> <code>{total_entered} rounds</code>\n"
             f"🎯 <b>Symbols:</b> <code>{symbols_str}</code>\n"
             f"⏱️ <b>Timeframe:</b> <code>{getattr(c, 'interval', '1m')} / 300s Expiry</code>\n"
-            f"💵 <b>Stake per Trade:</b> <code>{stake} Native</code>\n"
             f"🔮 <b>PRDT Round:</b> <code>{round_text}</code>\n\n"
-            f"<i>Use /demo or /real to switch execution mode.</i>"
+            f"<i>Tap /demo or /real to switch mode anytime.</i>"
         )
         await update.message.reply_text(msg, parse_mode='HTML')
 
