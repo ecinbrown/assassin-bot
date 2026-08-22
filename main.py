@@ -1,8 +1,7 @@
 """
-Assassin Bot - Main Application Runner
-======================================
-Connects real-time Binance market data streams to the Assassin Confluence Engine
-and dispatches validated signals to PRDT Finance.
+Assassin Bot - Main Application Runner v2
+==========================================
+Full Price-Action Confluence Engine — Binance Live → Assassin Analysis → PRDT Finance
 """
 import asyncio
 import logging
@@ -26,10 +25,14 @@ logger = logging.getLogger("AssassinBot")
 
 async def main():
     logger.info("=" * 65)
-    logger.info("  ASSASSIN BOT — High-Probability Crypto Confluence Engine")
-    logger.info("  Strategies: QM Order Block + FVG Overlap + Doji Breakout")
+    logger.info("  ASSASSIN BOT v2 — Pure Price-Action Confluence Engine")
+    logger.info("  ─────────────────────────────────────────────────────")
+    logger.info("  Patterns: QM + OB + FVG + Doji + Engulfing + Exhaustion")
+    logger.info("  Structure: S/R Zones + Round Numbers + Trendlines")
+    logger.info("  Analysis: Regime Detection + Confluence Scoring")
+    logger.info("  Verdict: Take It (3+ solid) | Lean (2+1) | Leave It")
     logger.info("  Execution: Margin of Safety / Round Number Retest")
-    logger.info("  Feeder: Binance Live WebSocket (1m/3m/5m)")
+    logger.info("  Feeder: Binance Live WebSocket")
     logger.info("  Destination: PRDT Finance Webhook")
     logger.info("=" * 65)
 
@@ -38,7 +41,7 @@ async def main():
     symbols = [s.strip() for s in symbols if s.strip()]
     interval = os.environ.get("CANDLE_INTERVAL", "1m")
     expiry_seconds = int(os.environ.get("TRADE_EXPIRY_SECONDS", "300"))
-    
+
     webhook_url = os.environ.get("PRDT_WEBHOOK_URL", "")
     api_key = os.environ.get("PRDT_API_KEY", "")
     stake_usd = float(os.environ.get("TRADE_STAKE_USD", "10.0"))
@@ -52,7 +55,7 @@ async def main():
         swing_right=2,
         safety_tolerance_pct=0.08,
         default_expiry_seconds=expiry_seconds,
-        require_safety_retest=True
+        require_safety_retest=True,
     )
 
     dispatcher = PRDTWebhookDispatcher(
@@ -66,10 +69,12 @@ async def main():
     async def on_candle_closed(symbol: str, candle: Candle):
         signals = engine.update_candle(symbol, candle)
         for sig in signals:
+            verdict_icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
             logger.critical(
-                f"🔥 SIGNAL DETECTED: {sig.symbol} {sig.action.upper()} | "
-                f"${sig.price:.2f} | Confidence: {sig.confidence*100:.0f}% | "
-                f"Trigger: {sig.trigger}"
+                f"{verdict_icon} SIGNAL: {sig.symbol} {sig.action.upper()} | "
+                f"${sig.price:.2f} | {sig.verdict} ({sig.confidence*100:.0f}%) | "
+                f"Solid={sig.solid_count} Soft={sig.soft_count} | "
+                f"Regime={sig.regime} | {sig.trigger}"
             )
             # Dispatch to PRDT Webhook
             await dispatcher.dispatch_trade(sig)
