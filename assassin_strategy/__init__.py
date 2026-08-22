@@ -26,6 +26,7 @@ from .confluence_scorer import ConfluenceScorer, Confirmation, ConfluenceVerdict
 from .signal_engine import AssassinSignalEngine, AssassinSignal
 from .binance_feed import BinanceFeed
 from .prdt_webhook import PRDTWebhookDispatcher
+from .prdt_contract import PRDTAgent, EnteredRound
 
 __all__ = [
     'Candle', 'detect_gap',
@@ -40,4 +41,5 @@ __all__ = [
     'ConfluenceScorer', 'Confirmation', 'ConfluenceVerdict',
     'AssassinSignalEngine', 'AssassinSignal',
     'BinanceFeed', 'PRDTWebhookDispatcher',
+    'PRDTAgent', 'EnteredRound',
 ]
