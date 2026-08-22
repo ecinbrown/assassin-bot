@@ -1,7 +1,0 @@
-hyperliquid-python-sdk
-python-telegram-bot
-python-dotenv
-numpy
-eth_account
-httpx
-aiohttp
