@@ -75,6 +75,7 @@ class AssassinSignalEngine:
 
         self.default_expiry = default_expiry_seconds
         self.require_safety_retest = require_safety_retest
+        self.min_confidence = float(os.environ.get("MIN_CONFIDENCE", "0.90"))  # Strict 90%+ verdict filter
 
         # Per-symbol candle history
         self.candle_history: Dict[str, List[Candle]] = {}
@@ -282,7 +283,8 @@ class AssassinSignalEngine:
             post_run_caution=state.post_run_caution
         )
 
-        if verdict.verdict in ('TAKE_IT', 'LEAN') and verdict.action in ('call', 'put'):
+        # Strict 90%+ Filter: Only TAKE_IT signals meeting the minimum confidence are traded
+        if verdict.verdict == 'TAKE_IT' and verdict.confidence >= self.min_confidence and verdict.action in ('call', 'put'):
             sig = AssassinSignal(
                 symbol=symbol,
                 action=verdict.action,
@@ -304,10 +306,9 @@ class AssassinSignalEngine:
                 }
             )
 
-            # Log the full analysis
+            # Log the high-conviction trade signal
             logger.info(
-                f"{'🔥' if verdict.verdict == 'TAKE_IT' else '📊'} [{symbol}] "
-                f"{verdict.verdict} {verdict.action.upper()} | "
+                f"🔥 [TAKE_IT 90%+] [{symbol}] {verdict.action.upper()} | "
                 f"Solid={verdict.solid_count} Soft={verdict.soft_count} | "
                 f"Confidence={verdict.confidence*100:.0f}% | "
                 f"Regime={regime.regime} Run={state.run_length}{state.run_color[0].upper()}"
@@ -317,6 +318,12 @@ class AssassinSignalEngine:
 
             signals.append(sig)
             self.last_signals[symbol] = now
+        elif verdict.verdict == 'LEAN':
+            # Sub-90% setup filtered out
+            logger.info(
+                f"⏭️ [FILTERED - SUB-90%] [{symbol}] {verdict.action.upper()} ({verdict.confidence*100:.0f}% < 90%) | "
+                f"Solid={verdict.solid_count} — Trade skipped."
+            )
 
         # Also check pending safety retests (from prior armed setups)
         triggered_setups = self.safety_filter.check_pending(symbol, candle.close, current_idx)
