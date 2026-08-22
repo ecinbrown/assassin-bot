@@ -113,6 +113,7 @@ class PRDTAgent:
         rpc_url: Optional[str] = None,
         contract_address: Optional[str] = None,
         private_key: Optional[str] = None,
+        stake_pct: float = 5.0,
         default_stake_native: float = 0.01,
         min_buffer_seconds: int = 20,
         gas_limit: int = 160000,
@@ -121,16 +122,38 @@ class PRDTAgent:
         self.rpc_url = rpc_url or os.environ.get("PRDT_RPC_URL", "https://bsc-dataseed.binance.org/")
         self.contract_address = contract_address or os.environ.get("PRDT_CONTRACT_ADDRESS", "")
         self.private_key = private_key or os.environ.get("WALLET_PRIVATE_KEY", "")
+        self.stake_pct = float(os.environ.get("STAKE_PCT", stake_pct))
         self.default_stake = float(os.environ.get("PRDT_STAKE_NATIVE", default_stake_native))
         self.min_buffer_seconds = min_buffer_seconds
         self.gas_limit = gas_limit
         self.simulation_mode = simulation_mode or (not self.private_key or not self.contract_address)
+        self.simulated_balance = 10.0  # Default 10 Native tokens (e.g. 10 BNB) in demo mode
 
         self.w3 = None
         self.account = None
         self.contract = None
         self.entered_rounds: Dict[int, EnteredRound] = {}
         self._nonce = None
+
+    def calculate_stake(self, stake_override: Optional[float] = None) -> float:
+        """Calculate dynamic trade stake (5% of wallet / simulated balance)."""
+        if stake_override is not None and stake_override > 0:
+            return stake_override
+
+        # If live wallet connected, calculate 5% of real on-chain balance
+        if self.account and self.w3 and self.w3.is_connected() and not self.simulation_mode:
+            try:
+                balance_wei = self.w3.eth.get_balance(self.account.address)
+                balance_native = float(self.w3.from_wei(balance_wei, 'ether'))
+                calculated = balance_native * (self.stake_pct / 100.0)
+                # Keep floor of 0.002 and round to 4 decimals
+                return max(0.002, round(calculated, 4))
+            except Exception as e:
+                logger.warning(f"Error calculating dynamic stake from on-chain balance: {e}")
+
+        # In simulation mode, calculate 5% of simulated balance
+        calculated = self.simulated_balance * (self.stake_pct / 100.0)
+        return max(0.002, round(calculated, 4))
 
     def initialize(self) -> bool:
         """Initialize Web3 connection, account credentials, and contract instance."""
@@ -247,7 +270,7 @@ class PRDTAgent:
         return await asyncio.to_thread(self._sync_execute_trade, signal, stake_native)
 
     def _sync_execute_trade(self, signal, stake_native: Optional[float] = None) -> Tuple[bool, str]:
-        stake = stake_native if stake_native is not None else self.default_stake
+        stake = self.calculate_stake(stake_native)
         action = signal.action.lower()  # 'call' or 'put'
         epoch = self.get_current_epoch()
         round_info = self.get_round_info(epoch)
@@ -278,9 +301,11 @@ class PRDTAgent:
             )
             logger.info(
                 f"🧪 [SIMULATION TRADE EXECUTED] Epoch #{epoch} | "
-                f"{action.upper()} | Stake: {stake:.4f} Native | "
+                f"{action.upper()} | Stake: {stake:.4f} Native (5% of {self.simulated_balance:.4f}) | "
                 f"Simulated TxHash: {sim_tx}"
             )
+            # Deduct stake from simulated balance
+            self.simulated_balance -= stake
             return True, sim_tx
 
         # LIVE ON-CHAIN TRANSACTION EXECUTION
