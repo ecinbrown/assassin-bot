@@ -3,11 +3,14 @@ Assassin Bot - Main Application Runner v2
 ==========================================
 Full Price-Action Confluence Engine:
 Binance Live Feeder → Assassin Confluence Engine → PRDT Finance Web3 Smart Contract
++ Interactive Telegram Controller & Live Alert Engine
 """
 import asyncio
 import logging
 import os
 import sys
+from dataclasses import dataclass, field
+from typing import List, Optional
 
 from assassin_strategy import (
     Candle,
@@ -15,7 +18,8 @@ from assassin_strategy import (
     AssassinSignal,
     BinanceFeed,
     PRDTAgent,
-    PRDTWebhookDispatcher
+    PRDTWebhookDispatcher,
+    AssassinTelegramBot
 )
 
 logging.basicConfig(
@@ -25,6 +29,29 @@ logging.basicConfig(
 logger = logging.getLogger("AssassinBot")
 
 
+class AssassinController:
+    """Master controller managing runtime state, mode toggling, and services."""
+    def __init__(
+        self,
+        symbols: List[str],
+        interval: str = "1m",
+        expiry_seconds: int = 300,
+        stake_native: float = 0.01,
+        simulation_mode: bool = True
+    ):
+        self.symbols = symbols
+        self.interval = interval
+        self.expiry_seconds = expiry_seconds
+        self.stake_native = stake_native
+        self.simulation_mode = simulation_mode
+        self.paused = False
+        
+        self.engine: Optional[AssassinSignalEngine] = None
+        self.prdt_agent: Optional[PRDTAgent] = None
+        self.telegram_bot: Optional[AssassinTelegramBot] = None
+        self.dispatcher: Optional[PRDTWebhookDispatcher] = None
+
+
 async def main():
     logger.info("=" * 65)
     logger.info("  ASSASSIN BOT v2 — Real-Market Crypto Confluence Engine")
@@ -32,8 +59,9 @@ async def main():
     logger.info("  Strategies: QM + OB + FVG + Doji + Engulfing + Exhaustion")
     logger.info("  Structure: S/R Zones + Round Numbers + Trendlines")
     logger.info("  Analysis: Regime Detection + 3-Tier Confluence Scoring")
-    logger.info("  Execution Engine: Web3 Smart Contract (PRDTAgent)")
+    logger.info("  Execution: Web3 Smart Contract (PRDTAgent)")
     logger.info("  Feeder: Binance Live WebSocket (1m/3m/5m)")
+    logger.info("  Telegram: Interactive Control + Real/Demo Mode Switcher")
     logger.info("=" * 65)
 
     # 1. Configuration from Environment
@@ -49,11 +77,24 @@ async def main():
     stake_native = float(os.environ.get("PRDT_STAKE_NATIVE", "0.01"))
     simulation_mode = os.environ.get("SIMULATION_MODE", "true").lower() in ("true", "1", "yes")
 
+    # Telegram Credentials (supports ASSASSIN_TG_TOKEN & TELEGRAM_BOT_TOKEN)
+    tg_token = os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    tg_chat_id = os.environ.get("ASSASSIN_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID", "")
+
     # Optional Webhook fallback URL
     webhook_url = os.environ.get("PRDT_WEBHOOK_URL", "")
     api_key = os.environ.get("PRDT_API_KEY", "")
 
-    # 2. Instantiate Components
+    # 2. Instantiate Master Controller
+    controller = AssassinController(
+        symbols=symbols,
+        interval=interval,
+        expiry_seconds=expiry_seconds,
+        stake_native=stake_native,
+        simulation_mode=simulation_mode
+    )
+
+    # 3. Instantiate Engine & Web3 Agent
     engine = AssassinSignalEngine(
         doji_threshold=0.10,
         fvg_min_pct=0.01,
@@ -63,8 +104,8 @@ async def main():
         default_expiry_seconds=expiry_seconds,
         require_safety_retest=True,
     )
+    controller.engine = engine
 
-    # Direct Web3 Smart Contract Agent
     prdt_agent = PRDTAgent(
         rpc_url=rpc_url,
         contract_address=contract_addr,
@@ -74,19 +115,33 @@ async def main():
         simulation_mode=simulation_mode
     )
     prdt_agent.initialize()
+    controller.prdt_agent = prdt_agent
 
     # Webhook Dispatcher (if configured)
-    dispatcher = None
     if webhook_url:
-        dispatcher = PRDTWebhookDispatcher(
+        controller.dispatcher = PRDTWebhookDispatcher(
             webhook_url=webhook_url,
             api_key=api_key,
             default_stake_usd=10.0,
             simulation_mode=simulation_mode
         )
 
-    # 3. Define Callback for Closed Candles
+    # 4. Instantiate Telegram Bot Controller
+    tg_bot = None
+    if tg_token:
+        tg_bot = AssassinTelegramBot(
+            token=tg_token,
+            chat_id=tg_chat_id,
+            main_controller=controller
+        )
+        if tg_bot.initialize():
+            controller.telegram_bot = tg_bot
+
+    # 5. Define Callback for Closed Candles
     async def on_candle_closed(symbol: str, candle: Candle):
+        if controller.paused:
+            return
+
         signals = engine.update_candle(symbol, candle)
         for sig in signals:
             verdict_icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
@@ -97,23 +152,34 @@ async def main():
                 f"Regime={sig.regime} | {sig.trigger}"
             )
 
-            # 1. Execute via Web3 Smart Contract (Method 2)
-            success, tx_or_reason = await prdt_agent.execute_trade(sig)
+            # Send Telegram Alert
+            if tg_bot:
+                await tg_bot.send_signal_alert(sig)
+
+            # 1. Execute via Web3 Smart Contract (PRDTAgent)
+            success, tx_or_reason = await prdt_agent.execute_trade(sig, stake_native=controller.stake_native)
             if success:
                 logger.info(f"✅ Trade Executed on PRDT Contract: {tx_or_reason}")
             else:
                 logger.warning(f"⚠️ Trade Execution Failed / Skipped: {tx_or_reason}")
 
-            # 2. Also dispatch to Webhook if configured
-            if dispatcher:
-                await dispatcher.dispatch_trade(sig)
+            # Send Trade Execution Alert to Telegram
+            if tg_bot:
+                await tg_bot.send_trade_alert(sig, tx_or_reason, success)
 
-    # 4. Background Auto-Claim Winnings Task (every 60s)
+            # 2. Also dispatch to Webhook if configured
+            if controller.dispatcher:
+                await controller.dispatcher.dispatch_trade(sig)
+
+    # 6. Background Auto-Claim Winnings Task (every 60s)
     async def auto_claim_worker():
         while True:
             try:
                 await asyncio.sleep(60)
-                await prdt_agent.auto_claim_winnings()
+                if not controller.paused and not controller.simulation_mode:
+                    txs = await prdt_agent.auto_claim_winnings()
+                    if txs and tg_bot:
+                        await tg_bot.send_claim_alert(txs)
             except asyncio.CancelledError:
                 break
             except Exception as e:
@@ -121,24 +187,35 @@ async def main():
 
     claim_task = asyncio.create_task(auto_claim_worker())
 
-    # 5. Start Binance Feed
+    # 7. Start Telegram Bot Polling (if enabled)
+    tg_task = None
+    if tg_bot:
+        tg_task = asyncio.create_task(tg_bot.start())
+
+    # 8. Start Binance Feed
     feed = BinanceFeed(
-        symbols=symbols,
-        interval=interval,
+        symbols=controller.symbols,
+        interval=controller.interval,
         on_candle_closed=on_candle_closed
     )
 
     try:
-        logger.info(f"Armed with symbols: {symbols} on {interval} candles.")
-        logger.info(f"PRDT Smart Contract Mode: {'SIMULATION (Dry-Run)' if prdt_agent.simulation_mode else 'LIVE ON-CHAIN'}")
+        logger.info(f"Armed with symbols: {controller.symbols} on {controller.interval} candles.")
+        logger.info(f"Initial Execution Mode: {'🧪 SIMULATION (Demo)' if controller.simulation_mode else '🟢 LIVE ON-CHAIN (Real)'}")
+        if tg_bot:
+            logger.info("📱 Telegram Controller: ACTIVE")
         await feed.start()
     except KeyboardInterrupt:
         logger.info("Shutting down Assassin Bot...")
     finally:
         claim_task.cancel()
+        if tg_bot:
+            await tg_bot.stop()
+        if tg_task:
+            tg_task.cancel()
         await feed.stop()
-        if dispatcher:
-            await dispatcher.close()
+        if controller.dispatcher:
+            await controller.dispatcher.close()
 
 
 if __name__ == "__main__":

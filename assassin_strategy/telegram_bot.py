@@ -1,0 +1,374 @@
+"""
+Assassin Bot - Telegram Controller & Live Alert Engine
+======================================================
+Provides interactive Telegram control for Assassin Bot:
+- Real-time trade and signal alerts with full price-action breakdown.
+- Dynamic mode switching between DEMO (Simulation) and REAL (Live Web3).
+- Stake adjustment, symbol management, status dashboard, and auto-claim triggers.
+"""
+import asyncio
+import logging
+import os
+import time
+from typing import Optional, List, Dict
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    MessageHandler,
+    ContextTypes,
+    filters
+)
+
+logger = logging.getLogger("AssassinTelegram")
+
+
+class AssassinTelegramBot:
+    """Interactive Telegram interface for Assassin Bot."""
+
+    def __init__(self, token: Optional[str] = None, chat_id: Optional[str] = None, main_controller=None):
+        self.token = token or os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN", "")
+        chat_id_val = chat_id or os.environ.get("ASSASSIN_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID", "")
+        self.chat_id = int(chat_id_val) if chat_id_val and chat_id_val.lstrip('-').isdigit() else None
+        
+        self.controller = main_controller  # Reference to main context (engine, prdt_agent, feed)
+        self.app: Optional[Application] = None
+        self.is_running = False
+
+    def _get_keyboard(self) -> ReplyKeyboardMarkup:
+        """Create persistent quick-action keyboard."""
+        keyboard = [
+            [KeyboardButton("📊 Status"), KeyboardButton("🎁 Claim Winnings")],
+            [KeyboardButton("🧪 Switch to DEMO"), KeyboardButton("🟢 Switch to REAL")],
+            [KeyboardButton("🛑 Pause / Resume")]
+        ]
+        return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
+    async def _check_auth(self, update: Update) -> bool:
+        """Authorize message sender against configured chat_id."""
+        if not self.chat_id:
+            # If no chat_id set yet, lock to the first user who messages
+            self.chat_id = update.effective_chat.id
+            logger.info(f"🔒 Bound Assassin Telegram to Chat ID: {self.chat_id}")
+            return True
+        if update.effective_chat.id != self.chat_id:
+            await update.message.reply_text("⛔ Unauthorized access.")
+            return False
+        return True
+
+    def initialize(self):
+        """Build Telegram Application and register command handlers."""
+        if not self.token:
+            logger.warning("⚠️ No ASSASSIN_TG_TOKEN configured. Telegram bot disabled.")
+            return False
+
+        try:
+            self.app = Application.builder().token(self.token).build()
+
+            # Commands
+            self.app.add_handler(CommandHandler("start", self.handle_start))
+            self.app.add_handler(CommandHandler("help", self.handle_start))
+            self.app.add_handler(CommandHandler("status", self.handle_status))
+            self.app.add_handler(CommandHandler("demo", self.handle_demo))
+            self.app.add_handler(CommandHandler("real", self.handle_real))
+            self.app.add_handler(CommandHandler("mode", self.handle_mode_toggle))
+            self.app.add_handler(CommandHandler("stake", self.handle_stake))
+            self.app.add_handler(CommandHandler("symbols", self.handle_symbols))
+            self.app.add_handler(CommandHandler("pause", self.handle_pause))
+            self.app.add_handler(CommandHandler("resume", self.handle_resume))
+            self.app.add_handler(CommandHandler("claim", self.handle_claim))
+
+            # Keyboard button text handlers
+            self.app.add_handler(MessageHandler(filters.Regex("^📊 Status$"), self.handle_status))
+            self.app.add_handler(MessageHandler(filters.Regex("^🧪 Switch to DEMO$"), self.handle_demo))
+            self.app.add_handler(MessageHandler(filters.Regex("^🟢 Switch to REAL$"), self.handle_real))
+            self.app.add_handler(MessageHandler(filters.Regex("^🎁 Claim Winnings$"), self.handle_claim))
+            self.app.add_handler(MessageHandler(filters.Regex("^🛑 Pause / Resume$"), self.handle_pause_toggle))
+
+            logger.info("✅ Assassin Telegram Bot handlers registered successfully.")
+            return True
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize Telegram Bot: {e}")
+            return False
+
+    async def start(self):
+        """Start polling in async background loop."""
+        if not self.app:
+            return
+        self.is_running = True
+        logger.info("🤖 Starting Assassin Telegram polling loop...")
+        await self.app.initialize()
+        await self.app.start()
+        await self.app.updater.start_polling(drop_pending_updates=True)
+        
+        # Send startup greeting
+        await self.send_message(
+            "🦅 <b>ASSASSIN BOT v2 ONLINE</b> 🦅\n\n"
+            "Ready for high-probability crypto price-action sniper trades.\n"
+            "Type /help or use the menu below to control the bot.",
+            reply_markup=self._get_keyboard()
+        )
+
+    async def stop(self):
+        """Gracefully shut down Telegram bot."""
+        if self.app and self.is_running:
+            self.is_running = False
+            await self.app.updater.stop()
+            await self.app.stop()
+            await self.app.shutdown()
+
+    # ───────────────────────────────────────────
+    # NOTIFICATION DISPATCHERS
+    # ───────────────────────────────────────────
+
+    async def send_message(self, text: str, reply_markup=None):
+        """Send a message to the configured admin chat."""
+        if not self.app or not self.chat_id:
+            return
+        try:
+            await self.app.bot.send_message(
+                chat_id=self.chat_id,
+                text=text,
+                parse_mode='HTML',
+                reply_markup=reply_markup,
+                disable_web_page_preview=True
+            )
+        except Exception as e:
+            logger.warning(f"Telegram send error: {e}")
+
+    async def send_signal_alert(self, sig):
+        """Broadcast high-conviction signal detection alert."""
+        icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
+        mode_str = "🧪 DEMO (Simulation)" if getattr(self.controller, 'simulation_mode', True) else "🟢 REAL (Live On-Chain)"
+        
+        confirmations_str = ""
+        if sig.metadata and 'confirmations' in sig.metadata:
+            confirmations_str = "\n".join([f"  • {c}" for c in sig.metadata['confirmations']])
+
+        msg = (
+            f"{icon} <b>ASSASSIN SIGNAL DETECTED</b> {icon}\n\n"
+            f"🎯 <b>Asset:</b> <code>{sig.symbol}</code>\n"
+            f"⚡ <b>Action:</b> <b>{sig.action.upper()}</b>\n"
+            f"💰 <b>Price:</b> <code>${sig.price:.2f}</code>\n"
+            f"🏆 <b>Verdict:</b> <code>{sig.verdict} ({sig.confidence*100:.0f}% confidence)</code>\n"
+            f"📊 <b>Confirmations:</b> <code>{sig.solid_count} Solid | {sig.soft_count} Soft</code>\n"
+            f"🌐 <b>Regime:</b> <code>{sig.regime}</code>\n"
+            f"⚙️ <b>Execution Mode:</b> <code>{mode_str}</code>\n\n"
+            f"📝 <b>Key Drivers:</b>\n{confirmations_str if confirmations_str else '  • ' + sig.trigger}"
+        )
+        await self.send_message(msg)
+
+    async def send_trade_alert(self, sig, tx_or_reason: str, success: bool):
+        """Broadcast trade execution result."""
+        mode_str = "🧪 DEMO (Simulation)" if getattr(self.controller, 'simulation_mode', True) else "🟢 REAL ON-CHAIN"
+        status_icon = "✅" if success else "❌"
+        
+        tx_display = tx_or_reason
+        if len(tx_or_reason) > 30 and not tx_or_reason.startswith("0xsim"):
+            tx_display = f"<code>{tx_or_reason[:16]}...{tx_or_reason[-8:]}</code>\n🔗 <a href='https://bscscan.com/tx/{tx_or_reason}'>View on BscScan</a>"
+        else:
+            tx_display = f"<code>{tx_or_reason}</code>"
+
+        msg = (
+            f"{status_icon} <b>TRADE EXECUTION: {sig.symbol} {sig.action.upper()}</b>\n\n"
+            f"⚙️ <b>Mode:</b> <code>{mode_str}</code>\n"
+            f"💵 <b>Stake:</b> <code>{getattr(self.controller, 'stake_native', 0.01)} Native</code>\n"
+            f"⏱️ <b>Expiry:</b> <code>{sig.expiry_seconds}s (5m epoch)</code>\n"
+            f"🧾 <b>Tx / Result:</b> {tx_display}"
+        )
+        await self.send_message(msg)
+
+    async def send_claim_alert(self, tx_hashes: List[str]):
+        """Broadcast winning payouts claimed alert."""
+        tx_links = "\n".join([f"• <code>{tx[:20]}...</code>" for tx in tx_hashes])
+        msg = (
+            f"🎉 <b>WINNINGS CLAIMED SUCCESSFULLY!</b> 🎉\n\n"
+            f"Harvested winning payout(s) from PRDT contract.\n"
+            f"<b>Transactions:</b>\n{tx_links}"
+        )
+        await self.send_message(msg)
+
+    # ───────────────────────────────────────────
+    # COMMAND HANDLERS
+    # ───────────────────────────────────────────
+
+    async def handle_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not await self._check_auth(update):
+            return
+        help_text = (
+            "🦅 <b>ASSASSIN BOT — CONTROL PANEL</b>\n\n"
+            "<b>Commands:</b>\n"
+            "• <code>/status</code> — Live dashboard & performance\n"
+            "• <code>/demo</code> — Switch to 🧪 <b>DEMO (Simulation) Mode</b>\n"
+            "• <code>/real</code> — Switch to 🟢 <b>REAL (Live Web3) Mode</b>\n"
+            "• <code>/mode</code> — Toggle between Demo and Real\n"
+            "• <code>/stake [amount]</code> — Set stake in BNB/ETH (e.g. <code>/stake 0.02</code>)\n"
+            "• <code>/symbols [list]</code> — Update monitored pairs (e.g. <code>/symbols BTCUSDT,ETHUSDT</code>)\n"
+            "• <code>/claim</code> — Manually claim winning payouts\n"
+            "• <code>/pause</code> / <code>/resume</code> — Toggle signal engine"
+        )
+        await update.message.reply_text(help_text, parse_mode='HTML', reply_markup=self._get_keyboard())
+
+    async def handle_status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not await self._check_auth(update):
+            return
+        c = self.controller
+        if not c:
+            await update.message.reply_text("❌ Controller not initialized.")
+            return
+
+        sim_mode = getattr(c, 'simulation_mode', True)
+        mode_str = "🧪 DEMO (Simulation)" if sim_mode else "🟢 REAL (Live Web3 Contract)"
+        symbols_str = ", ".join(getattr(c, 'symbols', []))
+        stake = getattr(c, 'stake_native', 0.01)
+        paused = getattr(c, 'paused', False)
+
+        # Get round info from agent
+        round_text = "N/A"
+        if hasattr(c, 'prdt_agent') and c.prdt_agent:
+            epoch = c.prdt_agent.get_current_epoch()
+            r_info = c.prdt_agent.get_round_info(epoch)
+            time_left = r_info.get("time_to_lock_seconds", 0)
+            round_text = f"Epoch #{epoch} ({time_left}s remaining)"
+
+        msg = (
+            "📊 <b>ASSASSIN BOT DASHBOARD</b> 📊\n\n"
+            f"⚙️ <b>Mode:</b> <b>{mode_str}</b>\n"
+            f"🚦 <b>Engine State:</b> {'🛑 PAUSED' if paused else '🟢 ACTIVE'}\n"
+            f"🎯 <b>Symbols:</b> <code>{symbols_str}</code>\n"
+            f"⏱️ <b>Timeframe:</b> <code>{getattr(c, 'interval', '1m')} / 300s Expiry</code>\n"
+            f"💵 <b>Stake per Trade:</b> <code>{stake} Native</code>\n"
+            f"🔮 <b>PRDT Round:</b> <code>{round_text}</code>\n\n"
+            f"<i>Use /demo or /real to switch execution mode.</i>"
+        )
+        await update.message.reply_text(msg, parse_mode='HTML')
+
+    async def handle_demo(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Switch bot to Demo / Simulation mode."""
+        if not await self._check_auth(update):
+            return
+        if self.controller:
+            self.controller.simulation_mode = True
+            if hasattr(self.controller, 'prdt_agent') and self.controller.prdt_agent:
+                self.controller.prdt_agent.simulation_mode = True
+        
+        msg = (
+            "🧪 <b>SWITCHED TO DEMO MODE</b> 🧪\n\n"
+            "• Trades will be <b>simulated</b> with zero real gas/funds spent.\n"
+            "• Full price-action analysis remains active on live Binance feeds.\n"
+            "• Trade results will be logged and simulated automatically."
+        )
+        await update.message.reply_text(msg, parse_mode='HTML', reply_markup=self._get_keyboard())
+
+    async def handle_real(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Switch bot to Real On-Chain execution mode."""
+        if not await self._check_auth(update):
+            return
+        c = self.controller
+        if not c:
+            return
+
+        # Verification check: do we have contract and private key?
+        agent = getattr(c, 'prdt_agent', None)
+        if not agent or not agent.account or not agent.contract:
+            await update.message.reply_text(
+                "⚠️ <b>CANNOT ACTIVATE REAL MODE YET</b>\n\n"
+                "Missing <code>WALLET_PRIVATE_KEY</code> or <code>PRDT_CONTRACT_ADDRESS</code>.\n"
+                "Please configure them in Render environment variables first so the bot can sign on-chain transactions.",
+                parse_mode='HTML'
+            )
+            return
+
+        c.simulation_mode = False
+        agent.simulation_mode = False
+
+        msg = (
+            "🟢 <b>SWITCHED TO REAL ON-CHAIN MODE!</b> 🟢\n\n"
+            f"• Wallet: <code>{agent.account.address}</code>\n"
+            f"• Contract: <code>{agent.contract_address}</code>\n"
+            f"• Stake: <code>{c.stake_native} Native</code> per trade\n\n"
+            "⚠️ <i>Real Web3 transactions will be signed and broadcast on signal triggers!</i>"
+        )
+        await update.message.reply_text(msg, parse_mode='HTML', reply_markup=self._get_keyboard())
+
+    async def handle_mode_toggle(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not await self._check_auth(update):
+            return
+        cur_sim = getattr(self.controller, 'simulation_mode', True)
+        if cur_sim:
+            await self.handle_real(update, context)
+        else:
+            await self.handle_demo(update, context)
+
+    async def handle_stake(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not await self._check_auth(update):
+            return
+        args = context.args
+        if not args:
+            cur_stake = getattr(self.controller, 'stake_native', 0.01)
+            await update.message.reply_text(f"Current stake: <code>{cur_stake}</code> Native.\nTo change: <code>/stake 0.02</code>", parse_mode='HTML')
+            return
+
+        try:
+            val = float(args[0])
+            if val <= 0:
+                raise ValueError()
+            if self.controller:
+                self.controller.stake_native = val
+                if hasattr(self.controller, 'prdt_agent') and self.controller.prdt_agent:
+                    self.controller.prdt_agent.default_stake = val
+            await update.message.reply_text(f"✅ Stake updated to <b>{val} Native</b> per trade.", parse_mode='HTML')
+        except Exception:
+            await update.message.reply_text("❌ Invalid stake amount. Example: <code>/stake 0.02</code>", parse_mode='HTML')
+
+    async def handle_symbols(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not await self._check_auth(update):
+            return
+        args = context.args
+        if not args:
+            cur = ", ".join(getattr(self.controller, 'symbols', []))
+            await update.message.reply_text(f"Current symbols: <code>{cur}</code>\nTo change: <code>/symbols BTCUSDT,ETHUSDT,SOLUSDT</code>", parse_mode='HTML')
+            return
+
+        syms = [s.strip().upper() for s in " ".join(args).split(",") if s.strip()]
+        if self.controller:
+            self.controller.symbols = syms
+        await update.message.reply_text(f"✅ Monitored symbols updated to: <code>{', '.join(syms)}</code>", parse_mode='HTML')
+
+    async def handle_pause(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not await self._check_auth(update):
+            return
+        if self.controller:
+            self.controller.paused = True
+        await update.message.reply_text("🛑 <b>Assassin Bot PAUSED.</b> No trades will fire.", parse_mode='HTML')
+
+    async def handle_resume(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not await self._check_auth(update):
+            return
+        if self.controller:
+            self.controller.paused = False
+        await update.message.reply_text("🟢 <b>Assassin Bot RESUMED.</b> Scanning live feeds.", parse_mode='HTML')
+
+    async def handle_pause_toggle(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not await self._check_auth(update):
+            return
+        is_paused = getattr(self.controller, 'paused', False)
+        if is_paused:
+            await self.handle_resume(update, context)
+        else:
+            await self.handle_pause(update, context)
+
+    async def handle_claim(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not await self._check_auth(update):
+            return
+        agent = getattr(self.controller, 'prdt_agent', None)
+        if not agent:
+            await update.message.reply_text("❌ PRDT Agent not active.")
+            return
+
+        await update.message.reply_text("🔍 Checking PRDT contract for claimable rounds...")
+        txs = await agent.auto_claim_winnings()
+        if txs:
+            await self.send_claim_alert(txs)
+        else:
+            await update.message.reply_text("ℹ️ No pending claimable rounds found.")

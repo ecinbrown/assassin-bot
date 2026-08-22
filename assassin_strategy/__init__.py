@@ -27,6 +27,7 @@ from .signal_engine import AssassinSignalEngine, AssassinSignal
 from .binance_feed import BinanceFeed
 from .prdt_webhook import PRDTWebhookDispatcher
 from .prdt_contract import PRDTAgent, EnteredRound
+from .telegram_bot import AssassinTelegramBot
 
 __all__ = [
     'Candle', 'detect_gap',
@@ -42,4 +43,5 @@ __all__ = [
     'AssassinSignalEngine', 'AssassinSignal',
     'BinanceFeed', 'PRDTWebhookDispatcher',
     'PRDTAgent', 'EnteredRound',
+    'AssassinTelegramBot',
 ]
