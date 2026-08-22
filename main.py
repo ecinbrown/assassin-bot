@@ -12,6 +12,9 @@ import sys
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+import aiohttp
+from aiohttp import web
+
 from assassin_strategy import (
     Candle,
     AssassinSignalEngine,
@@ -192,7 +195,21 @@ async def main():
     if tg_bot:
         tg_task = asyncio.create_task(tg_bot.start())
 
-    # 8. Start Binance Feed
+    # 8. Start HTTP Health Server (Required for Render Web Service)
+    port = int(os.environ.get("PORT", 8080))
+    async def handle_health(request):
+        return web.Response(text="OK - Assassin Bot v2 Running", status=200)
+
+    http_app = web.Application()
+    http_app.router.add_get("/", handle_health)
+    http_app.router.add_get("/health", handle_health)
+    runner = web.AppRunner(http_app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    logger.info(f"🌐 HTTP Health server listening on port {port}")
+
+    # 9. Start Binance Feed
     feed = BinanceFeed(
         symbols=controller.symbols,
         interval=controller.interval,
@@ -209,6 +226,7 @@ async def main():
         logger.info("Shutting down Assassin Bot...")
     finally:
         claim_task.cancel()
+        await runner.cleanup()
         if tg_bot:
             await tg_bot.stop()
         if tg_task:
