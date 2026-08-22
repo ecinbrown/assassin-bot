@@ -32,6 +32,17 @@ logging.basicConfig(
 logger = logging.getLogger("AssassinBot")
 
 
+@dataclass
+class ActiveTrade:
+    symbol: str
+    action: str
+    entry_price: float
+    stake_native: float
+    entry_time: float
+    expiry_time: float
+    epoch: int
+
+
 class AssassinController:
     """Master controller managing runtime state, mode toggling, and services."""
     def __init__(
@@ -48,6 +59,12 @@ class AssassinController:
         self.stake_native = stake_native
         self.simulation_mode = simulation_mode
         self.paused = False
+
+        # Live performance stats
+        self.wins: int = 0
+        self.losses: int = 0
+        self.active_trades: List[ActiveTrade] = []
+        self.latest_prices: dict = {}
         
         self.engine: Optional[AssassinSignalEngine] = None
         self.prdt_agent: Optional[PRDTAgent] = None
@@ -145,6 +162,49 @@ async def main():
         if controller.paused:
             return
 
+        controller.latest_prices[symbol] = candle.close
+        now = time.time()
+
+        # Check and settle any completed active trades
+        remaining_trades = []
+        for t in controller.active_trades:
+            if now >= t.expiry_time:
+                exit_price = controller.latest_prices.get(t.symbol, candle.close)
+                is_win = (exit_price > t.entry_price) if t.action == 'call' else (exit_price < t.entry_price)
+
+                if is_win:
+                    controller.wins += 1
+                    profit = t.stake_native * 0.90
+                    prdt_agent.simulated_balance += (t.stake_native + profit)
+                else:
+                    controller.losses += 1
+                    profit = -t.stake_native
+
+                logger.critical(
+                    f"🏆 [SETTLEMENT] {t.symbol} {t.action.upper()} | "
+                    f"Result: {'WIN ✅' if is_win else 'LOSS ❌'} | "
+                    f"Entry: ${t.entry_price:.2f} -> Exit: ${exit_price:.2f} | "
+                    f"PnL: {profit:+.4f} Native | "
+                    f"Score: {controller.wins}W - {controller.losses}L"
+                )
+
+                if tg_bot:
+                    await tg_bot.send_settlement_alert(
+                        symbol=t.symbol,
+                        action=t.action,
+                        entry_price=t.entry_price,
+                        exit_price=exit_price,
+                        is_win=is_win,
+                        profit_loss=profit,
+                        new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
+                        wins=controller.wins,
+                        losses=controller.losses
+                    )
+            else:
+                remaining_trades.append(t)
+        controller.active_trades = remaining_trades
+
+        # Evaluate candle for new 90%+ confluence signals
         signals = engine.update_candle(symbol, candle)
         for sig in signals:
             verdict_icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
@@ -160,9 +220,20 @@ async def main():
                 await tg_bot.send_signal_alert(sig)
 
             # 1. Execute via Web3 Smart Contract (PRDTAgent)
-            success, tx_or_reason = await prdt_agent.execute_trade(sig, stake_native=controller.stake_native)
+            trade_stake = prdt_agent.calculate_stake(controller.stake_native)
+            success, tx_or_reason = await prdt_agent.execute_trade(sig, stake_native=trade_stake)
             if success:
                 logger.info(f"✅ Trade Executed on PRDT Contract: {tx_or_reason}")
+                # Register active trade for automated outcome tracking
+                controller.active_trades.append(ActiveTrade(
+                    symbol=sig.symbol,
+                    action=sig.action.lower(),
+                    entry_price=sig.price,
+                    stake_native=trade_stake,
+                    entry_time=time.time(),
+                    expiry_time=time.time() + sig.expiry_seconds,
+                    epoch=prdt_agent.get_current_epoch()
+                ))
             else:
                 logger.warning(f"⚠️ Trade Execution Failed / Skipped: {tx_or_reason}")
 

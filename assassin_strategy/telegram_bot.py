@@ -188,6 +188,39 @@ class AssassinTelegramBot:
         )
         await self.send_message(msg)
 
+    async def send_settlement_alert(
+        self,
+        symbol: str,
+        action: str,
+        entry_price: float,
+        exit_price: float,
+        is_win: bool,
+        profit_loss: float,
+        new_balance: float,
+        wins: int,
+        losses: int
+    ):
+        """Broadcast crystal-clear round settlement WIN / LOSS outcome card."""
+        total = wins + losses
+        win_rate = (wins / total * 100.0) if total > 0 else 0.0
+        
+        diff = exit_price - entry_price
+        diff_str = f"+{diff:.2f}" if diff >= 0 else f"{diff:.2f}"
+        
+        icon = "🏆" if is_win else "❌"
+        outcome_str = "WIN ✅" if is_win else "LOSS ❌"
+        pnl_str = f"+{profit_loss:.4f}" if profit_loss >= 0 else f"{profit_loss:.4f}"
+        
+        msg = (
+            f"{icon} <b>TRADE RESULT: {symbol} {action.upper()} ({outcome_str})</b>\n\n"
+            f"🎯 <b>Entry Price:</b> <code>${entry_price:.2f}</code>\n"
+            f"🏁 <b>Expiry Price:</b> <code>${exit_price:.2f} ({diff_str})</code>\n"
+            f"💵 <b>Profit/Loss:</b> <code>{pnl_str} Native</code>\n"
+            f"💰 <b>Total Balance:</b> <code>{new_balance:.4f} Native</code>\n\n"
+            f"📊 <b>Scorecard:</b> <code>{wins} Wins - {losses} Losses ({win_rate:.0f}% Win Rate)</code>"
+        )
+        await self.send_message(msg)
+
     # ───────────────────────────────────────────
     # COMMAND HANDLERS
     # ───────────────────────────────────────────
@@ -250,13 +283,20 @@ class AssassinTelegramBot:
 
             total_entered = len(agent.entered_rounds)
 
+        wins = getattr(c, 'wins', 0)
+        losses = getattr(c, 'losses', 0)
+        total_settled = wins + losses
+        win_rate = (wins / total_settled * 100.0) if total_settled > 0 else 0.0
+        active_count = len(getattr(c, 'active_trades', []))
+
         msg = (
             "📊 <b>ASSASSIN BOT DASHBOARD</b> 📊\n\n"
             f"⚙️ <b>Mode:</b> <b>{mode_str}</b>\n"
             f"🚦 <b>Engine:</b> {'🛑 PAUSED' if paused else '🟢 ACTIVE'}\n"
             f"💰 <b>Balance:</b> <code>{balance_text}</code>\n"
             f"💵 <b>Current Stake:</b> <code>{stake_text}</code>\n"
-            f"📈 <b>Trades Placed:</b> <code>{total_entered} rounds</code>\n"
+            f"🏆 <b>Scorecard:</b> <code>{wins}W - {losses}L ({win_rate:.1f}% Win Rate)</code>\n"
+            f"⚡ <b>Active Trades Running:</b> <code>{active_count} open</code>\n"
             f"🎯 <b>Symbols:</b> <code>{symbols_str}</code>\n"
             f"⏱️ <b>Timeframe:</b> <code>{getattr(c, 'interval', '1m')} / 300s Expiry</code>\n"
             f"🔮 <b>PRDT Round:</b> <code>{round_text}</code>\n\n"
