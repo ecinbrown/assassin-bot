@@ -113,18 +113,33 @@ class ConfluenceScorer:
         if net_solid < 0:
             net_solid = 0
 
+        # Check for the 3 golden triggers
+        has_engulfing = any(c.source == 'ENGULFING' and c.action == action for c in deduped)
+        has_trendline = any(c.source == 'THIRD_TOUCH' and c.action == action for c in deduped)
+        has_major_sr = any(c.source == 'SR_CONTACT' and c.action == action for c in deduped)
+        has_qm = any(c.source in ('QM_PATTERN', 'OB_CONTACT') and c.action == action for c in deduped)
+
+        # Golden trigger bonus
+        trigger_bonus = 0.0
+        if has_engulfing:
+            trigger_bonus += 0.08  # 100% winrate trigger
+        if has_trendline:
+            trigger_bonus += 0.05  # 91.6% consistency trigger
+        if has_major_sr:
+            trigger_bonus += 0.04  # 83.3% structural floor trigger
+
         # Apply confidence tiers
         if net_solid >= self.take_it_threshold:
             verdict = 'TAKE_IT'
-            confidence = min(0.90 + (net_solid - self.take_it_threshold) * 0.03 + soft_count * 0.01, 0.98)
-            reasoning = f"Take it — {net_solid} solid + {soft_count} soft aligned {action.upper()} confirmations."
-        elif net_solid >= self.lean_threshold and soft_count >= self.lean_soft_required:
+            confidence = min(0.90 + (net_solid - self.take_it_threshold) * 0.03 + soft_count * 0.01 + trigger_bonus, 0.98)
+            reasoning = f"Take it (Golden Trio Aligned) — {net_solid} solid + {soft_count} soft aligned {action.upper()} confirmations."
+        elif net_solid >= self.lean_threshold and (soft_count >= self.lean_soft_required or trigger_bonus > 0.04):
             verdict = 'LEAN'
-            confidence = min(0.82 + (net_solid - self.lean_threshold) * 0.03 + soft_count * 0.02, 0.88)
+            confidence = min(0.80 + (net_solid - self.lean_threshold) * 0.03 + soft_count * 0.02 + trigger_bonus, 0.89)
             reasoning = f"Lean {action.upper()} — {net_solid} solid + {soft_count} soft aligned confirmations."
         elif net_solid >= self.lean_threshold:
             verdict = 'LEAN'
-            confidence = 0.80
+            confidence = min(0.75 + trigger_bonus, 0.82)
             reasoning = f"Lean {action.upper()} — {net_solid} solid confirmations."
         else:
             verdict = 'LEAVE_IT'

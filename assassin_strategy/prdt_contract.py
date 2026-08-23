@@ -276,17 +276,18 @@ class PRDTAgent:
         round_info = self.get_round_info(epoch)
 
         time_left = round_info.get("time_to_lock_seconds", 0)
+        
+        # If active round is locking in <20s, roll forward to next Epoch for full 5m duration!
+        if time_left < self.min_buffer_seconds:
+            epoch += 1
+            time_left += 300
+            logger.info(f"⏳ Rolling trade to upcoming Epoch #{epoch} for full 5m development time ({time_left}s).")
+
         logger.info(
             f"🎯 [PRDT CONTRACT] Target Epoch: #{epoch} | "
             f"Action: {action.upper()} | Time to Lock: {time_left}s | "
             f"Stake: {stake:.4f} Native"
         )
-
-        # Safety buffer check
-        if time_left < self.min_buffer_seconds:
-            msg = f"Skipped trade: Only {time_left}s left in Epoch #{epoch} (buffer minimum is {self.min_buffer_seconds}s)."
-            logger.warning(f"⏳ {msg}")
-            return False, msg
 
         # SIMULATION MODE EXECUTION
         if self.simulation_mode or not self.contract or not self.account:
