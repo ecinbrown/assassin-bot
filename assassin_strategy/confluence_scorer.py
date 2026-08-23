@@ -120,11 +120,11 @@ class ConfluenceScorer:
             reasoning = f"Take it — {net_solid} solid + {soft_count} soft aligned {action.upper()} confirmations."
         elif net_solid >= self.lean_threshold and soft_count >= self.lean_soft_required:
             verdict = 'LEAN'
-            confidence = min(0.80 + (net_solid - self.lean_threshold) * 0.03 + soft_count * 0.02, 0.88)
+            confidence = min(0.82 + (net_solid - self.lean_threshold) * 0.03 + soft_count * 0.02, 0.88)
             reasoning = f"Lean {action.upper()} — {net_solid} solid + {soft_count} soft aligned confirmations."
         elif net_solid >= self.lean_threshold:
             verdict = 'LEAN'
-            confidence = 0.75
+            confidence = 0.80
             reasoning = f"Lean {action.upper()} — {net_solid} solid confirmations."
         else:
             verdict = 'LEAVE_IT'

@@ -76,7 +76,7 @@ class AssassinSignalEngine:
 
         self.default_expiry = default_expiry_seconds
         self.require_safety_retest = require_safety_retest
-        self.min_confidence = float(os.environ.get("MIN_CONFIDENCE", "0.75"))  # Enables all 2+ solid TAKE_IT & LEAN setups
+        self.min_confidence = float(os.environ.get("MIN_CONFIDENCE", "0.80"))  # 80% baseline (all verified 2+ solid setups)
 
         # Per-symbol candle history
         self.candle_history: Dict[str, List[Candle]] = {}
