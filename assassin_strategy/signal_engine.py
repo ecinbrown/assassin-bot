@@ -287,8 +287,9 @@ class AssassinSignalEngine:
         # ═══════════════════════════════════════════════
         # STEP 7: TREND ALIGNMENT GATE
         # ═══════════════════════════════════════════════
-        # Forensic data: ALL 15 losses on Aug 22 were CALLs in TRENDING_DOWN without reversal proof.
-        # Rule: In trending regimes, only trade WITH the trend UNLESS Engulfing or QM proves reversal.
+        # Only blocks counter-trend trades in CLEAR trending regimes.
+        # RANGING = both directions allowed (where the bounce setups work).
+        # Counter-trend allowed IF Engulfing/QM/Exhaustion proves the reversal.
         has_reversal_proof = any(
             c.source in ('ENGULFING', 'QM_PATTERN', 'EXHAUSTION') and c.action == verdict.action
             for c in verdict.confirmations
@@ -303,7 +304,7 @@ class AssassinSignalEngine:
         if is_counter_trend and verdict.verdict in ('TAKE_IT', 'LEAN'):
             logger.info(
                 f"🛡️ [TREND GATE] [{symbol}] {verdict.action.upper()} blocked — "
-                f"Counter-trend in {regime.regime} without Engulfing/QM reversal proof. "
+                f"Counter-trend in {regime.regime} without reversal proof. "
                 f"Confidence was {verdict.confidence*100:.0f}%."
             )
         # 75% Filter: Trades all verified 2+ solid setups (TAKE_IT and LEAN)
