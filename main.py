@@ -287,6 +287,17 @@ async def main():
         on_candle_closed=on_candle_closed
     )
 
+    # Preload historical candles via REST API (Eliminates 15-minute cold start!)
+    try:
+        logger.info(f"⏳ Pre-loading historical {controller.interval} candles for {controller.symbols}...")
+        history_map = await feed.preload_history(limit=50)
+        for sym, candles in history_map.items():
+            if candles:
+                engine.candle_history[sym] = candles
+                logger.info(f"🚀 {sym} pre-seeded with {len(candles)} candles. Engine INSTANTLY ARMED!")
+    except Exception as e:
+        logger.warning(f"Historical preload failed ({e}). Will build history from live feed.")
+
     try:
         logger.info(f"Armed with symbols: {controller.symbols} on {controller.interval} candles.")
         logger.info(f"Initial Execution Mode: {'🧪 SIMULATION (Demo)' if controller.simulation_mode else '🟢 LIVE ON-CHAIN (Real)'}")

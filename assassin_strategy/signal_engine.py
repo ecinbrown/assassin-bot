@@ -81,7 +81,7 @@ class AssassinSignalEngine:
         # Per-symbol candle history
         self.candle_history: Dict[str, List[Candle]] = {}
         self.last_signals: Dict[str, float] = {}
-        self.signal_cooldown = 60.0  # Minimum seconds between signals per symbol
+        self.signal_cooldown = 40.0  # Minimum seconds between signals per symbol (prevents 1m jitter lock)
 
     def update_candle(self, symbol: str, candle: Candle) -> List[AssassinSignal]:
         """
@@ -99,8 +99,8 @@ class AssassinSignalEngine:
         history.append(candle)
         current_idx = len(history) - 1
 
-        # Don't generate signals until we have enough data
-        if len(history) < 15:
+        # Don't generate signals until we have enough data (seeded on boot)
+        if len(history) < 10:
             return []
 
         # Cooldown check
