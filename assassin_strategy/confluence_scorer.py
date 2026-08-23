@@ -113,24 +113,24 @@ class ConfluenceScorer:
         if net_solid < 0:
             net_solid = 0
 
-        # Apply confidence tiers (Strict 90%+ for TAKE_IT)
+        # Apply confidence tiers
         if net_solid >= self.take_it_threshold:
             verdict = 'TAKE_IT'
             confidence = min(0.90 + (net_solid - self.take_it_threshold) * 0.03 + soft_count * 0.01, 0.98)
-            reasoning = f"Take it (90%+ Confirmed) — {net_solid} solid + {soft_count} soft aligned {action.upper()} confirmations."
+            reasoning = f"Take it — {net_solid} solid + {soft_count} soft aligned {action.upper()} confirmations."
         elif net_solid >= self.lean_threshold and soft_count >= self.lean_soft_required:
             verdict = 'LEAN'
-            confidence = min(0.75 + (net_solid - self.lean_threshold) * 0.04 + soft_count * 0.02, 0.85)
-            reasoning = f"Lean {action.upper()} (Sub-90%) — {net_solid} solid + {soft_count} soft. Filtered out (minimum 90% required)."
+            confidence = min(0.80 + (net_solid - self.lean_threshold) * 0.03 + soft_count * 0.02, 0.88)
+            reasoning = f"Lean {action.upper()} — {net_solid} solid + {soft_count} soft aligned confirmations."
         elif net_solid >= self.lean_threshold:
             verdict = 'LEAN'
             confidence = 0.75
-            reasoning = f"Lean {action.upper()} (Sub-90%) — {net_solid} solid, insufficient structure."
+            reasoning = f"Lean {action.upper()} — {net_solid} solid confirmations."
         else:
             verdict = 'LEAVE_IT'
             confidence = max(0.10, net_solid * 0.15 + soft_count * 0.05)
-            missing = self.take_it_threshold - net_solid
-            reasoning = f"Leave it — only {net_solid} solid ({missing} more needed for 90%+ TAKE_IT)."
+            missing = self.lean_threshold - net_solid
+            reasoning = f"Leave it — only {net_solid} solid ({missing} more needed). Not enough structure."
 
         return ConfluenceVerdict(
             verdict=verdict,

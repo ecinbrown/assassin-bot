@@ -76,7 +76,7 @@ class AssassinSignalEngine:
 
         self.default_expiry = default_expiry_seconds
         self.require_safety_retest = require_safety_retest
-        self.min_confidence = float(os.environ.get("MIN_CONFIDENCE", "0.85"))  # Calibrated 85%+ sweet spot
+        self.min_confidence = float(os.environ.get("MIN_CONFIDENCE", "0.75"))  # Enables all 2+ solid TAKE_IT & LEAN setups
 
         # Per-symbol candle history
         self.candle_history: Dict[str, List[Candle]] = {}
@@ -308,7 +308,7 @@ class AssassinSignalEngine:
             )
 
             # Log the trade signal
-            verdict_tag = "🔥 [TAKE_IT 90%+]" if verdict.verdict == "TAKE_IT" else "📊 [HIGH-GRADE 85%+]"
+            verdict_tag = "🔥 [TAKE_IT]" if verdict.verdict == "TAKE_IT" else "📊 [LEAN]"
             logger.info(
                 f"{verdict_tag} [{symbol}] {verdict.action.upper()} | "
                 f"Solid={verdict.solid_count} Soft={verdict.soft_count} | "
@@ -321,9 +321,9 @@ class AssassinSignalEngine:
             signals.append(sig)
             self.last_signals[symbol] = now
         elif verdict.confidence < self.min_confidence:
-            # Sub-85% noise filtered out
+            # Sub-threshold setups skipped
             logger.info(
-                f"⏭️ [FILTERED - SUB-85%] [{symbol}] {verdict.action.upper()} ({verdict.confidence*100:.0f}% < 85%) — Trade skipped."
+                f"⏭️ [LEAVE_IT] [{symbol}] {verdict.action.upper()} ({verdict.confidence*100:.0f}%) — Trade skipped."
             )
 
         # Also check pending safety retests (from prior armed setups)
