@@ -284,8 +284,30 @@ class AssassinSignalEngine:
             post_run_caution=state.post_run_caution
         )
 
-        # 75% Filter: Trades all verified 2+ solid setups (TAKE_IT and LEAN) — proven 24-win config
-        if verdict.verdict in ('TAKE_IT', 'LEAN') and verdict.confidence >= self.min_confidence and verdict.action in ('call', 'put'):
+        # ═══════════════════════════════════════════════
+        # STEP 7: TREND ALIGNMENT GATE
+        # ═══════════════════════════════════════════════
+        # Forensic data: ALL 15 losses on Aug 22 were CALLs in TRENDING_DOWN without reversal proof.
+        # Rule: In trending regimes, only trade WITH the trend UNLESS Engulfing or QM proves reversal.
+        has_reversal_proof = any(
+            c.source in ('ENGULFING', 'QM_PATTERN', 'EXHAUSTION') and c.action == verdict.action
+            for c in verdict.confirmations
+        )
+
+        is_counter_trend = False
+        if regime.regime == 'TRENDING_DOWN' and verdict.action == 'call' and not has_reversal_proof:
+            is_counter_trend = True
+        elif regime.regime == 'TRENDING_UP' and verdict.action == 'put' and not has_reversal_proof:
+            is_counter_trend = True
+
+        if is_counter_trend and verdict.verdict in ('TAKE_IT', 'LEAN'):
+            logger.info(
+                f"🛡️ [TREND GATE] [{symbol}] {verdict.action.upper()} blocked — "
+                f"Counter-trend in {regime.regime} without Engulfing/QM reversal proof. "
+                f"Confidence was {verdict.confidence*100:.0f}%."
+            )
+        # 75% Filter: Trades all verified 2+ solid setups (TAKE_IT and LEAN)
+        elif verdict.verdict in ('TAKE_IT', 'LEAN') and verdict.confidence >= self.min_confidence and verdict.action in ('call', 'put'):
             sig = AssassinSignal(
                 symbol=symbol,
                 action=verdict.action,
@@ -321,7 +343,6 @@ class AssassinSignalEngine:
             signals.append(sig)
             self.last_signals[symbol] = now
         elif verdict.verdict == 'LEAVE_IT' or verdict.confidence < self.min_confidence:
-            # Sub-threshold or insufficient structure
             logger.info(
                 f"⏭️ [SKIP] [{symbol}] {verdict.action.upper()} ({verdict.confidence*100:.0f}%) — {verdict.reasoning}"
             )
