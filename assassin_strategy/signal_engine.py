@@ -76,12 +76,12 @@ class AssassinSignalEngine:
 
         self.default_expiry = default_expiry_seconds
         self.require_safety_retest = require_safety_retest
-        self.min_confidence = float(os.environ.get("MIN_CONFIDENCE", "0.80"))  # 80% baseline (all verified 2+ solid setups)
+        self.min_confidence = float(os.environ.get("MIN_CONFIDENCE", "0.75"))  # 75% = all 2+ solid LEAN setups (proven 24-win config)
 
         # Per-symbol candle history
         self.candle_history: Dict[str, List[Candle]] = {}
         self.last_signals: Dict[str, float] = {}
-        self.signal_cooldown = 40.0  # Minimum seconds between signals per symbol (prevents 1m jitter lock)
+        self.signal_cooldown = 120.0  # 2min cooldown per symbol (prevents 10+ trades on same asset in 15min)
 
     def update_candle(self, symbol: str, candle: Candle) -> List[AssassinSignal]:
         """
@@ -284,7 +284,7 @@ class AssassinSignalEngine:
             post_run_caution=state.post_run_caution
         )
 
-        # Calibrated 85%+ Filter: Trades TAKE_IT (90%+) & high-tier LEAN (85%+), filters out sub-85% noise
+        # 75% Filter: Trades all verified 2+ solid setups (TAKE_IT and LEAN) — proven 24-win config
         if verdict.verdict in ('TAKE_IT', 'LEAN') and verdict.confidence >= self.min_confidence and verdict.action in ('call', 'put'):
             sig = AssassinSignal(
                 symbol=symbol,
@@ -320,10 +320,10 @@ class AssassinSignalEngine:
 
             signals.append(sig)
             self.last_signals[symbol] = now
-        elif verdict.confidence < self.min_confidence:
-            # Sub-threshold setups skipped
+        elif verdict.verdict == 'LEAVE_IT' or verdict.confidence < self.min_confidence:
+            # Sub-threshold or insufficient structure
             logger.info(
-                f"⏭️ [LEAVE_IT] [{symbol}] {verdict.action.upper()} ({verdict.confidence*100:.0f}%) — Trade skipped."
+                f"⏭️ [SKIP] [{symbol}] {verdict.action.upper()} ({verdict.confidence*100:.0f}%) — {verdict.reasoning}"
             )
 
         # Also check pending safety retests (from prior armed setups)
