@@ -136,24 +136,24 @@ class ConfluenceScorer:
             verdict = 'TAKE_IT'
             confidence = min(0.92 + trigger_bonus + net_solid * 0.01, 0.98)
             climax_desc = next((c.description for c in deduped if c.source == 'EXHAUSTION_CLIMAX'), '')
-            reasoning = f"Take It (90% Exhaustion Climax) — {climax_desc}"
+            reasoning = f"Take It (90% Exhaustion Climax) - {climax_desc}"
         elif net_solid >= self.take_it_threshold:
             verdict = 'TAKE_IT'
             confidence = min(0.90 + (net_solid - self.take_it_threshold) * 0.03 + soft_count * 0.01 + trigger_bonus, 0.98)
-            reasoning = f"Take it (Golden Trio Aligned) — {net_solid} solid + {soft_count} soft aligned {action.upper()} confirmations."
+            reasoning = f"Take it (Golden Trio Aligned) - {net_solid} solid + {soft_count} soft aligned {action.upper()} confirmations."
         elif net_solid >= self.lean_threshold and (soft_count >= self.lean_soft_required or trigger_bonus > 0.04):
             verdict = 'LEAN'
             confidence = min(0.80 + (net_solid - self.lean_threshold) * 0.03 + soft_count * 0.02 + trigger_bonus, 0.89)
-            reasoning = f"Lean {action.upper()} — {net_solid} solid + {soft_count} soft aligned confirmations."
+            reasoning = f"Lean {action.upper()} - {net_solid} solid + {soft_count} soft aligned confirmations."
         elif net_solid >= self.lean_threshold:
             verdict = 'LEAN'
             confidence = min(0.75 + trigger_bonus, 0.82)
-            reasoning = f"Lean {action.upper()} — {net_solid} solid confirmations."
+            reasoning = f"Lean {action.upper()} - {net_solid} solid confirmations."
         else:
             verdict = 'LEAVE_IT'
             confidence = max(0.10, net_solid * 0.15 + soft_count * 0.05)
             missing = self.lean_threshold - net_solid
-            reasoning = f"Leave it — only {net_solid} solid ({missing} more needed). Not enough structure."
+            reasoning = f"Leave it - only {net_solid} solid ({missing} more needed). Not enough structure."
 
         return ConfluenceVerdict(
             verdict=verdict,

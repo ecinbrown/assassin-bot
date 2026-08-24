@@ -142,16 +142,29 @@ class AssassinTelegramBot:
                     disable_web_page_preview=True
                 )
             except Exception as e:
-                logger.debug(f"Telegram send error to {cid}: {e}")
+                logger.warning(f"Telegram send error to {cid}: {e} | Falling back to plain text send...")
+                try:
+                    await self.app.bot.send_message(
+                        chat_id=cid,
+                        text=text.replace('<b>', '').replace('</b>', '').replace('<code>', '').replace('</code>', ''),
+                        reply_markup=reply_markup,
+                        disable_web_page_preview=True
+                    )
+                except Exception as e2:
+                    logger.error(f"Telegram plain text fallback failed to {cid}: {e2}")
 
     async def send_signal_alert(self, sig):
         """Broadcast high-conviction signal detection alert."""
+        import html
         icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
         mode_str = "🧪 DEMO (Simulation)" if getattr(self.controller, 'simulation_mode', True) else "🟢 REAL (Live On-Chain)"
         
         confirmations_str = ""
         if sig.metadata and 'confirmations' in sig.metadata:
-            confirmations_str = "\n".join([f"  • {c}" for c in sig.metadata['confirmations']])
+            escaped_confs = [html.escape(str(c)) for c in sig.metadata['confirmations']]
+            confirmations_str = "\n".join([f"  • {c}" for c in escaped_confs])
+        else:
+            confirmations_str = "  • " + html.escape(str(sig.trigger))
 
         msg = (
             f"{icon} <b>ASSASSIN SIGNAL DETECTED</b> {icon}\n\n"
@@ -162,7 +175,7 @@ class AssassinTelegramBot:
             f"📊 <b>Confirmations:</b> <code>{sig.solid_count} Solid | {sig.soft_count} Soft</code>\n"
             f"🌐 <b>Regime:</b> <code>{sig.regime}</code>\n"
             f"⚙️ <b>Execution Mode:</b> <code>{mode_str}</code>\n\n"
-            f"📝 <b>Key Drivers:</b>\n{confirmations_str if confirmations_str else '  • ' + sig.trigger}"
+            f"📝 <b>Key Drivers:</b>\n{confirmations_str}"
         )
         await self.send_message(msg)
 

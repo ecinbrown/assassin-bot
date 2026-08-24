@@ -131,7 +131,7 @@ class ExhaustionClimaxDetector:
             desc = (
                 f"Exhaustion Climax CALL | Run={consecutive_run} Red Bars | "
                 f"RSI={rsi:.1f} (<= {self.rsi_oversold}) | "
-                f"Close {current.close:.2f} <= Lower 2.5σ BB {bb_lower:.2f} | "
+                f"Close {current.close:.2f} <= Lower 2.5-std BB {bb_lower:.2f} | "
                 f"Vol={vol_multiplier:.1f}x SMA(20)"
             )
             return ExhaustionClimaxSignal(
@@ -156,7 +156,7 @@ class ExhaustionClimaxDetector:
             desc = (
                 f"Exhaustion Climax PUT | Run={consecutive_run} Green Bars | "
                 f"RSI={rsi:.1f} (>= {self.rsi_overbought}) | "
-                f"Close {current.close:.2f} >= Upper 2.5σ BB {bb_upper:.2f} | "
+                f"Close {current.close:.2f} >= Upper 2.5-std BB {bb_upper:.2f} | "
                 f"Vol={vol_multiplier:.1f}x SMA(20)"
             )
             return ExhaustionClimaxSignal(
