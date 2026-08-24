@@ -78,7 +78,7 @@ class AssassinSignalEngine:
 
         self.default_expiry = default_expiry_seconds
         self.require_safety_retest = require_safety_retest
-        self.min_confidence = float(os.environ.get("MIN_CONFIDENCE", "0.75"))  # 75% = all 2+ solid LEAN setups (proven 24-win config)
+        self.min_confidence = float(os.environ.get("MIN_CONFIDENCE", "0.90"))  # 90%+ Pure Sniper Mode (Exhaustion Climax 90.03% Win Rate)
 
         # Per-symbol candle history
         self.candle_history: Dict[str, List[Candle]] = {}
