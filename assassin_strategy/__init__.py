@@ -24,6 +24,7 @@ from .sr_levels import SRDetector, SRLevel
 from .regime_detector import RegimeDetector, MarketRegime, MarketState
 from .confluence_scorer import ConfluenceScorer, Confirmation, ConfluenceVerdict
 from .signal_engine import AssassinSignalEngine, AssassinSignal
+from .exhaustion_climax import ExhaustionClimaxDetector, ExhaustionClimaxSignal
 from .binance_feed import BinanceFeed
 from .prdt_webhook import PRDTWebhookDispatcher
 from .prdt_contract import PRDTAgent, EnteredRound
@@ -40,6 +41,7 @@ __all__ = [
     'SRDetector', 'SRLevel',
     'RegimeDetector', 'MarketRegime', 'MarketState',
     'ConfluenceScorer', 'Confirmation', 'ConfluenceVerdict',
+    'ExhaustionClimaxDetector', 'ExhaustionClimaxSignal',
     'AssassinSignalEngine', 'AssassinSignal',
     'BinanceFeed', 'PRDTWebhookDispatcher',
     'PRDTAgent', 'EnteredRound',

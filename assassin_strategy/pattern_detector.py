@@ -212,8 +212,8 @@ class PatternDetector:
         n = len(candles)
         tol_abs = (candles[-1].close * self.trendline_tolerance_pct / 100.0) if candles else 0
 
-        # Build support trendlines from swing lows
-        swing_lows = [s for s in swings if s.is_low]
+        # Build support trendlines from recent swing lows (fast 8-point slice)
+        swing_lows = [s for s in swings if s.is_low][-8:]
         for i in range(len(swing_lows)):
             for j in range(i + 1, len(swing_lows)):
                 s1, s2 = swing_lows[i], swing_lows[j]
@@ -236,8 +236,8 @@ class PatternDetector:
                         tolerance=tol_abs
                     ))
 
-        # Build resistance trendlines from swing highs
-        swing_highs = [s for s in swings if s.is_high]
+        # Build resistance trendlines from recent swing highs
+        swing_highs = [s for s in swings if s.is_high][-8:]
         for i in range(len(swing_highs)):
             for j in range(i + 1, len(swing_highs)):
                 s1, s2 = swing_highs[i], swing_highs[j]

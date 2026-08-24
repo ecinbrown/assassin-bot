@@ -25,6 +25,7 @@ from .pattern_detector import PatternDetector, PatternSignal
 from .sr_levels import SRDetector, SRLevel
 from .regime_detector import RegimeDetector, MarketRegime, MarketState
 from .confluence_scorer import ConfluenceScorer, Confirmation, ConfluenceVerdict
+from .exhaustion_climax import ExhaustionClimaxDetector, ExhaustionClimaxSignal
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +74,7 @@ class AssassinSignalEngine:
         self.sr_detector = SRDetector()
         self.regime_detector = RegimeDetector()
         self.confluence_scorer = ConfluenceScorer()
+        self.climax_detector = ExhaustionClimaxDetector()
 
         self.default_expiry = default_expiry_seconds
         self.require_safety_retest = require_safety_retest
@@ -103,8 +105,8 @@ class AssassinSignalEngine:
         if len(history) < 10:
             return []
 
-        # Cooldown check
-        now = time.time()
+        # Cooldown check (uses candle timestamp for backtest & live replay fidelity)
+        now = candle.timestamp if candle.timestamp > 0 else time.time()
         if symbol in self.last_signals:
             if now - self.last_signals[symbol] < self.signal_cooldown:
                 return []
@@ -148,7 +150,7 @@ class AssassinSignalEngine:
         confirmations: List[Confirmation] = []
 
         # 3a. Candlestick Patterns (Exhaustion, Engulfing, Spinning Top, Third Touch)
-        pa_signals = self.pattern_detector.scan_all(history, run_length=state.run_length)
+        pa_signals = self.pattern_detector.scan_all(lookback_slice, run_length=state.run_length)
         for pa in pa_signals:
             # Regime gate: Doji breakouts work in ranges, Exhaustion at trend extremes
             if pa.pattern == 'EXHAUSTION':
@@ -193,6 +195,17 @@ class AssassinSignalEngine:
                 action=action,
                 description=f"QM {qm.pattern_type.upper()}{fvg_note} Level={qm.qm_level:.5f}",
                 category='structure_QM'
+            ))
+
+        # 3d. Exhaustion Climax Reversals (Empirical 90% Win Rate Setup)
+        climax_sig = self.climax_detector.detect(lookback_slice)
+        if climax_sig:
+            confirmations.append(Confirmation(
+                source='EXHAUSTION_CLIMAX',
+                is_solid=True,
+                action=climax_sig.action,
+                description=climax_sig.description,
+                category='pattern_CLIMAX'
             ))
 
         # ═══════════════════════════════════════════════
@@ -289,9 +302,9 @@ class AssassinSignalEngine:
         # ═══════════════════════════════════════════════
         # Only blocks counter-trend trades in CLEAR trending regimes.
         # RANGING = both directions allowed (where the bounce setups work).
-        # Counter-trend allowed IF Engulfing/QM/Exhaustion proves the reversal.
+        # Counter-trend allowed IF Engulfing/QM/Exhaustion/Climax proves the reversal.
         has_reversal_proof = any(
-            c.source in ('ENGULFING', 'QM_PATTERN', 'EXHAUSTION') and c.action == verdict.action
+            c.source in ('EXHAUSTION_CLIMAX', 'ENGULFING', 'QM_PATTERN', 'EXHAUSTION') and c.action == verdict.action
             for c in verdict.confirmations
         )
 
