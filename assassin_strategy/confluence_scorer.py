@@ -134,9 +134,9 @@ class ConfluenceScorer:
         # Apply confidence tiers
         if has_exhaustion_climax:
             verdict = 'TAKE_IT'
-            confidence = min(0.92 + trigger_bonus + net_solid * 0.01, 0.98)
+            confidence = min(0.70 + trigger_bonus + net_solid * 0.01, 0.80)
             climax_desc = next((c.description for c in deduped if c.source == 'EXHAUSTION_CLIMAX'), '')
-            reasoning = f"Take It (90% Exhaustion Climax) - {climax_desc}"
+            reasoning = f"Take It (70% Exhaustion Climax) - {climax_desc}"
         elif net_solid >= self.take_it_threshold:
             verdict = 'TAKE_IT'
             confidence = min(0.90 + (net_solid - self.take_it_threshold) * 0.03 + soft_count * 0.01 + trigger_bonus, 0.98)
