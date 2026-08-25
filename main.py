@@ -98,7 +98,7 @@ async def main():
     simulation_mode = os.environ.get("SIMULATION_MODE", "true").lower() in ("true", "1", "yes")
 
     # Telegram Credentials (supports ASSASSIN_TG_TOKEN & TELEGRAM_BOT_TOKEN)
-    tg_token = os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    tg_token = os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("BOT_TOKEN", "7906303240:AAGp3GA2dobQ1-5AUtZu0tkFI0I9RSFKKy8")
     tg_chat_id = os.environ.get("ASSASSIN_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID", "")
 
     # Optional Webhook fallback URL
