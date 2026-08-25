@@ -23,16 +23,16 @@ from telegram.ext import (
 logger = logging.getLogger("AssassinTelegram")
 
 
-AUTHORIZED_CHAT_IDS = [6363315804, 5473222741, 6891630125]
+AUTHORIZED_CHAT_IDS = [6363315804]
 
 
 class AssassinTelegramBot:
     """Interactive Telegram interface for Assassin Bot."""
 
     def __init__(self, token: Optional[str] = None, chat_id: Optional[str] = None, main_controller=None):
-        self.token = token or os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("BOT_TOKEN", "8295109367:AAHeUa5k_eIpl-OQb9LcuOUekBiGL7D8FQQ")
-        chat_id_val = chat_id or os.environ.get("ASSASSIN_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID", "6363315804")
-        self.chat_id = int(chat_id_val) if chat_id_val and str(chat_id_val).lstrip('-').isdigit() else 6363315804
+        self.token = token or os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN", "8295109367:AAHeUa5k_eIpl-OQb9LcuOUekBiGL7D8FQQ")
+        chat_id_val = chat_id or os.environ.get("ASSASSIN_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID", "")
+        self.chat_id = int(chat_id_val) if chat_id_val and chat_id_val.lstrip('-').isdigit() else None
         
         self.chat_ids = set(AUTHORIZED_CHAT_IDS)
         if self.chat_id:
