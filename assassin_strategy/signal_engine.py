@@ -197,8 +197,8 @@ class AssassinSignalEngine:
                 category='structure_QM'
             ))
 
-        # 3d. Exhaustion Climax Reversals (Empirical 90% Win Rate Setup)
-        climax_sig = self.climax_detector.detect(lookback_slice)
+        # 3d. Exhaustion Climax Reversals (EMA-RSI 2.5-sigma Sniper)
+        climax_sig = self.climax_detector.detect(history, symbol=symbol)
         if climax_sig:
             confirmations.append(Confirmation(
                 source='EXHAUSTION_CLIMAX',

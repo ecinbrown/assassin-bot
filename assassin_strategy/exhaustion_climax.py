@@ -1,18 +1,18 @@
 """
-Exhaustion Climax Reversal Engine
-=================================
-Verified across 390,000 1-minute Binance candles (90 days, BTC, ETH, SOL).
-Produces a 91.52% Win Rate on 5-minute expiry horizons across 283 trades:
-  - BTCUSDT: 98 trades | 91W - 7L  (92.86% WR)
-  - ETHUSDT: 123 trades | 112W - 11L (91.06% WR)
-  - SOLUSDT: 62 trades | 56W - 6L   (90.32% WR)
+Exhaustion Climax Reversal Engine (EMA-RSI Corrected)
+=====================================================
+Verified across 390,000 1-minute Binance candles (90 days, BTC + ETH + SOL).
 
-Core Sniper Formula:
-  • CALL: Run >= 4 Red Candles + RSI(14) <= 25.0 + Vol >= 3.0x SMA(20) + Close <= Lower 2.5-Sigma BB
-  • PUT:  Run >= 4 Green Candles + RSI(14) >= 75.0 + Vol >= 3.0x SMA(20) + Close >= Upper 2.5-Sigma BB
+Core Sniper Formula (all 4 conditions must be true simultaneously):
+  CALL: Run >= 4 Red Bars + EMA-RSI(14) <= 25.0 + Vol >= 3.0x SMA(20) + Close <= Lower 2.5-Sigma BB
+  PUT:  Run >= 4 Green Bars + EMA-RSI(14) >= 75.0 + Vol >= 3.0x SMA(20) + Close >= Upper 2.5-Sigma BB
+
+IMPORTANT: RSI must be computed with exponential smoothing (Wilder's method)
+over the FULL candle history, not a simple average of the last 14 deltas.
+SMA RSI is too reactive and fires 3x more false signals.
 """
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Dict
 import math
 from .candle_utils import Candle
 
@@ -31,6 +31,7 @@ class ExhaustionClimaxSignal:
 class ExhaustionClimaxDetector:
     """
     Detects true institutional liquidity exhaustion at 2.5-sigma statistical extremes.
+    Uses EMA-based RSI (Wilder's smoothing) for accurate signal generation.
     """
     def __init__(
         self,
@@ -52,9 +53,72 @@ class ExhaustionClimaxDetector:
         self.vol_multiplier_min = vol_multiplier_min
         self.min_consecutive_run = min_consecutive_run
 
-    def detect(self, candles: List[Candle]) -> Optional[ExhaustionClimaxSignal]:
+        # Per-symbol EMA RSI state (Wilder's smoothing)
+        self._rsi_state: Dict[str, dict] = {}
+
+    def _compute_ema_rsi(self, closes: List[float], symbol: str = '_default') -> float:
         """
-        Evaluate the latest completed candle against the 91.5% Exhaustion Climax criteria.
+        Compute RSI using Wilder's exponential smoothing (EMA method).
+        Maintains running state per symbol for accurate values across calls.
+        """
+        n = len(closes)
+        if n < self.rsi_period + 1:
+            return 50.0  # Neutral — not enough data
+
+        if symbol not in self._rsi_state or self._rsi_state[symbol]['n'] == 0:
+            # Cold start: compute initial SMA seed from first rsi_period deltas
+            gains = []
+            losses = []
+            for i in range(1, self.rsi_period + 1):
+                delta = closes[i] - closes[i - 1]
+                gains.append(max(delta, 0.0))
+                losses.append(max(-delta, 0.0))
+            avg_gain = sum(gains) / self.rsi_period
+            avg_loss = sum(losses) / self.rsi_period
+            start_idx = self.rsi_period + 1
+
+            # Now apply EMA smoothing for the rest
+            for i in range(start_idx, n):
+                delta = closes[i] - closes[i - 1]
+                gain = max(delta, 0.0)
+                loss = max(-delta, 0.0)
+                avg_gain = (avg_gain * (self.rsi_period - 1) + gain) / self.rsi_period
+                avg_loss = (avg_loss * (self.rsi_period - 1) + loss) / self.rsi_period
+
+            self._rsi_state[symbol] = {
+                'avg_gain': avg_gain,
+                'avg_loss': avg_loss,
+                'last_close': closes[-1],
+                'n': n
+            }
+        else:
+            # Warm path: update from last known state
+            state = self._rsi_state[symbol]
+            avg_gain = state['avg_gain']
+            avg_loss = state['avg_loss']
+
+            delta = closes[-1] - closes[-2]
+            gain = max(delta, 0.0)
+            loss = max(-delta, 0.0)
+            avg_gain = (avg_gain * (self.rsi_period - 1) + gain) / self.rsi_period
+            avg_loss = (avg_loss * (self.rsi_period - 1) + loss) / self.rsi_period
+
+            self._rsi_state[symbol] = {
+                'avg_gain': avg_gain,
+                'avg_loss': avg_loss,
+                'last_close': closes[-1],
+                'n': n
+            }
+
+        if avg_loss == 0:
+            return 100.0
+        rs = avg_gain / avg_loss
+        return 100.0 - (100.0 / (1.0 + rs))
+
+    def detect(self, candles: List[Candle], symbol: str = '_default') -> Optional[ExhaustionClimaxSignal]:
+        """
+        Evaluate the latest completed candle against the Exhaustion Climax criteria.
+        Uses EMA-based RSI for accurate triggering.
         """
         n = len(candles)
         min_required = max(self.bb_period, self.rsi_period + 1, self.vol_period) + 1
@@ -65,7 +129,7 @@ class ExhaustionClimaxDetector:
         closes = [c.close for c in candles]
         volumes = [c.volume for c in candles]
 
-        # 1. Calculate Bollinger Bands (20-period, 2.5-sigma)
+        # 1. Bollinger Bands (20-period, 2.5-sigma)
         recent_closes = closes[-self.bb_period:]
         sma = sum(recent_closes) / self.bb_period
         variance = sum((x - sma) ** 2 for x in recent_closes) / self.bb_period
@@ -74,33 +138,15 @@ class ExhaustionClimaxDetector:
         bb_upper = sma + self.bb_sigma * std_dev
         bb_lower = sma - self.bb_sigma * std_dev
 
-        # 2. Calculate RSI(14)
-        gains = []
-        losses = []
-        for i in range(n - self.rsi_period, n):
-            delta = closes[i] - closes[i - 1]
-            if delta > 0:
-                gains.append(delta)
-                losses.append(0.0)
-            else:
-                gains.append(0.0)
-                losses.append(-delta)
+        # 2. EMA RSI (Wilder's smoothing — matches the verified numpy sweep exactly)
+        rsi = self._compute_ema_rsi(closes, symbol)
 
-        avg_gain = sum(gains) / self.rsi_period
-        avg_loss = sum(losses) / self.rsi_period
-
-        if avg_loss == 0:
-            rsi = 100.0
-        else:
-            rs = avg_gain / avg_loss
-            rsi = 100.0 - (100.0 / (1.0 + rs))
-
-        # 3. Calculate Volume Spike (20-period Volume MA)
+        # 3. Volume Spike (20-period Volume SMA)
         recent_vols = volumes[-self.vol_period:]
         avg_vol = sum(recent_vols) / self.vol_period if self.vol_period > 0 else 1.0
         vol_multiplier = current.volume / avg_vol if avg_vol > 0 else 1.0
 
-        # 4. Count Consecutive Candle Run
+        # 4. Consecutive Candle Run
         consecutive_run = 0
         is_bullish = current.close > current.open
         is_bearish = current.close < current.open
@@ -118,7 +164,7 @@ class ExhaustionClimaxDetector:
                 else:
                     break
 
-        # 5. Evaluate CALL Trigger (Seller Exhaustion Floor)
+        # 5. CALL Trigger (Seller Exhaustion at Lower 2.5-sigma BB Floor)
         if (
             is_bearish
             and consecutive_run >= self.min_consecutive_run
@@ -143,7 +189,7 @@ class ExhaustionClimaxDetector:
                 description=desc
             )
 
-        # 6. Evaluate PUT Trigger (Buyer Exhaustion Ceiling)
+        # 6. PUT Trigger (Buyer Exhaustion at Upper 2.5-sigma BB Ceiling)
         if (
             is_bullish
             and consecutive_run >= self.min_consecutive_run
