@@ -342,14 +342,15 @@ async def main():
                 logger.info(f"⏸️ [SYMBOL BUSY] {sig.symbol} already has an active trade sequence running. Skipping duplicate signal.")
                 continue
 
-            # ─── POST-LOSS STABILIZATION FILTER (Marts +1 & +2 require 4+ Confirmations) ───
-            if controller.marts_since_loss < 2:
-                if sig.solid_count < 3 and (sig.solid_count + sig.soft_count) < 4:
-                    logger.info(
-                        f"🛡️ [POST-LOSS STABILIZATION] {sig.symbol} skipped ({sig.solid_count} solid + {sig.soft_count} soft). "
-                        f"Requires 4+ confirmations."
-                    )
-                    continue
+            # ─── UNIVERSAL 4+ CONFIRMATION SNIPER GATE ───
+            # Requires at least 4 total confirmations (or at least 3 solid institutional confirmations)
+            total_confs = sig.solid_count + sig.soft_count
+            if sig.solid_count < 3 and total_confs < 4:
+                logger.info(
+                    f"🛡️ [STRICT 4-CONFIRMATION GATE] {sig.symbol} skipped ({sig.solid_count} solid + {sig.soft_count} soft = {total_confs} total). "
+                    f"Requires 4+ confirmations for validation."
+                )
+                continue
 
             verdict_icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
             logger.critical(
