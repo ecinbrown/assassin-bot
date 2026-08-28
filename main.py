@@ -244,8 +244,8 @@ async def main():
                             step_info=outcome_title
                         )
                 else:
-                    # ─── DYNAMIC GALE RECOVERY (Method 1 in Stabilization, Full 2-Gale in Rebound) ───
-                    max_allowed_gale = 1 if controller.marts_since_loss < 2 else 2
+                    # ─── AUTO 1-GALE RECOVERY ENGINE (STRICT MAX GALE 1) ───
+                    max_allowed_gale = 1
 
                     if t.gale_level < max_allowed_gale:
                         next_gale = t.gale_level + 1
@@ -272,14 +272,14 @@ async def main():
                             total_sequence_stake=round(t.total_sequence_stake + next_stake, 4)
                         ))
                     else:
-                        # ─── FULL SEQUENCE LOSS (BUST) ───
+                        # ─── SEQUENCE LOSS (GALE 1 CAP - MAX 16% RISK) ───
                         controller.losses += 1
-                        controller.marts_since_loss = 0  # Enter Stabilization Phase
+                        controller.marts_since_loss = 0
                         seq_loss = -round(t.total_sequence_stake, 4)
                         save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
 
                         logger.warning(
-                            f"❌ [SEQUENCE BUST] {t.symbol} {t.action.upper()} lost (Gale {t.gale_level} cap). "
+                            f"❌ [SEQUENCE LOSS] {t.symbol} {t.action.upper()} missed Gale 1. "
                             f"Total Loss: {seq_loss:+.4f} Native | Score: {controller.wins}W - {controller.losses}L"
                         )
 

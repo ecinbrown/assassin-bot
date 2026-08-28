@@ -192,12 +192,11 @@ class AssassinTelegramBot:
                 f"⚡ <b>Action:</b> <b>{sig.action.upper()}</b>\n"
                 f"💰 <b>Price:</b> <code>${sig.price:.2f}</code>\n"
                 f"🏆 <b>Verdict:</b> <code>{sig.verdict} ({sig.confidence*100:.0f}% confidence)</code>\n"
-                f"⏱️ <b>Expiry:</b> <code>5 Minutes (300s)</code>\n\n"
                 f"📈 <b>DYNAMIC COMPOUNDING (5% Scaling):</b>\n"
                 f"  💵 <b>Live Balance:</b> <code>${bal:.2f}</code>\n"
-                f"  🎯 <b>Base Stake (Trade 1):</b> <code>${dynamic_stake:.2f}</code>\n"
-                f"  ⚡ <b>Gale 1 Recovery:</b> <code>${g1_rec:.2f}</code> (2.2x)\n"
-                f"  🚀 <b>Gale 2 Recovery:</b> <code>${g2_rec:.2f}</code> (5.0x)\n\n"
+                f"  🎯 <b>Base Stake (Trade 1):</b> <code>${dynamic_stake:.2f}</code> (5%)\n"
+                f"  ⚡ <b>Gale 1 Recovery (Trade 2):</b> <code>${g1_rec:.2f}</code> (2.2x)\n"
+                f"  🛡️ <b>Max Risk Cap:</b> <code>16.0% (Gale 1 Max)</code>\n\n"
                 f"📝 <b>Key Drivers:</b>\n{confirmations_str}"
             )
             await self.send_message(msg)
