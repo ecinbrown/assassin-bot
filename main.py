@@ -86,6 +86,7 @@ class AssassinController:
         saved = load_saved_state()
         self.wins: int = saved.get("wins", 18)
         self.losses: int = saved.get("losses", 0)
+        self.marts_since_loss: int = 10  # Starts in Golden Rebound state
         self.active_trades: List[ActiveTrade] = []
         self.latest_prices: dict = {}
         
@@ -214,6 +215,7 @@ async def main():
                 if is_win:
                     # ─── SEQUENCE WIN (Base, Gale 1, or Gale 2) ───
                     controller.wins += 1
+                    controller.marts_since_loss += 1
                     gross_payout = round(t.stake_native * 1.88, 4)
                     seq_profit = round(gross_payout - t.total_sequence_stake, 4)
                     prdt_agent.simulated_balance = round(prdt_agent.simulated_balance + gross_payout, 4)
@@ -225,7 +227,7 @@ async def main():
                         f"Entry: ${t.entry_price:.2f} -> Exit: ${exit_price:.2f} | "
                         f"Net Profit: {seq_profit:+.4f} Native | "
                         f"Balance: {prdt_agent.simulated_balance:.4f} Native | "
-                        f"Score: {controller.wins}W - {controller.losses}L"
+                        f"Score: {controller.wins}W - {controller.losses}L (Streak: {controller.marts_since_loss})"
                     )
 
                     if tg_bot:
@@ -242,8 +244,10 @@ async def main():
                             step_info=outcome_title
                         )
                 else:
-                    # ─── AUTO SAME-COIN GALE RECOVERY (Up to Gale 2) ───
-                    if t.gale_level < 2:
+                    # ─── DYNAMIC GALE RECOVERY (Method 1 in Stabilization, Full 2-Gale in Rebound) ───
+                    max_allowed_gale = 1 if controller.marts_since_loss < 2 else 2
+
+                    if t.gale_level < max_allowed_gale:
                         next_gale = t.gale_level + 1
                         next_stake = round(t.stake_native * 2.2, 4)
                         # Deduct next stake for simulation
@@ -268,13 +272,14 @@ async def main():
                             total_sequence_stake=round(t.total_sequence_stake + next_stake, 4)
                         ))
                     else:
-                        # ─── FULL SEQUENCE LOSS (GALE 2 BUST) ───
+                        # ─── FULL SEQUENCE LOSS (BUST) ───
                         controller.losses += 1
+                        controller.marts_since_loss = 0  # Enter Stabilization Phase
                         seq_loss = -round(t.total_sequence_stake, 4)
                         save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
 
                         logger.warning(
-                            f"❌ [SEQUENCE BUST] {t.symbol} {t.action.upper()} lost Base + G1 + G2. "
+                            f"❌ [SEQUENCE BUST] {t.symbol} {t.action.upper()} lost (Gale {t.gale_level} cap). "
                             f"Total Loss: {seq_loss:+.4f} Native | Score: {controller.wins}W - {controller.losses}L"
                         )
 
@@ -311,6 +316,15 @@ async def main():
             if sig.symbol in active_symbols:
                 logger.info(f"⏸️ [SYMBOL BUSY] {sig.symbol} already has an active trade sequence running. Skipping duplicate signal.")
                 continue
+
+            # ─── POST-LOSS STABILIZATION FILTER (Marts +1 & +2 require 4+ Confirmations) ───
+            if controller.marts_since_loss < 2:
+                if sig.solid_count < 3 and (sig.solid_count + sig.soft_count) < 4:
+                    logger.info(
+                        f"🛡️ [POST-LOSS STABILIZATION] {sig.symbol} skipped ({sig.solid_count} solid + {sig.soft_count} soft). "
+                        f"Requires 4+ confirmations."
+                    )
+                    continue
 
             verdict_icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
             logger.critical(
