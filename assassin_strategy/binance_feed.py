@@ -20,7 +20,9 @@ logger = logging.getLogger(__name__)
 WS_HOSTS = [
     "wss://stream.binance.com:9443/stream?streams=",
     "wss://data-stream.binance.com:9443/stream?streams=",
+    "wss://fstream.binance.com/stream?streams=",
     "wss://stream.binance.vision:9443/stream?streams=",
+    "wss://stream.binance.us:9443/stream?streams=",
     "wss://stream.binance.com:443/stream?streams=",
 ]
 
@@ -30,6 +32,8 @@ REST_HOSTS = [
     "https://api2.binance.com/api/v3/klines",
     "https://api3.binance.com/api/v3/klines",
     "https://data-api.binance.vision/api/v3/klines",
+    "https://api.binance.us/api/v3/klines",
+    "https://fapi.binance.com/fapi/v1/klines",
 ]
 
 

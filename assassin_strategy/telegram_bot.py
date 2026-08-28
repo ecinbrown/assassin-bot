@@ -54,6 +54,8 @@ class AssassinTelegramBot:
 
     async def _check_auth(self, update: Update) -> bool:
         """Authorize message sender against configured chat_id."""
+        if not update or not update.effective_chat:
+            return False
         user_id = update.effective_chat.id
         self.chat_ids.add(user_id)
         self.chat_id = user_id
@@ -81,12 +83,15 @@ class AssassinTelegramBot:
             self.app.add_handler(CommandHandler("resume", self.handle_resume))
             self.app.add_handler(CommandHandler("claim", self.handle_claim))
 
-            # Keyboard button text handlers
-            self.app.add_handler(MessageHandler(filters.Regex("^📊 Status$"), self.handle_status))
-            self.app.add_handler(MessageHandler(filters.Regex("^🧪 Switch to DEMO$"), self.handle_demo))
-            self.app.add_handler(MessageHandler(filters.Regex("^🟢 Switch to REAL$"), self.handle_real))
-            self.app.add_handler(MessageHandler(filters.Regex("^🎁 Claim Winnings$"), self.handle_claim))
-            self.app.add_handler(MessageHandler(filters.Regex("^🛑 Pause / Resume$"), self.handle_pause_toggle))
+            # Keyboard button text handlers (ultra-flexible matching)
+            self.app.add_handler(MessageHandler(filters.Regex(r"(?i).*status.*"), self.handle_status))
+            self.app.add_handler(MessageHandler(filters.Regex(r"(?i).*demo.*"), self.handle_demo))
+            self.app.add_handler(MessageHandler(filters.Regex(r"(?i).*real.*"), self.handle_real))
+            self.app.add_handler(MessageHandler(filters.Regex(r"(?i).*claim.*"), self.handle_claim))
+            self.app.add_handler(MessageHandler(filters.Regex(r"(?i).*pause.*|.*resume.*"), self.handle_pause_toggle))
+
+            # Universal Fallback Message Handler
+            self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_unknown_or_text))
 
             logger.info("✅ Assassin Telegram Bot handlers registered successfully.")
             return True
@@ -474,3 +479,29 @@ class AssassinTelegramBot:
             await self.send_claim_alert(txs)
         else:
             await update.message.reply_text("ℹ️ No pending claimable rounds found.")
+
+    async def handle_unknown_or_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not await self._check_auth(update):
+            return
+        target_msg = update.effective_message or update.message
+        if not target_msg or not target_msg.text:
+            return
+        text = target_msg.text.strip().lower()
+        logger.info(f"📨 Received Telegram text: '{text}'")
+        if "status" in text:
+            await self.handle_status(update, context)
+        elif "demo" in text:
+            await self.handle_demo(update, context)
+        elif "real" in text:
+            await self.handle_real(update, context)
+        elif "claim" in text:
+            await self.handle_claim(update, context)
+        elif "pause" in text or "resume" in text:
+            await self.handle_pause_toggle(update, context)
+        elif "help" in text or "start" in text:
+            await self.handle_start(update, context)
+        else:
+            await target_msg.reply_text(
+                "🤖 Use the menu buttons below or type /help to view all available commands.",
+                reply_markup=self._get_keyboard()
+            )
