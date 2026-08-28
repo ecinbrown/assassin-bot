@@ -159,6 +159,14 @@ class AssassinTelegramBot:
         icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
         mode_str = "🧪 DEMO (Simulation)" if getattr(self.controller, 'simulation_mode', True) else "🟢 REAL (Live On-Chain)"
         
+        # Calculate dynamic compounding parameters
+        bal = 10.0
+        if self.controller and self.controller.prdt_agent:
+            bal = self.controller.prdt_agent.simulated_balance if self.controller.simulation_mode else self.controller.prdt_agent.get_balance()
+        dynamic_stake = self.controller.calculate_dynamic_stake(bal) if self.controller else 1.0
+        g1_rec = round(dynamic_stake * 2.2, 4)
+        g2_rec = round(dynamic_stake * 5.0, 4)
+        
         confirmations_str = ""
         if sig.metadata and 'confirmations' in sig.metadata:
             escaped_confs = [html.escape(str(c)) for c in sig.metadata['confirmations']]
@@ -172,9 +180,12 @@ class AssassinTelegramBot:
             f"⚡ <b>Action:</b> <b>{sig.action.upper()}</b>\n"
             f"💰 <b>Price:</b> <code>${sig.price:.2f}</code>\n"
             f"🏆 <b>Verdict:</b> <code>{sig.verdict} ({sig.confidence*100:.0f}% confidence)</code>\n"
-            f"📊 <b>Confirmations:</b> <code>{sig.solid_count} Solid | {sig.soft_count} Soft</code>\n"
-            f"🌐 <b>Regime:</b> <code>{sig.regime}</code>\n"
-            f"⚙️ <b>Execution Mode:</b> <code>{mode_str}</code>\n\n"
+            f"⏱️ <b>Expiry:</b> <code>5 Minutes (300s)</code>\n\n"
+            f"📈 <b>DYNAMIC COMPOUNDING (5% Scaling):</b>\n"
+            f"  💵 <b>Live Balance:</b> <code>${bal:.2f}</code>\n"
+            f"  🎯 <b>Base Stake (Trade 1):</b> <code>${dynamic_stake:.2f}</code>\n"
+            f"  ⚡ <b>Gale 1 Recovery:</b> <code>${g1_rec:.2f}</code> (2.2x)\n"
+            f"  🚀 <b>Gale 2 Recovery:</b> <code>${g2_rec:.2f}</code> (5.0x)\n\n"
             f"📝 <b>Key Drivers:</b>\n{confirmations_str}"
         )
         await self.send_message(msg)

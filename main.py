@@ -72,6 +72,18 @@ class AssassinController:
         self.telegram_bot: Optional[AssassinTelegramBot] = None
         self.dispatcher: Optional[PRDTWebhookDispatcher] = None
 
+    def calculate_dynamic_stake(self, balance: float) -> float:
+        """
+        Dynamic Compounding Engine (5% Base Stake Scaling):
+        - Dynamically calculates 5% base stake as balance compounds ($10 -> $25 -> $50 -> $100+).
+        - Enforces minimum stake floor of self.stake_native ($1.00 / 0.01 Native).
+        """
+        if balance <= 0:
+            return self.stake_native
+        # 5% base stake scaling with a hard minimum floor
+        dynamic_stake = round(max(self.stake_native, balance * 0.05), 4)
+        return dynamic_stake
+
 
 async def main():
     logger.info("=" * 65)
@@ -262,11 +274,12 @@ async def main():
             if tg_bot:
                 await tg_bot.send_signal_alert(sig)
 
-            # 1. Execute via Web3 Smart Contract (PRDTAgent)
-            trade_stake = prdt_agent.calculate_stake(controller.stake_native)
+            # 1. Execute via Dynamic Compounding Staking
+            current_balance = prdt_agent.simulated_balance if controller.simulation_mode else prdt_agent.get_balance()
+            trade_stake = controller.calculate_dynamic_stake(current_balance)
             success, tx_or_reason = await prdt_agent.execute_trade(sig, stake_native=trade_stake)
             if success:
-                logger.info(f"✅ Trade Executed on PRDT Contract: {tx_or_reason}")
+                logger.info(f"✅ Trade Executed on PRDT Contract (Stake: {trade_stake} Native | Balance: {current_balance:.4f}): {tx_or_reason}")
                 # Register active trade for automated outcome tracking
                 controller.active_trades.append(ActiveTrade(
                     symbol=sig.symbol,
