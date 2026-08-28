@@ -49,7 +49,10 @@ class BinanceFeed:
 
     async def _get_session(self) -> aiohttp.ClientSession:
         if self._session is None or self._session.closed:
-            self._session = aiohttp.ClientSession()
+            import socket
+            resolver = aiohttp.ThreadedResolver()
+            connector = aiohttp.TCPConnector(resolver=resolver, family=socket.AF_INET, ssl=False)
+            self._session = aiohttp.ClientSession(connector=connector)
         return self._session
 
     def _build_stream_url(self, host_base: str) -> str:
