@@ -87,6 +87,8 @@ class AssassinController:
         self.wins: int = saved.get("wins", 18)
         self.losses: int = saved.get("losses", 0)
         self.marts_since_loss: int = 10  # Starts in Golden Rebound state
+        self.is_in_mart_recovery: bool = False
+        self.lost_mart_amount: float = 0.0
         self.active_trades: List[ActiveTrade] = []
         self.latest_prices: dict = {}
         
@@ -97,12 +99,20 @@ class AssassinController:
 
     def calculate_dynamic_stake(self, balance: float) -> float:
         """
-        Dynamic Compounding Engine (5% Base Stake Scaling):
-        - Dynamically calculates 5% base stake as balance compounds ($10 -> $25 -> $50 -> $100+).
-        - Enforces minimum stake floor of self.stake_native ($1.00 / 0.01 Native).
+        Dynamic Compounding Engine (5% Base Stake Scaling + 1-Trade Mart Recovery):
+        - If in Mart Recovery mode: sizes stake to recover the entire lost Mart + full target profit in 1 single trade.
+        - Otherwise: dynamically calculates 5% base stake as balance compounds.
         """
         if balance <= 0:
             return self.stake_native
+
+        if self.is_in_mart_recovery and self.lost_mart_amount > 0:
+            target_profit = balance * 0.05 * 0.88
+            rec_stake = round((self.lost_mart_amount + target_profit) / 0.88, 4)
+            # Safe risk cap at max 23% of balance
+            rec_stake = min(round(balance * 0.23, 4), rec_stake)
+            return max(self.stake_native, rec_stake)
+
         # 5% base stake scaling with a hard minimum floor
         dynamic_stake = round(max(self.stake_native, balance * 0.05), 4)
         return dynamic_stake
@@ -213,13 +223,19 @@ async def main():
                 step_name = "BASE" if t.gale_level == 0 else f"GALE {t.gale_level}"
 
                 if is_win:
-                    # ─── SEQUENCE WIN (Base, Gale 1, or Gale 2) ───
+                    # ─── SEQUENCE WIN (Base or Gale 1) ───
                     controller.wins += 1
                     controller.marts_since_loss += 1
                     gross_payout = round(t.stake_native * 1.88, 4)
                     seq_profit = round(gross_payout - t.total_sequence_stake, 4)
                     prdt_agent.simulated_balance = round(prdt_agent.simulated_balance + gross_payout, 4)
                     save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
+
+                    # Reset 1-Trade Mart Recovery mode immediately on win -> returns to normal 5% Base!
+                    if controller.is_in_mart_recovery:
+                        controller.is_in_mart_recovery = False
+                        controller.lost_mart_amount = 0.0
+                        logger.critical("🎯 [1-TRADE RECOVERY COMPLETE] Loss 100% erased + profit banked! Resetting to normal 5% Base Stake.")
 
                     outcome_title = "WIN ✅"
                     logger.critical(
@@ -276,6 +292,15 @@ async def main():
                         controller.losses += 1
                         controller.marts_since_loss = 0
                         seq_loss = -round(t.total_sequence_stake, 4)
+                        
+                        # Arm 1-Trade Mart Recovery for the very next signal
+                        controller.is_in_mart_recovery = True
+                        controller.lost_mart_amount = round(t.total_sequence_stake, 4)
+                        logger.warning(
+                            f"⚡ [1-TRADE RECOVERY ARMED] Next signal will stake to recover "
+                            f"{controller.lost_mart_amount:.4f} Native in 1 single trade."
+                        )
+                        
                         save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
 
                         logger.warning(
