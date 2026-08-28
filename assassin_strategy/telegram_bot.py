@@ -244,7 +244,8 @@ class AssassinTelegramBot:
         profit_loss: float,
         new_balance: float,
         wins: int,
-        losses: int
+        losses: int,
+        step_info: str = ""
     ):
         """Broadcast crystal-clear round settlement WIN / LOSS outcome card."""
         total = wins + losses
@@ -254,7 +255,7 @@ class AssassinTelegramBot:
         diff_str = f"+{diff:.2f}" if diff >= 0 else f"{diff:.2f}"
         
         icon = "🏆" if is_win else "❌"
-        outcome_str = "WIN ✅" if is_win else "LOSS ❌"
+        outcome_str = step_info if step_info else ("WIN ✅" if is_win else "LOSS ❌")
         pnl_str = f"+{profit_loss:.4f}" if profit_loss >= 0 else f"{profit_loss:.4f}"
         
         msg = (

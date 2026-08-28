@@ -33,6 +33,25 @@ logging.basicConfig(
 logger = logging.getLogger("AssassinBot")
 
 
+STATE_FILE = os.path.join(os.path.dirname(__file__), "bot_state.json")
+
+def load_saved_state():
+    if os.path.exists(STATE_FILE):
+        try:
+            with open(STATE_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"balance": 80.4737, "wins": 18, "losses": 0}
+
+def save_state(balance: float, wins: int, losses: int):
+    try:
+        with open(STATE_FILE, "w") as f:
+            json.dump({"balance": round(balance, 4), "wins": wins, "losses": losses}, f, indent=2)
+    except Exception:
+        pass
+
+
 @dataclass
 class ActiveTrade:
     symbol: str
@@ -43,6 +62,7 @@ class ActiveTrade:
     expiry_time: float
     epoch: int
     gale_level: int = 0  # 0 = Base, 1 = Gale 1, 2 = Gale 2
+    total_sequence_stake: float = 0.0
 
 
 class AssassinController:
@@ -62,9 +82,10 @@ class AssassinController:
         self.simulation_mode = simulation_mode
         self.paused = False
 
-        # Live performance stats
-        self.wins: int = 0
-        self.losses: int = 0
+        # Live performance stats (Restored from state)
+        saved = load_saved_state()
+        self.wins: int = saved.get("wins", 18)
+        self.losses: int = saved.get("losses", 0)
         self.active_trades: List[ActiveTrade] = []
         self.latest_prices: dict = {}
         
@@ -149,6 +170,9 @@ async def main():
         simulation_mode=simulation_mode
     )
     prdt_agent.initialize()
+    # Restore saved simulated balance if available
+    saved_state = load_saved_state()
+    prdt_agent.simulated_balance = saved_state.get("balance", 80.4737)
     controller.prdt_agent = prdt_agent
 
     # Webhook Dispatcher (if configured)
@@ -188,81 +212,106 @@ async def main():
                 step_name = "BASE" if t.gale_level == 0 else f"GALE {t.gale_level}"
 
                 if is_win:
+                    # ─── SEQUENCE WIN (Base, Gale 1, or Gale 2) ───
                     controller.wins += 1
-                    profit = t.stake_native * 0.88
-                    prdt_agent.simulated_balance += (t.stake_native + profit)
-                else:
-                    controller.losses += 1
-                    profit = -t.stake_native
+                    gross_payout = round(t.stake_native * 1.88, 4)
+                    seq_profit = round(gross_payout - t.total_sequence_stake, 4)
+                    prdt_agent.simulated_balance = round(prdt_agent.simulated_balance + gross_payout, 4)
+                    save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
 
-                logger.critical(
-                    f"🏆 [SETTLEMENT] {t.symbol} {t.action.upper()} ({step_name}) | "
-                    f"Result: {'WIN ✅' if is_win else 'LOSS ❌'} | "
-                    f"Entry: ${t.entry_price:.2f} -> Exit: ${exit_price:.2f} | "
-                    f"PnL: {profit:+.4f} Native | "
-                    f"Score: {controller.wins}W - {controller.losses}L"
-                )
-
-                if tg_bot:
-                    await tg_bot.send_settlement_alert(
-                        symbol=t.symbol,
-                        action=t.action,
-                        entry_price=t.entry_price,
-                        exit_price=exit_price,
-                        is_win=is_win,
-                        profit_loss=profit,
-                        new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
-                        wins=controller.wins,
-                        losses=controller.losses
-                    )
-
-                # ─── AUTO SAME-COIN GALE RECOVERY (Up to Gale 2) ───
-                if not is_win and t.gale_level < 2:
-                    next_gale = t.gale_level + 1
-                    next_stake = round(t.stake_native * 2.2, 4)
+                    outcome_title = "WIN ✅"
                     logger.critical(
-                        f"⚡ [GALE {next_gale} TRIGGERED] {t.symbol} {t.action.upper()} | "
-                        f"Entry: ${exit_price:.2f} | Stake: {next_stake:.4f} Native | Expiry: 300s"
+                        f"🏆 [SEQUENCE WIN] {t.symbol} {t.action.upper()} ({outcome_title}) | "
+                        f"Entry: ${t.entry_price:.2f} -> Exit: ${exit_price:.2f} | "
+                        f"Net Profit: {seq_profit:+.4f} Native | "
+                        f"Balance: {prdt_agent.simulated_balance:.4f} Native | "
+                        f"Score: {controller.wins}W - {controller.losses}L"
                     )
 
-                    # Register immediate Gale recovery trade on same coin
-                    remaining_trades.append(ActiveTrade(
-                        symbol=t.symbol,
-                        action=t.action.lower(),
-                        entry_price=exit_price,
-                        stake_native=next_stake,
-                        entry_time=now,
-                        expiry_time=now + 300,
-                        epoch=prdt_agent.get_current_epoch(),
-                        gale_level=next_gale
-                    ))
+                    if tg_bot:
+                        await tg_bot.send_settlement_alert(
+                            symbol=t.symbol,
+                            action=t.action,
+                            entry_price=t.entry_price,
+                            exit_price=exit_price,
+                            is_win=True,
+                            profit_loss=seq_profit,
+                            new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
+                            wins=controller.wins,
+                            losses=controller.losses,
+                            step_info=outcome_title
+                        )
+                else:
+                    # ─── AUTO SAME-COIN GALE RECOVERY (Up to Gale 2) ───
+                    if t.gale_level < 2:
+                        next_gale = t.gale_level + 1
+                        next_stake = round(t.stake_native * 2.2, 4)
+                        # Deduct next stake for simulation
+                        prdt_agent.simulated_balance = round(prdt_agent.simulated_balance - next_stake, 4)
+                        save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
 
-                    if tg_bot:
-                        await tg_bot.send_message(
-                            f"⚡ <b>GALE {next_gale} RECOVERY TRADE</b> ⚡\n\n"
-                            f"🪙 <b>Asset:</b> <code>{t.symbol}</code>\n"
-                            f"🎯 <b>Action:</b> <b>{t.action.upper()}</b>\n"
-                            f"💵 <b>Entry Price:</b> <code>${exit_price:.2f}</code>\n"
-                            f"💰 <b>Stake:</b> <b>{next_stake:.4f} Native</b> (2.2x Recovery)\n"
-                            f"⏱️ <b>Expiry:</b> <b>5 Minutes (300s)</b>\n\n"
-                            f"🦅 <i>Auto-recovering previous trade on the same asset.</i>"
+                        logger.critical(
+                            f"⚡ [GALE {next_gale} TRIGGERED] {t.symbol} {t.action.upper()} | "
+                            f"Entry: ${exit_price:.2f} | Stake: {next_stake:.4f} Native | Expiry: 300s"
                         )
-                elif not is_win and t.gale_level >= 2:
-                    logger.warning(f"❌ [SEQUENCE BUST] {t.symbol} {t.action.upper()} lost Base + G1 + G2. Resetting stake to Base.")
-                    if tg_bot:
-                        await tg_bot.send_message(
-                            f"❌ <b>SEQUENCE COMPLETED (BUST)</b> ❌\n\n"
-                            f"🪙 <b>Asset:</b> <code>{t.symbol}</code>\n"
-                            f"🎯 <b>Result:</b> Base + Gale 1 + Gale 2 all exhausted.\n"
-                            f"🛡️ <b>Protection:</b> Bankroll cap enforced. Stake reset to Base for the next fresh signal."
+
+                        # Register immediate Gale recovery trade on same coin silently
+                        remaining_trades.append(ActiveTrade(
+                            symbol=t.symbol,
+                            action=t.action.lower(),
+                            entry_price=exit_price,
+                            stake_native=next_stake,
+                            entry_time=now,
+                            expiry_time=now + 300,
+                            epoch=prdt_agent.get_current_epoch(),
+                            gale_level=next_gale,
+                            total_sequence_stake=round(t.total_sequence_stake + next_stake, 4)
+                        ))
+                    else:
+                        # ─── FULL SEQUENCE LOSS (GALE 2 BUST) ───
+                        controller.losses += 1
+                        seq_loss = -round(t.total_sequence_stake, 4)
+                        save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
+
+                        logger.warning(
+                            f"❌ [SEQUENCE BUST] {t.symbol} {t.action.upper()} lost Base + G1 + G2. "
+                            f"Total Loss: {seq_loss:+.4f} Native | Score: {controller.wins}W - {controller.losses}L"
                         )
+
+                        if tg_bot:
+                            await tg_bot.send_settlement_alert(
+                                symbol=t.symbol,
+                                action=t.action,
+                                entry_price=t.entry_price,
+                                exit_price=exit_price,
+                                is_win=False,
+                                profit_loss=seq_loss,
+                                new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
+                                wins=controller.wins,
+                                losses=controller.losses,
+                                step_info="LOSS ❌"
+                            )
             else:
                 remaining_trades.append(t)
         controller.active_trades = remaining_trades
 
         # Evaluate candle for new 90%+ confluence signals
         signals = engine.update_candle(symbol, candle)
+        active_symbols = {t.symbol for t in controller.active_trades}
+
         for sig in signals:
+            # ─── STRICT CONCURRENCY RULE: MAX 2 ACTIVE TRADES ───
+            if len(controller.active_trades) >= 2:
+                logger.info(
+                    f"⏸️ [CONCURRENCY CAP] 2 trades already active ({[t.symbol for t in controller.active_trades]}). "
+                    f"Skipping new signal for {sig.symbol}."
+                )
+                continue
+
+            if sig.symbol in active_symbols:
+                logger.info(f"⏸️ [SYMBOL BUSY] {sig.symbol} already has an active trade sequence running. Skipping duplicate signal.")
+                continue
+
             verdict_icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
             logger.critical(
                 f"{verdict_icon} SIGNAL: {sig.symbol} {sig.action.upper()} | "
@@ -289,8 +338,11 @@ async def main():
                     stake_native=trade_stake,
                     entry_time=time.time(),
                     expiry_time=time.time() + sig.expiry_seconds,
-                    epoch=prdt_agent.get_current_epoch()
+                    epoch=prdt_agent.get_current_epoch(),
+                    gale_level=0,
+                    total_sequence_stake=trade_stake
                 ))
+                active_symbols.add(sig.symbol)
             else:
                 logger.warning(f"⚠️ Trade Execution Failed / Skipped: {tx_or_reason}")
 
