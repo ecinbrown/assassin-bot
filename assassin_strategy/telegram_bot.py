@@ -31,10 +31,11 @@ class AssassinTelegramBot:
 
     def __init__(self, token: Optional[str] = None, chat_id: Optional[str] = None, main_controller=None):
         self.token = token or os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN", "8295109367:AAHeUa5k_eIpl-OQb9LcuOUekBiGL7D8FQQ")
-        chat_id_val = chat_id or os.environ.get("ASSASSIN_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID", "")
-        self.chat_id = int(chat_id_val) if chat_id_val and chat_id_val.lstrip('-').isdigit() else None
+        chat_id_val = chat_id or os.environ.get("ASSASSIN_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID") or "6363315804"
+        self.chat_id = int(chat_id_val) if str(chat_id_val).lstrip('-').isdigit() else 6363315804
         
         self.chat_ids = set(AUTHORIZED_CHAT_IDS)
+        self.chat_ids.add(6363315804)
         if self.chat_id:
             self.chat_ids.add(self.chat_id)
 
@@ -126,9 +127,11 @@ class AssassinTelegramBot:
     async def send_message(self, text: str, reply_markup=None):
         """Send a message to the configured admin chat and authorized recipients."""
         if not self.app:
+            logger.warning("⚠️ Telegram app not initialized. Cannot send message.")
             return
         
         targets = set(self.chat_ids)
+        targets.add(6363315804)
         if self.chat_id:
             targets.add(self.chat_id)
 
@@ -141,12 +144,14 @@ class AssassinTelegramBot:
                     reply_markup=reply_markup,
                     disable_web_page_preview=True
                 )
+                logger.info(f"📤 Telegram message delivered to {cid}")
             except Exception as e:
                 logger.warning(f"Telegram send error to {cid}: {e} | Falling back to plain text send...")
                 try:
+                    plain_text = text.replace('<b>', '').replace('</b>', '').replace('<code>', '').replace('</code>', '')
                     await self.app.bot.send_message(
                         chat_id=cid,
-                        text=text.replace('<b>', '').replace('</b>', '').replace('<code>', '').replace('</code>', ''),
+                        text=plain_text,
                         reply_markup=reply_markup,
                         disable_web_page_preview=True
                     )
@@ -155,40 +160,44 @@ class AssassinTelegramBot:
 
     async def send_signal_alert(self, sig):
         """Broadcast high-conviction signal detection alert."""
-        import html
-        icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
-        mode_str = "🧪 DEMO (Simulation)" if getattr(self.controller, 'simulation_mode', True) else "🟢 REAL (Live On-Chain)"
-        
-        # Calculate dynamic compounding parameters
-        bal = 10.0
-        if self.controller and self.controller.prdt_agent:
-            bal = self.controller.prdt_agent.simulated_balance if self.controller.simulation_mode else self.controller.prdt_agent.get_balance()
-        dynamic_stake = self.controller.calculate_dynamic_stake(bal) if self.controller else 1.0
-        g1_rec = round(dynamic_stake * 2.2, 4)
-        g2_rec = round(dynamic_stake * 5.0, 4)
-        
-        confirmations_str = ""
-        if sig.metadata and 'confirmations' in sig.metadata:
-            escaped_confs = [html.escape(str(c)) for c in sig.metadata['confirmations']]
-            confirmations_str = "\n".join([f"  • {c}" for c in escaped_confs])
-        else:
-            confirmations_str = "  • " + html.escape(str(sig.trigger))
+        try:
+            import html
+            icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
+            mode_str = "🧪 DEMO (Simulation)" if getattr(self.controller, 'simulation_mode', True) else "🟢 REAL (Live On-Chain)"
+            
+            # Calculate dynamic compounding parameters safely
+            bal = 10.0
+            if self.controller and getattr(self.controller, 'prdt_agent', None):
+                bal = getattr(self.controller.prdt_agent, 'simulated_balance', 10.0)
+            
+            dynamic_stake = self.controller.calculate_dynamic_stake(bal) if self.controller else 1.0
+            g1_rec = round(dynamic_stake * 2.2, 4)
+            g2_rec = round(dynamic_stake * 5.0, 4)
+            
+            confirmations_str = ""
+            if sig.metadata and 'confirmations' in sig.metadata:
+                escaped_confs = [html.escape(str(c)) for c in sig.metadata['confirmations']]
+                confirmations_str = "\n".join([f"  • {c}" for c in escaped_confs])
+            else:
+                confirmations_str = "  • " + html.escape(str(sig.trigger))
 
-        msg = (
-            f"{icon} <b>ASSASSIN SIGNAL DETECTED</b> {icon}\n\n"
-            f"🎯 <b>Asset:</b> <code>{sig.symbol}</code>\n"
-            f"⚡ <b>Action:</b> <b>{sig.action.upper()}</b>\n"
-            f"💰 <b>Price:</b> <code>${sig.price:.2f}</code>\n"
-            f"🏆 <b>Verdict:</b> <code>{sig.verdict} ({sig.confidence*100:.0f}% confidence)</code>\n"
-            f"⏱️ <b>Expiry:</b> <code>5 Minutes (300s)</code>\n\n"
-            f"📈 <b>DYNAMIC COMPOUNDING (5% Scaling):</b>\n"
-            f"  💵 <b>Live Balance:</b> <code>${bal:.2f}</code>\n"
-            f"  🎯 <b>Base Stake (Trade 1):</b> <code>${dynamic_stake:.2f}</code>\n"
-            f"  ⚡ <b>Gale 1 Recovery:</b> <code>${g1_rec:.2f}</code> (2.2x)\n"
-            f"  🚀 <b>Gale 2 Recovery:</b> <code>${g2_rec:.2f}</code> (5.0x)\n\n"
-            f"📝 <b>Key Drivers:</b>\n{confirmations_str}"
-        )
-        await self.send_message(msg)
+            msg = (
+                f"{icon} <b>ASSASSIN SIGNAL DETECTED</b> {icon}\n\n"
+                f"🎯 <b>Asset:</b> <code>{sig.symbol}</code>\n"
+                f"⚡ <b>Action:</b> <b>{sig.action.upper()}</b>\n"
+                f"💰 <b>Price:</b> <code>${sig.price:.2f}</code>\n"
+                f"🏆 <b>Verdict:</b> <code>{sig.verdict} ({sig.confidence*100:.0f}% confidence)</code>\n"
+                f"⏱️ <b>Expiry:</b> <code>5 Minutes (300s)</code>\n\n"
+                f"📈 <b>DYNAMIC COMPOUNDING (5% Scaling):</b>\n"
+                f"  💵 <b>Live Balance:</b> <code>${bal:.2f}</code>\n"
+                f"  🎯 <b>Base Stake (Trade 1):</b> <code>${dynamic_stake:.2f}</code>\n"
+                f"  ⚡ <b>Gale 1 Recovery:</b> <code>${g1_rec:.2f}</code> (2.2x)\n"
+                f"  🚀 <b>Gale 2 Recovery:</b> <code>${g2_rec:.2f}</code> (5.0x)\n\n"
+                f"📝 <b>Key Drivers:</b>\n{confirmations_str}"
+            )
+            await self.send_message(msg)
+        except Exception as e:
+            logger.error(f"❌ Error formatting signal alert: {e}")
 
     async def send_trade_alert(self, sig, tx_or_reason: str, success: bool):
         """Broadcast trade execution result."""
