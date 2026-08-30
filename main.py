@@ -364,6 +364,26 @@ async def main():
                 )
                 continue
 
+            # ─── MINIMUM CANDLE RANGE FILTER (Reject tiny/flat candles) ───
+            candle_range = candle.high - candle.low
+            history = engine.candle_history.get(symbol, [])
+            if len(history) >= 20:
+                avg_range = sum(c.high - c.low for c in history[-20:]) / 20.0
+                if candle_range < avg_range:
+                    logger.info(
+                        f"🛡️ [RANGE FILTER] {sig.symbol} skipped — candle range {candle_range:.5f} < avg {avg_range:.5f}. Too flat for reliable outcome."
+                    )
+                    continue
+
+            # ─── SESSION FILTER (Skip 03:00–06:00 UTC dead zone) ───
+            from datetime import datetime, timezone
+            utc_hour = datetime.now(timezone.utc).hour
+            if 3 <= utc_hour < 6:
+                logger.info(
+                    f"🛡️ [SESSION FILTER] {sig.symbol} skipped — UTC {utc_hour}:00 is in the 03:00–06:00 dead zone."
+                )
+                continue
+
             verdict_icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
             logger.critical(
                 f"{verdict_icon} SIGNAL: {sig.symbol} {sig.action.upper()} | "
