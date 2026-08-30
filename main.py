@@ -6,6 +6,7 @@ Binance Live Feeder → Assassin Confluence Engine → PRDT Finance Web3 Smart C
 + Interactive Telegram Controller & Live Alert Engine
 """
 import asyncio
+import json
 import logging
 import os
 import sys
@@ -42,7 +43,7 @@ def load_saved_state():
                 return json.load(f)
         except Exception:
             pass
-    return {"balance": 80.4737, "wins": 18, "losses": 0}
+    return {"balance": 10.0, "wins": 0, "losses": 0}
 
 def save_state(balance: float, wins: int, losses: int):
     try:
@@ -63,6 +64,7 @@ class ActiveTrade:
     epoch: int
     gale_level: int = 0  # 0 = Base, 1 = Gale 1, 2 = Gale 2
     total_sequence_stake: float = 0.0
+    is_recovery_trade: bool = False
 
 
 class AssassinController:
@@ -231,11 +233,11 @@ async def main():
                     prdt_agent.simulated_balance = round(prdt_agent.simulated_balance + gross_payout, 4)
                     save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
 
-                    # Reset 1-Trade Mart Recovery mode immediately on win -> returns to normal 5% Base!
-                    if controller.is_in_mart_recovery:
+                    # Reset 1-Trade Mart Recovery mode ONLY if this trade was the designated recovery trade!
+                    if t.is_recovery_trade:
                         controller.is_in_mart_recovery = False
                         controller.lost_mart_amount = 0.0
-                        logger.critical("🎯 [1-TRADE RECOVERY COMPLETE] Loss 100% erased + profit banked! Resetting to normal 5% Base Stake.")
+                        logger.critical("🎯 [1-TRADE RECOVERY COMPLETE] Designated recovery trade won! Loss 100% erased + profit banked! Resetting to normal 5% Base Stake.")
 
                     outcome_title = "WIN ✅"
                     logger.critical(
@@ -285,7 +287,8 @@ async def main():
                             expiry_time=now + 300,
                             epoch=prdt_agent.get_current_epoch(),
                             gale_level=next_gale,
-                            total_sequence_stake=round(t.total_sequence_stake + next_stake, 4)
+                            total_sequence_stake=round(t.total_sequence_stake + next_stake, 4),
+                            is_recovery_trade=t.is_recovery_trade
                         ))
                     else:
                         # ─── SEQUENCE LOSS (GALE 1 CAP - MAX 16% RISK) ───
@@ -330,13 +333,22 @@ async def main():
         active_symbols = {t.symbol for t in controller.active_trades}
 
         for sig in signals:
-            # ─── STRICT CONCURRENCY RULE: MAX 2 ACTIVE TRADES ───
-            if len(controller.active_trades) >= 2:
-                logger.info(
-                    f"⏸️ [CONCURRENCY CAP] 2 trades already active ({[t.symbol for t in controller.active_trades]}). "
-                    f"Skipping new signal for {sig.symbol}."
-                )
-                continue
+            # ─── STRICT RECOVERY ISOLATION: WAIT FOR ALL TRADES TO CLEAR, THEN STRICTLY 1 ISOLATED TRADE ───
+            if controller.is_in_mart_recovery:
+                if len(controller.active_trades) >= 1:
+                    logger.info(
+                        f"⏸️ [RECOVERY ISOLATION] In Recovery Mode — waiting for open trades ({[t.symbol for t in controller.active_trades]}) to settle before placing 1 single isolated recovery trade. "
+                        f"Skipping signal for {sig.symbol}."
+                    )
+                    continue
+            else:
+                # ─── STRICT CONCURRENCY RULE: MAX 2 ACTIVE TRADES IN NORMAL 5% MODE ───
+                if len(controller.active_trades) >= 2:
+                    logger.info(
+                        f"⏸️ [CONCURRENCY CAP] 2 trades already active ({[t.symbol for t in controller.active_trades]}). "
+                        f"Skipping new signal for {sig.symbol}."
+                    )
+                    continue
 
             if sig.symbol in active_symbols:
                 logger.info(f"⏸️ [SYMBOL BUSY] {sig.symbol} already has an active trade sequence running. Skipping duplicate signal.")
@@ -371,6 +383,7 @@ async def main():
             if success:
                 logger.info(f"✅ Trade Executed on PRDT Contract (Stake: {trade_stake} Native | Balance: {current_balance:.4f}): {tx_or_reason}")
                 # Register active trade for automated outcome tracking
+                is_rec = controller.is_in_mart_recovery
                 controller.active_trades.append(ActiveTrade(
                     symbol=sig.symbol,
                     action=sig.action.lower(),
@@ -380,7 +393,8 @@ async def main():
                     expiry_time=time.time() + sig.expiry_seconds,
                     epoch=prdt_agent.get_current_epoch(),
                     gale_level=0,
-                    total_sequence_stake=trade_stake
+                    total_sequence_stake=trade_stake,
+                    is_recovery_trade=is_rec
                 ))
                 active_symbols.add(sig.symbol)
             else:
