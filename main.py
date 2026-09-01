@@ -99,24 +99,34 @@ class AssassinController:
         self.telegram_bot: Optional[AssassinTelegramBot] = None
         self.dispatcher: Optional[PRDTWebhookDispatcher] = None
 
+    # ─── Filter Thresholds ───
+    # Normal mode (high frequency): relaxed filters for ~35 profit trades/day
+    NORMAL_RUN_MIN = 4
+    NORMAL_WICK_MIN = 1.8
+    NORMAL_VOL_MIN = 1.8
+    # Recovery mode (cherry-picked): strict filters for 82.5%+ WR recovery trades
+    RECOVERY_RUN_MIN = 6
+    RECOVERY_WICK_MIN = 2.0
+    RECOVERY_VOL_MIN = 2.5
+
     def calculate_dynamic_stake(self, balance: float) -> float:
         """
-        Dynamic Compounding Engine (5% Base Stake Scaling + 1-Trade Mart Recovery):
+        Dynamic Compounding Engine (6.1% Base Stake Scaling + 1-Trade Mart Recovery):
         - If in Mart Recovery mode: sizes stake to recover the entire lost Mart + full target profit in 1 single trade.
-        - Otherwise: dynamically calculates 5% base stake as balance compounds.
+        - Otherwise: dynamically calculates 6.1% base stake as balance compounds.
         """
         if balance <= 0:
             return self.stake_native
 
         if self.is_in_mart_recovery and self.lost_mart_amount > 0:
-            target_profit = balance * 0.05 * 0.88
-            rec_stake = round((self.lost_mart_amount + target_profit) / 0.88, 4)
+            target_profit = balance * 0.061 * 0.86
+            rec_stake = round((self.lost_mart_amount + target_profit) / 0.86, 4)
             # Safe risk cap at max 23% of balance
             rec_stake = min(round(balance * 0.23, 4), rec_stake)
             return max(self.stake_native, rec_stake)
 
-        # 5% base stake scaling with a hard minimum floor
-        dynamic_stake = round(max(self.stake_native, balance * 0.05), 4)
+        # 6.1% base stake scaling with a hard minimum floor
+        dynamic_stake = round(max(self.stake_native, balance * 0.061), 4)
         return dynamic_stake
 
 
@@ -368,11 +378,18 @@ async def main():
                 continue
 
             # ═══════════════════════════════════════════════════════════════
-            # 80.3% VERIFIED SNIPER GATE (365-Day Backtested)
-            # Run>=7 + 50-Bar S/R + Wick>=2.0x Body + Vol>=2.5x 20-SMA
-            # + Min Range Filter + Session Filter
+            # SMART DUAL-MODE SNIPER GATE (365-Day Backtested)
+            # NORMAL MODE:   Run>=4, Wick>=1.8x, Vol>=1.8x  (78.3% WR)
+            # RECOVERY MODE: Run>=6, Wick>=2.0x, Vol>=2.5x  (82.5%+ WR)
             # ═══════════════════════════════════════════════════════════════
             history = engine.candle_history.get(symbol, [])
+            is_recovery = controller.is_in_mart_recovery
+
+            # Select filter thresholds based on mode
+            run_min = AssassinController.RECOVERY_RUN_MIN if is_recovery else AssassinController.NORMAL_RUN_MIN
+            wick_min = AssassinController.RECOVERY_WICK_MIN if is_recovery else AssassinController.NORMAL_WICK_MIN
+            vol_min = AssassinController.RECOVERY_VOL_MIN if is_recovery else AssassinController.NORMAL_VOL_MIN
+            mode_tag = "RECOVERY 82.5%" if is_recovery else "NORMAL 78.3%"
 
             # ─── GATE 1: SESSION FILTER (Skip 03:00–06:00 UTC dead zone) ───
             from datetime import datetime, timezone
@@ -389,32 +406,30 @@ async def main():
                     logger.info(f"🛡️ [RANGE FILTER] {sig.symbol} skipped — range {candle_range:.5f} < avg {avg_range:.5f}")
                     continue
 
-            # ─── GATE 3: EXHAUSTION RUN >= 4 consecutive same-color candles ───
+            # ─── GATE 3: EXHAUSTION RUN (dynamic: 4 normal / 6 recovery) ───
             run_ok = False
-            if len(history) >= 4:
+            if len(history) >= run_min:
                 if sig.action.lower() == 'call':
-                    # Bullish reversal needs 4+ bearish (red) candles before
                     run_count = 0
-                    for hc in reversed(history[-4:]):
+                    for hc in reversed(history[-run_min:]):
                         if hc.close < hc.open:
                             run_count += 1
                         else:
                             break
-                    run_ok = run_count >= 4
+                    run_ok = run_count >= run_min
                 else:
-                    # Bearish reversal needs 4+ bullish (green) candles before
                     run_count = 0
-                    for hc in reversed(history[-4:]):
+                    for hc in reversed(history[-run_min:]):
                         if hc.close > hc.open:
                             run_count += 1
                         else:
                             break
-                    run_ok = run_count >= 4
+                    run_ok = run_count >= run_min
             if not run_ok:
-                logger.info(f"🛡️ [RUN FILTER] {sig.symbol} skipped — no 4+ exhaustion run detected.")
+                logger.info(f"🛡️ [RUN FILTER|{mode_tag}] {sig.symbol} skipped — no {run_min}+ exhaustion run.")
                 continue
 
-            # ─── GATE 4: REJECTION WICK >= 1.8x BODY ───
+            # ─── GATE 4: REJECTION WICK (dynamic: 1.8x normal / 2.0x recovery) ───
             body = abs(candle.close - candle.open)
             if body < 1e-10:
                 logger.info(f"🛡️ [WICK FILTER] {sig.symbol} skipped — zero body (doji).")
@@ -422,15 +437,15 @@ async def main():
             upper_wick = candle.high - max(candle.open, candle.close)
             lower_wick = min(candle.open, candle.close) - candle.low
             max_wick = max(upper_wick, lower_wick)
-            if max_wick < 1.8 * body:
-                logger.info(f"🛡️ [WICK FILTER] {sig.symbol} skipped — wick ratio {max_wick/body:.1f}x < 1.8x required.")
+            if max_wick < wick_min * body:
+                logger.info(f"🛡️ [WICK FILTER|{mode_tag}] {sig.symbol} skipped — wick {max_wick/body:.1f}x < {wick_min}x.")
                 continue
 
-            # ─── GATE 5: VOLUME CLIMAX >= 1.8x 20-SMA ───
+            # ─── GATE 5: VOLUME CLIMAX (dynamic: 1.8x normal / 2.5x recovery) ───
             if len(history) >= 20:
                 avg_vol = sum(c.volume for c in history[-20:]) / 20.0
-                if avg_vol > 0 and candle.volume < 1.8 * avg_vol:
-                    logger.info(f"🛡️ [VOLUME FILTER] {sig.symbol} skipped — vol ratio {candle.volume/avg_vol:.1f}x < 1.8x required.")
+                if avg_vol > 0 and candle.volume < vol_min * avg_vol:
+                    logger.info(f"🛡️ [VOL FILTER|{mode_tag}] {sig.symbol} skipped — vol {candle.volume/avg_vol:.1f}x < {vol_min}x.")
                     continue
 
             # ─── GATE 6: 50-BAR S/R PROXIMITY ───
@@ -449,7 +464,7 @@ async def main():
                     logger.info(f"🛡️ [S/R FILTER] {sig.symbol} skipped — not near 50-bar S/R zone.")
                     continue
 
-            logger.info(f"✅ [80.3% SNIPER GATE PASSED] {sig.symbol} {sig.action.upper()} — All 6 gates cleared!")
+            logger.info(f"✅ [{mode_tag} GATE PASSED] {sig.symbol} {sig.action.upper()} — All 6 gates cleared!")
 
 
             verdict_icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
