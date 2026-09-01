@@ -133,7 +133,20 @@ async def main():
     logger.info("=" * 65)
 
     # 1. Configuration from Environment
-    symbols = os.environ.get("TRADING_SYMBOLS", "BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT").split(",")
+    # 50 High-Liquidity Pairs (All >$7k/min volume, tolerate $2k+ stakes)
+    default_symbols = (
+        "BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,BNBUSDT,"
+        "UNIUSDT,SUIUSDT,DOGEUSDT,ZECUSDT,PEPEUSDT,"
+        "ENAUSDT,TRXUSDT,TRUMPUSDT,NEARUSDT,ADAUSDT,"
+        "LINKUSDT,TAOUSDT,WLDUSDT,DASHUSDT,AAVEUSDT,"
+        "AVAXUSDT,XLMUSDT,LTCUSDT,CAKEUSDT,FETUSDT,"
+        "ZKUSDT,POLUSDT,ONDOUSDT,PENGUUSDT,HEMIUSDT,"
+        "PUMPUSDT,XAUTUSDT,SEIUSDT,TIAUSDT,INJUSDT,"
+        "ARBUSDT,OPUSDT,TONUSDT,BCHUSDT,APTUSDT,"
+        "RENDERUSDT,RUNEUSDT,MKRUSDT,CRVUSDT,LDOUSDT,"
+        "PENDLEUSDT,SHIBUSDT,BONKUSDT,JUPUSDT,STXUSDT"
+    )
+    symbols = os.environ.get("TRADING_SYMBOLS", default_symbols).split(",")
     symbols = [s.strip() for s in symbols if s.strip()]
     interval = os.environ.get("CANDLE_INTERVAL", "1m")
     expiry_seconds = int(os.environ.get("TRADE_EXPIRY_SECONDS", "300"))
@@ -376,32 +389,32 @@ async def main():
                     logger.info(f"🛡️ [RANGE FILTER] {sig.symbol} skipped — range {candle_range:.5f} < avg {avg_range:.5f}")
                     continue
 
-            # ─── GATE 3: EXHAUSTION RUN >= 7 consecutive same-color candles ───
+            # ─── GATE 3: EXHAUSTION RUN >= 4 consecutive same-color candles ───
             run_ok = False
-            if len(history) >= 7:
+            if len(history) >= 4:
                 if sig.action.lower() == 'call':
-                    # Bullish reversal needs 7+ bearish (red) candles before
+                    # Bullish reversal needs 4+ bearish (red) candles before
                     run_count = 0
-                    for hc in reversed(history[-7:]):
+                    for hc in reversed(history[-4:]):
                         if hc.close < hc.open:
                             run_count += 1
                         else:
                             break
-                    run_ok = run_count >= 7
+                    run_ok = run_count >= 4
                 else:
-                    # Bearish reversal needs 7+ bullish (green) candles before
+                    # Bearish reversal needs 4+ bullish (green) candles before
                     run_count = 0
-                    for hc in reversed(history[-7:]):
+                    for hc in reversed(history[-4:]):
                         if hc.close > hc.open:
                             run_count += 1
                         else:
                             break
-                    run_ok = run_count >= 7
+                    run_ok = run_count >= 4
             if not run_ok:
-                logger.info(f"🛡️ [RUN FILTER] {sig.symbol} skipped — no 7+ exhaustion run detected.")
+                logger.info(f"🛡️ [RUN FILTER] {sig.symbol} skipped — no 4+ exhaustion run detected.")
                 continue
 
-            # ─── GATE 4: REJECTION WICK >= 2.0x BODY ───
+            # ─── GATE 4: REJECTION WICK >= 1.8x BODY ───
             body = abs(candle.close - candle.open)
             if body < 1e-10:
                 logger.info(f"🛡️ [WICK FILTER] {sig.symbol} skipped — zero body (doji).")
@@ -409,15 +422,15 @@ async def main():
             upper_wick = candle.high - max(candle.open, candle.close)
             lower_wick = min(candle.open, candle.close) - candle.low
             max_wick = max(upper_wick, lower_wick)
-            if max_wick < 2.0 * body:
-                logger.info(f"🛡️ [WICK FILTER] {sig.symbol} skipped — wick ratio {max_wick/body:.1f}x < 2.0x required.")
+            if max_wick < 1.8 * body:
+                logger.info(f"🛡️ [WICK FILTER] {sig.symbol} skipped — wick ratio {max_wick/body:.1f}x < 1.8x required.")
                 continue
 
-            # ─── GATE 5: VOLUME CLIMAX >= 2.5x 20-SMA ───
+            # ─── GATE 5: VOLUME CLIMAX >= 1.8x 20-SMA ───
             if len(history) >= 20:
                 avg_vol = sum(c.volume for c in history[-20:]) / 20.0
-                if avg_vol > 0 and candle.volume < 2.5 * avg_vol:
-                    logger.info(f"🛡️ [VOLUME FILTER] {sig.symbol} skipped — vol ratio {candle.volume/avg_vol:.1f}x < 2.5x required.")
+                if avg_vol > 0 and candle.volume < 1.8 * avg_vol:
+                    logger.info(f"🛡️ [VOLUME FILTER] {sig.symbol} skipped — vol ratio {candle.volume/avg_vol:.1f}x < 1.8x required.")
                     continue
 
             # ─── GATE 6: 50-BAR S/R PROXIMITY ───
