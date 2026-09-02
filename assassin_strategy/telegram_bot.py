@@ -185,17 +185,46 @@ class AssassinTelegramBot:
             logger.error(f"❌ Error formatting signal alert: {e}")
 
     async def send_trade_alert(self, sig, tx_or_reason: str, success: bool):
-        """Broadcast trade execution — lean version."""
+        """Broadcast clean single entry alert when trade is executed."""
+        if not success:
+            msg = f"❌ <b>FAILED TO PLACE TRADE: {sig.symbol} {sig.action.upper()}</b>\nReason: <code>{tx_or_reason}</code>"
+            await self.send_message(msg)
+            return
+
         mode = "🧪 DEMO" if getattr(self.controller, 'simulation_mode', True) else "🟢 LIVE"
-        icon = "✅" if success else "❌"
         bal = 10.0
         if self.controller and getattr(self.controller, 'prdt_agent', None):
             bal = getattr(self.controller.prdt_agent, 'simulated_balance', 10.0)
         stake = self.controller.calculate_dynamic_stake(bal) if self.controller else 1.0
+        rec_tag = " [⚡ RECOVERY]" if getattr(self.controller, 'is_in_mart_recovery', False) else ""
+        open_count = len(getattr(self.controller, 'active_trades', []))
+        exp_m = max(1, sig.expiry_seconds // 60)
 
         msg = (
-            f"{icon} <b>{sig.symbol} {sig.action.upper()} — TRADE PLACED</b> | {mode}\n"
-            f"💵 Stake: <code>${stake:.2f}</code> | ⏱️ 5 min"
+            f"⚡ <b>TRADE OPENED: {sig.symbol} {sig.action.upper()}</b> | {mode}\n"
+            f"💵 Stake: <code>${stake:.2f}</code>{rec_tag} | ⏱️ <code>{exp_m} min</code>\n"
+            f"📌 Entry: <code>${sig.price:.4f}</code>\n"
+            f"📂 Active Trades Open: <b>{open_count}</b>"
+        )
+        await self.send_message(msg)
+
+    async def send_gale_alert(
+        self,
+        symbol: str,
+        action: str,
+        gale_level: int,
+        stake: float,
+        entry_price: float,
+        expiry_seconds: int = 300
+    ):
+        """Broadcast clear Gale 1 Recovery trade alert so it never happens silently."""
+        exp_m = max(1, expiry_seconds // 60)
+        open_count = len(getattr(self.controller, 'active_trades', []))
+        msg = (
+            f"🔄 <b>GALE {gale_level} RECOVERY: {symbol} {action.upper()}</b>\n"
+            f"💵 Recovery Stake: <code>${stake:.2f}</code> (2.2x) | ⏱️ <code>{exp_m} min</code>\n"
+            f"📌 Re-Entry Price: <code>${entry_price:.4f}</code>\n"
+            f"📂 Active Trades Open: <b>{open_count}</b>"
         )
         await self.send_message(msg)
 
@@ -222,17 +251,20 @@ class AssassinTelegramBot:
         losses: int,
         step_info: str = ""
     ):
-        """Broadcast round settlement result — lean version."""
+        """Broadcast round settlement result with open count and structured stats."""
         total = wins + losses
         win_rate = (wins / total * 100.0) if total > 0 else 0.0
         icon = "🏆" if is_win else "❌"
-        outcome = "WIN" if is_win else "LOSS"
-        pnl_str = f"+{profit_loss:.2f}" if profit_loss >= 0 else f"{profit_loss:.2f}"
+        outcome = "WIN ✅" if is_win else "SEQUENCE LOSS ❌"
+        pnl_str = f"+${profit_loss:.2f}" if profit_loss >= 0 else f"-${abs(profit_loss):.2f}"
+        open_count = len(getattr(self.controller, 'active_trades', []))
 
         msg = (
-            f"{icon} <b>{symbol} {action.upper()} — {outcome}</b>\n"
-            f"💰 P&L: <code>{pnl_str}</code> | Bal: <code>${new_balance:.2f}</code>\n"
-            f"📊 {wins}W – {losses}L ({win_rate:.0f}% WR)"
+            f"{icon} <b>RESULT: {symbol} {action.upper()} — {outcome}</b>\n"
+            f"💰 P&L: <code>{pnl_str}</code> | Balance: <code>${new_balance:.2f}</code>\n"
+            f"🎯 Entry: <code>${entry_price:.4f}</code> ➜ Exit: <code>${exit_price:.4f}</code>\n"
+            f"📊 Scorecard: <b>{wins}W – {losses}L ({win_rate:.0f}% WR)</b>\n"
+            f"📂 Remaining Trades Open: <b>{open_count}</b>"
         )
         await self.send_message(msg)
 

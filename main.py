@@ -310,7 +310,7 @@ async def main():
                             f"Entry: ${exit_price:.2f} | Stake: {next_stake:.4f} Native | Expiry: 300s"
                         )
 
-                        # Register immediate Gale recovery trade on same coin silently
+                        # Register immediate Gale recovery trade on same coin
                         remaining_trades.append(ActiveTrade(
                             symbol=t.symbol,
                             action=t.action.lower(),
@@ -323,6 +323,15 @@ async def main():
                             total_sequence_stake=round(t.total_sequence_stake + next_stake, 4),
                             is_recovery_trade=t.is_recovery_trade
                         ))
+                        if tg_bot:
+                            await tg_bot.send_gale_alert(
+                                symbol=t.symbol,
+                                action=t.action,
+                                gale_level=next_gale,
+                                stake=next_stake,
+                                entry_price=exit_price,
+                                expiry_seconds=300
+                            )
                     else:
                         # ─── SEQUENCE LOSS (GALE 1 CAP - MAX 16% RISK) ───
                         controller.losses += 1
@@ -482,10 +491,6 @@ async def main():
                 f"Solid={sig.solid_count} Soft={sig.soft_count} | "
                 f"Regime={sig.regime} | {sig.trigger}"
             )
-
-            # Send Telegram Alert
-            if tg_bot:
-                await tg_bot.send_signal_alert(sig)
 
             # 1. Execute via Dynamic Compounding Staking
             current_balance = prdt_agent.simulated_balance if controller.simulation_mode else prdt_agent.get_balance()
