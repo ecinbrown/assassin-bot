@@ -147,10 +147,13 @@ async def main():
     logger.info("=" * 65)
 
     # 1. Configuration from Environment
-    # 3 High-Payout Majors ONLY (90% broker payout, deepest liquidity, highest limits)
-    default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT"
+    # All 8 broker pairs: 3 Tier-1 (90% payout) + 5 Tier-2 (70% payout)
+    default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT,SOLUSDT,DOGEUSDT,XRPUSDT,PEPEUSDT,ARBUSDT"
     symbols = os.environ.get("TRADING_SYMBOLS", default_symbols).split(",")
     symbols = [s.strip() for s in symbols if s.strip()]
+
+    # Tier-1 pairs (90% payout) — recovery trades ONLY execute on these
+    TIER1_PAIRS = {"BTCUSDT", "ETHUSDT", "BNBUSDT"}
 
     # Multi-Timeframe: scan 1m, 3m, 5m simultaneously for 3× signal flow
     INTERVALS = ["1m", "3m", "5m"]
@@ -367,21 +370,18 @@ async def main():
         for sig in signals:
             # Override signal expiry with the correct TF-matched expiry
             sig.expiry_seconds = expiry_seconds
-            # ─── STRICT RECOVERY ISOLATION: WAIT FOR ALL TRADES TO CLEAR, THEN STRICTLY 1 ISOLATED TRADE ───
+            # ─── STRICT RECOVERY ISOLATION: Only on 90% Tier-1 pairs, wait for all trades to clear ───
             if controller.is_in_mart_recovery:
+                if sig.symbol not in TIER1_PAIRS:
+                    logger.info(f"⏸️ [RECOVERY TIER] {sig.symbol} is 70% payout — recovery only on BTC/ETH/BNB. Skipping.")
+                    continue
                 if len(controller.active_trades) >= 1:
-                    logger.info(
-                        f"⏸️ [RECOVERY ISOLATION] In Recovery Mode — waiting for open trades ({[t.symbol for t in controller.active_trades]}) to settle before placing 1 single isolated recovery trade. "
-                        f"Skipping signal for {sig.symbol}."
-                    )
+                    logger.info(f"⏸️ [RECOVERY ISOLATION] Waiting for open trades to settle. Skipping {sig.symbol}.")
                     continue
             else:
-                # ─── STRICT CONCURRENCY RULE: MAX 2 ACTIVE TRADES IN NORMAL 5% MODE ───
-                if len(controller.active_trades) >= 2:
-                    logger.info(
-                        f"⏸️ [CONCURRENCY CAP] 2 trades already active ({[t.symbol for t in controller.active_trades]}). "
-                        f"Skipping new signal for {sig.symbol}."
-                    )
+                # ─── CONCURRENCY RULE: MAX 3 ACTIVE TRADES IN NORMAL MODE ───
+                if len(controller.active_trades) >= 3:
+                    logger.info(f"⏸️ [CONCURRENCY CAP] 3 trades active. Skipping {sig.symbol}.")
                     continue
 
             if sig.symbol in active_symbols:
