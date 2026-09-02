@@ -295,79 +295,41 @@ async def main():
                             step_info=outcome_title
                         )
                 else:
-                    # ─── AUTO 1-GALE RECOVERY ENGINE (STRICT MAX GALE 1) ───
-                    max_allowed_gale = 1
+                    # ─── TRADE LOSS (NO GALE RETRY — SINGLE TRADE CLEAN ARCHITECTURE) ───
+                    controller.losses += 1
+                    controller.marts_since_loss = 0
+                    seq_loss = -round(t.total_sequence_stake, 4)
 
-                    if t.gale_level < max_allowed_gale:
-                        next_gale = t.gale_level + 1
-                        next_stake = round(t.stake_native * 2.2, 4)
-                        # Deduct next stake for simulation
-                        prdt_agent.simulated_balance = round(prdt_agent.simulated_balance - next_stake, 4)
-                        save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
+                    # Arm 1-Trade Mart Recovery for the NEXT signal (on BTC/ETH/BNB 90% payout)
+                    controller.is_in_mart_recovery = True
+                    controller.lost_mart_amount = round(
+                        controller.lost_mart_amount + t.total_sequence_stake, 4
+                    )
+                    logger.warning(
+                        f"⚡ [1-TRADE RECOVERY ARMED] Cumulative loss to recover: "
+                        f"{controller.lost_mart_amount:.4f} Native. Next signal will stake to recover all + profit."
+                    )
 
-                        logger.critical(
-                            f"⚡ [GALE {next_gale} TRIGGERED] {t.symbol} {t.action.upper()} | "
-                            f"Entry: ${exit_price:.2f} | Stake: {next_stake:.4f} Native | Expiry: 300s"
-                        )
+                    save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
 
-                        # Register immediate Gale recovery trade on same coin
-                        remaining_trades.append(ActiveTrade(
+                    logger.warning(
+                        f"❌ [TRADE LOSS] {t.symbol} {t.action.upper()} | "
+                        f"Loss: {seq_loss:+.4f} Native | Score: {controller.wins}W - {controller.losses}L"
+                    )
+
+                    if tg_bot:
+                        await tg_bot.send_settlement_alert(
                             symbol=t.symbol,
-                            action=t.action.lower(),
-                            entry_price=exit_price,
-                            stake_native=next_stake,
-                            entry_time=now,
-                            expiry_time=now + 300,
-                            epoch=prdt_agent.get_current_epoch(),
-                            gale_level=next_gale,
-                            total_sequence_stake=round(t.total_sequence_stake + next_stake, 4),
-                            is_recovery_trade=t.is_recovery_trade
-                        ))
-                        if tg_bot:
-                            await tg_bot.send_gale_alert(
-                                symbol=t.symbol,
-                                action=t.action,
-                                gale_level=next_gale,
-                                stake=next_stake,
-                                entry_price=exit_price,
-                                expiry_seconds=300
-                            )
-                    else:
-                        # ─── SEQUENCE LOSS (GALE 1 CAP - MAX 16% RISK) ───
-                        controller.losses += 1
-                        controller.marts_since_loss = 0
-                        seq_loss = -round(t.total_sequence_stake, 4)
-                        
-                        # Arm 1-Trade Mart Recovery — ACCUMULATE losses for double-loss scenarios
-                        controller.is_in_mart_recovery = True
-                        controller.lost_mart_amount = round(
-                            controller.lost_mart_amount + t.total_sequence_stake, 4
+                            action=t.action,
+                            entry_price=t.entry_price,
+                            exit_price=exit_price,
+                            is_win=False,
+                            profit_loss=seq_loss,
+                            new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
+                            wins=controller.wins,
+                            losses=controller.losses,
+                            step_info="LOSS ❌"
                         )
-                        logger.warning(
-                            f"⚡ [RECOVERY ARMED] Cumulative loss to recover: "
-                            f"{controller.lost_mart_amount:.4f} Native. Next signal will stake to recover all + profit."
-                        )
-                        
-                        save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
-
-                        logger.warning(
-                            f"❌ [SEQUENCE LOSS] {t.symbol} {t.action.upper()} missed Gale 1. "
-                            f"Total Loss: {seq_loss:+.4f} Native | Score: {controller.wins}W - {controller.losses}L"
-                        )
-
-                        if tg_bot:
-                            await tg_bot.send_settlement_alert(
-                                symbol=t.symbol,
-                                action=t.action,
-                                entry_price=t.entry_price,
-                                exit_price=exit_price,
-                                is_win=False,
-                                profit_loss=seq_loss,
-                                new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
-                                wins=controller.wins,
-                                losses=controller.losses,
-                                step_info="LOSS ❌"
-                            )
             else:
                 remaining_trades.append(t)
         controller.active_trades = remaining_trades

@@ -208,26 +208,6 @@ class AssassinTelegramBot:
         )
         await self.send_message(msg)
 
-    async def send_gale_alert(
-        self,
-        symbol: str,
-        action: str,
-        gale_level: int,
-        stake: float,
-        entry_price: float,
-        expiry_seconds: int = 300
-    ):
-        """Broadcast clear Gale 1 Recovery trade alert so it never happens silently."""
-        exp_m = max(1, expiry_seconds // 60)
-        open_count = len(getattr(self.controller, 'active_trades', []))
-        msg = (
-            f"🔄 <b>GALE {gale_level} RECOVERY: {symbol} {action.upper()}</b>\n"
-            f"💵 Recovery Stake: <code>${stake:.2f}</code> (2.2x) | ⏱️ <code>{exp_m} min</code>\n"
-            f"📌 Re-Entry Price: <code>${entry_price:.4f}</code>\n"
-            f"📂 Active Trades Open: <b>{open_count}</b>"
-        )
-        await self.send_message(msg)
-
     async def send_claim_alert(self, tx_hashes: List[str]):
         """Broadcast winning payouts claimed alert."""
         tx_links = "\n".join([f"• <code>{tx[:20]}...</code>" for tx in tx_hashes])
