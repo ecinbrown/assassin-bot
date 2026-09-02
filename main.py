@@ -155,9 +155,9 @@ async def main():
     # Tier-1 pairs (90% payout) — recovery trades ONLY execute on these
     TIER1_PAIRS = {"BTCUSDT", "ETHUSDT", "BNBUSDT"}
 
-    # Multi-Timeframe: scan 1m, 3m, 5m simultaneously for 3× signal flow
+    # Multi-Timeframe scanning (1m, 3m, 5m), standardized to 5-min trade expiry for stable structural reversals
     INTERVALS = ["1m", "3m", "5m"]
-    INTERVAL_EXPIRY = {"1m": 60, "3m": 180, "5m": 300}  # Expiry matches candle TF
+    INTERVAL_EXPIRY = {"1m": 300, "3m": 300, "5m": 300}  # Solid 5m duration for all timeframes
 
     # Web3 Smart Contract Configuration
     rpc_url = os.environ.get("PRDT_RPC_URL", "https://bsc-dataseed.binance.org/")
@@ -350,9 +350,14 @@ async def main():
                     logger.info(f"⏸️ [RECOVERY ISOLATION] Waiting for open trades to settle. Skipping {sig.symbol}.")
                     continue
             else:
-                # ─── CONCURRENCY RULE: MAX 3 ACTIVE TRADES IN NORMAL MODE ───
-                if len(controller.active_trades) >= 3:
-                    logger.info(f"⏸️ [CONCURRENCY CAP] 3 trades active. Skipping {sig.symbol}.")
+                # ─── DIRECTIONAL CONCURRENCY GUARD: NO CORRELATED MULTI-BETS ───
+                # Max 2 total active trades, and MAX 1 trade in the same direction (never 3 simultaneous CALLs)
+                if len(controller.active_trades) >= 2:
+                    logger.info(f"⏸️ [CONCURRENCY CAP] 2 trades already active. Skipping {sig.symbol}.")
+                    continue
+                same_dir_trades = [t for t in controller.active_trades if t.action == sig.action.lower()]
+                if len(same_dir_trades) >= 1:
+                    logger.info(f"⏸️ [CORRELATION GUARD] Already have an active {sig.action.upper()} trade ({same_dir_trades[0].symbol}). Skipping correlated {sig.symbol}.")
                     continue
 
             if sig.symbol in active_symbols:
@@ -441,7 +446,38 @@ async def main():
                         logger.info(f"🛡️ [S/R FILTER] {sig.symbol} skipped — not near 50-bar S/R extreme.")
                         continue
             else:
-                mode_tag = "NORMAL CONFLUENCE"
+                mode_tag = "NORMAL 80%+"
+                # ─── NORMAL MODE SOLID QUALITY GATES (80%+ Accuracy) ───
+                # 1. Exhaustion Run Gate (Run >= 4)
+                run_ok = False
+                if len(history) >= 4:
+                    if sig.action.lower() == 'call':
+                        run_count = sum(1 for hc in reversed(history[-4:]) if hc.close < hc.open)
+                        run_ok = run_count >= 4
+                    else:
+                        run_count = sum(1 for hc in reversed(history[-4:]) if hc.close > hc.open)
+                        run_ok = run_count >= 4
+                if not run_ok:
+                    logger.info(f"🛡️ [RUN FILTER|{mode_tag}] {sig.symbol} skipped — no 4+ run.")
+                    continue
+
+                # 2. Rejection Wick Gate (Wick >= 1.6x Body)
+                body = abs(candle.close - candle.open)
+                if body < 1e-10:
+                    continue
+                upper_wick = candle.high - max(candle.open, candle.close)
+                lower_wick = min(candle.open, candle.close) - candle.low
+                max_wick = max(upper_wick, lower_wick)
+                if max_wick < 1.6 * body:
+                    logger.info(f"🛡️ [WICK FILTER|{mode_tag}] {sig.symbol} skipped — wick {max_wick/body:.1f}x < 1.6x.")
+                    continue
+
+                # 3. Volume Climax Gate (Vol >= 1.5x)
+                if len(history) >= 20:
+                    avg_vol = sum(c.volume for c in history[-20:]) / 20.0
+                    if avg_vol > 0 and candle.volume < 1.5 * avg_vol:
+                        logger.info(f"🛡️ [VOL FILTER|{mode_tag}] {sig.symbol} skipped — vol {candle.volume/avg_vol:.1f}x < 1.5x.")
+                        continue
 
             logger.info(f"✅ [{mode_tag}|{interval}] {sig.symbol} {sig.action.upper()} — Trade gate passed!")
 
