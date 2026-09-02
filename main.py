@@ -151,8 +151,10 @@ async def main():
     default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT"
     symbols = os.environ.get("TRADING_SYMBOLS", default_symbols).split(",")
     symbols = [s.strip() for s in symbols if s.strip()]
-    interval = os.environ.get("CANDLE_INTERVAL", "1m")
-    expiry_seconds = int(os.environ.get("TRADE_EXPIRY_SECONDS", "300"))
+
+    # Multi-Timeframe: scan 1m, 3m, 5m simultaneously for 3× signal flow
+    INTERVALS = ["1m", "3m", "5m"]
+    INTERVAL_EXPIRY = {"1m": 60, "3m": 180, "5m": 300}  # Expiry matches candle TF
 
     # Web3 Smart Contract Configuration
     rpc_url = os.environ.get("PRDT_RPC_URL", "https://bsc-dataseed.binance.org/")
@@ -172,23 +174,25 @@ async def main():
     # 2. Instantiate Master Controller
     controller = AssassinController(
         symbols=symbols,
-        interval=interval,
-        expiry_seconds=expiry_seconds,
+        interval="multi",  # Multi-TF mode
+        expiry_seconds=300,  # Default; overridden per-TF
         stake_native=stake_native,
         simulation_mode=simulation_mode
     )
 
-    # 3. Instantiate Engine & Web3 Agent
-    engine = AssassinSignalEngine(
-        doji_threshold=0.10,
-        fvg_min_pct=0.01,
-        swing_left=2,
-        swing_right=2,
-        safety_tolerance_pct=0.08,
-        default_expiry_seconds=expiry_seconds,
-        require_safety_retest=True,
-    )
-    controller.engine = engine
+    # 3. Instantiate one SignalEngine per timeframe (independent candle buffers)
+    engines = {}
+    for iv in INTERVALS:
+        engines[iv] = AssassinSignalEngine(
+            doji_threshold=0.10,
+            fvg_min_pct=0.01,
+            swing_left=2,
+            swing_right=2,
+            safety_tolerance_pct=0.08,
+            default_expiry_seconds=INTERVAL_EXPIRY[iv],
+            require_safety_retest=True,
+        )
+    controller.engine = engines["1m"]  # Primary reference for Telegram status
 
     prdt_agent = PRDTAgent(
         rpc_url=rpc_url,
@@ -224,13 +228,23 @@ async def main():
         if tg_bot.initialize():
             controller.telegram_bot = tg_bot
 
-    # 5. Define Callback for Closed Candles
-    async def on_candle_closed(symbol: str, candle: Candle):
+    # 5. Multi-TF Deduplication Guard: tracks last signal time per symbol
+    last_signal_time: dict = {}  # { "BTCUSDT": timestamp }
+    DEDUP_WINDOW = 120  # Skip if same symbol fired within 2 minutes on any TF
+
+    # 5. Define Callback for Closed Candles (MULTI-TF AWARE)
+    async def on_candle_closed(symbol: str, interval: str, candle: Candle):
         if controller.paused:
             return
 
         controller.latest_prices[symbol] = candle.close
         now = time.time()
+
+        # Route candle to the correct engine's history buffer
+        engine = engines.get(interval)
+        if not engine:
+            return
+        expiry_seconds = INTERVAL_EXPIRY.get(interval, 300)
 
         # Check and settle any completed active trades
         remaining_trades = []
@@ -351,6 +365,8 @@ async def main():
         active_symbols = {t.symbol for t in controller.active_trades}
 
         for sig in signals:
+            # Override signal expiry with the correct TF-matched expiry
+            sig.expiry_seconds = expiry_seconds
             # ─── STRICT RECOVERY ISOLATION: WAIT FOR ALL TRADES TO CLEAR, THEN STRICTLY 1 ISOLATED TRADE ───
             if controller.is_in_mart_recovery:
                 if len(controller.active_trades) >= 1:
@@ -369,7 +385,12 @@ async def main():
                     continue
 
             if sig.symbol in active_symbols:
-                logger.info(f"⏸️ [SYMBOL BUSY] {sig.symbol} already has an active trade sequence running. Skipping duplicate signal.")
+                logger.info(f"⏸️ [SYMBOL BUSY] {sig.symbol} already has an active trade. Skipping.")
+                continue
+
+            # ─── MULTI-TF DEDUP: Skip if same symbol signalled within 2 min on any TF ───
+            if sig.symbol in last_signal_time and (now - last_signal_time[sig.symbol]) < DEDUP_WINDOW:
+                logger.info(f"⏸️ [TF DEDUP] {sig.symbol} already signalled {now - last_signal_time[sig.symbol]:.0f}s ago. Skipping {interval} duplicate.")
                 continue
 
             # ═══════════════════════════════════════════════════════════════
@@ -459,12 +480,12 @@ async def main():
                     logger.info(f"🛡️ [S/R FILTER] {sig.symbol} skipped — not near 50-bar S/R zone.")
                     continue
 
-            logger.info(f"✅ [{mode_tag} GATE PASSED] {sig.symbol} {sig.action.upper()} — All 6 gates cleared!")
+            logger.info(f"✅ [{mode_tag}|{interval}] {sig.symbol} {sig.action.upper()} — All 6 gates cleared!")
 
 
             verdict_icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
             logger.critical(
-                f"{verdict_icon} SIGNAL: {sig.symbol} {sig.action.upper()} | "
+                f"{verdict_icon} [{interval}] {sig.symbol} {sig.action.upper()} | "
                 f"${sig.price:.2f} | {sig.verdict} ({sig.confidence*100:.0f}%) | "
                 f"Solid={sig.solid_count} Soft={sig.soft_count} | "
                 f"Regime={sig.regime} | {sig.trigger}"
@@ -495,6 +516,7 @@ async def main():
                     is_recovery_trade=is_rec
                 ))
                 active_symbols.add(sig.symbol)
+                last_signal_time[sig.symbol] = now  # Mark for dedup
             else:
                 logger.warning(f"⚠️ Trade Execution Failed / Skipped: {tx_or_reason}")
 
@@ -541,27 +563,28 @@ async def main():
     await site.start()
     logger.info(f"🌐 HTTP Health server listening on port {port}")
 
-    # 9. Start Binance Feed
+    # 9. Start Multi-TF Binance Feed
     feed = BinanceFeed(
         symbols=controller.symbols,
-        interval=controller.interval,
+        intervals=INTERVALS,
         on_candle_closed=on_candle_closed
     )
 
-    # Preload historical candles via REST API (Eliminates 15-minute cold start!)
+    # Preload historical candles for ALL timeframes
     try:
-        logger.info(f"⏳ Pre-loading historical {controller.interval} candles for {controller.symbols}...")
+        logger.info(f"⏳ Pre-loading history for {controller.symbols} × {INTERVALS}...")
         history_map = await feed.preload_history(limit=50)
-        for sym, candles in history_map.items():
-            if candles:
-                engine.candle_history[sym] = candles
-                logger.info(f"🚀 {sym} pre-seeded with {len(candles)} candles. Engine INSTANTLY ARMED!")
+        for sym, iv_data in history_map.items():
+            for iv, candles in iv_data.items():
+                if candles:
+                    engines[iv].candle_history[sym] = candles
+                    logger.info(f"🚀 {sym}/{iv} pre-seeded with {len(candles)} candles. ARMED!")
     except Exception as e:
         logger.warning(f"Historical preload failed ({e}). Will build history from live feed.")
 
     try:
-        logger.info(f"Armed with symbols: {controller.symbols} on {controller.interval} candles.")
-        logger.info(f"Initial Execution Mode: {'🧪 SIMULATION (Demo)' if controller.simulation_mode else '🟢 LIVE ON-CHAIN (Real)'}")
+        logger.info(f"Armed: {controller.symbols} × {INTERVALS} = {len(controller.symbols) * len(INTERVALS)} channels")
+        logger.info(f"Mode: {'🧪 SIMULATION (Demo)' if controller.simulation_mode else '🟢 LIVE ON-CHAIN (Real)'}")
         if tg_bot:
             logger.info("📱 Telegram Controller: ACTIVE")
         await feed.start()

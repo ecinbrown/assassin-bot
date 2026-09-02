@@ -1,9 +1,10 @@
 """
-Binance Live Feed Module (WebSocket + REST Preloader + Auto-Failover)
-====================================================================
-Streams real-time market data klines (1m, 3m, 5m) from Binance with:
-1. Instant historical candle preloading via REST API on startup (0-minute cold start).
-2. Multi-host WebSocket auto-failover (stream.binance.com, data-stream, vision, fstream).
+Binance Live Feed Module (Multi-TF WebSocket + REST Preloader + Auto-Failover)
+===============================================================================
+Streams real-time market data klines from Binance across MULTIPLE intervals
+(1m, 3m, 5m) in a single combined WebSocket connection with:
+1. Instant historical candle preloading via REST API on startup.
+2. Multi-host WebSocket auto-failover.
 3. Robust reconnection and heartbeats.
 """
 import asyncio
@@ -38,9 +39,26 @@ REST_HOSTS = [
 
 
 class BinanceFeed:
-    def __init__(self, symbols: List[str], interval: str = "1m", on_candle_closed: Optional[Callable] = None):
+    """Multi-timeframe Binance WebSocket feed.
+    
+    Subscribes to all (symbol × interval) combinations in a single connection.
+    Callback signature: on_candle_closed(symbol: str, interval: str, candle: Candle)
+    """
+
+    def __init__(
+        self,
+        symbols: List[str],
+        intervals: List[str] = None,
+        on_candle_closed: Optional[Callable] = None,
+        # Legacy single-interval support
+        interval: str = "1m",
+    ):
         self.symbols = [s.lower() for s in symbols]
-        self.interval = interval
+        # Support both new multi-interval and legacy single-interval API
+        if intervals:
+            self.intervals = intervals
+        else:
+            self.intervals = [interval]
         self.on_candle_closed = on_candle_closed
         self.is_running = False
         self._session: Optional[aiohttp.ClientSession] = None
@@ -56,49 +74,57 @@ class BinanceFeed:
         return self._session
 
     def _build_stream_url(self, host_base: str) -> str:
-        streams = [f"{s}@kline_{self.interval}" for s in self.symbols]
+        """Build combined stream URL for all symbols × intervals."""
+        streams = []
+        for s in self.symbols:
+            for iv in self.intervals:
+                streams.append(f"{s}@kline_{iv}")
         return f"{host_base}{'/'.join(streams)}"
 
-    async def preload_history(self, limit: int = 50) -> Dict[str, List[Candle]]:
+    async def preload_history(self, limit: int = 50) -> Dict[str, Dict[str, List[Candle]]]:
         """
-        Preload historical candles via REST API on startup.
-        Eliminates the 15-minute cold start delay.
+        Preload historical candles for ALL (symbol × interval) pairs.
+        Returns: { "BTCUSDT": { "1m": [Candle, ...], "3m": [...], "5m": [...] }, ... }
         """
         session = await self._get_session()
-        preloaded = {}
+        preloaded: Dict[str, Dict[str, List[Candle]]] = {}
 
         for sym in self.symbols:
             sym_upper = sym.upper()
-            candles = []
-            for host in REST_HOSTS:
-                url = f"{host}?symbol={sym_upper}&interval={self.interval}&limit={limit}"
-                try:
-                    async with session.get(url, timeout=aiohttp.ClientTimeout(total=5)) as resp:
-                        if resp.status == 200:
-                            data = await resp.json()
-                            for k in data:
-                                c = Candle(
-                                    timestamp=float(k[0]) / 1000.0,
-                                    open=float(k[1]),
-                                    high=float(k[2]),
-                                    low=float(k[3]),
-                                    close=float(k[4]),
-                                    volume=float(k[5])
-                                )
-                                candles.append(c)
-                            logger.info(f"✅ Preloaded {len(candles)} historical {self.interval} candles for {sym_upper}")
-                            break
-                except Exception as e:
-                    logger.debug(f"Preload from {host} failed: {e}")
+            preloaded[sym_upper] = {}
 
-            preloaded[sym_upper] = candles
+            for iv in self.intervals:
+                candles = []
+                for host in REST_HOSTS:
+                    url = f"{host}?symbol={sym_upper}&interval={iv}&limit={limit}"
+                    try:
+                        async with session.get(url, timeout=aiohttp.ClientTimeout(total=5)) as resp:
+                            if resp.status == 200:
+                                data = await resp.json()
+                                for k in data:
+                                    c = Candle(
+                                        timestamp=float(k[0]) / 1000.0,
+                                        open=float(k[1]),
+                                        high=float(k[2]),
+                                        low=float(k[3]),
+                                        close=float(k[4]),
+                                        volume=float(k[5])
+                                    )
+                                    candles.append(c)
+                                logger.info(f"✅ Preloaded {len(candles)} historical {iv} candles for {sym_upper}")
+                                break
+                    except Exception as e:
+                        logger.debug(f"Preload from {host} failed for {sym_upper}/{iv}: {e}")
+
+                preloaded[sym_upper][iv] = candles
 
         return preloaded
 
     async def start(self):
         """Start persistent WebSocket stream with automatic multi-host failover."""
         self.is_running = True
-        logger.info(f"📡 Starting Binance Live Feed for {len(self.symbols)} pairs on {self.interval}...")
+        total_streams = len(self.symbols) * len(self.intervals)
+        logger.info(f"📡 Starting Binance Multi-TF Feed: {len(self.symbols)} pairs × {len(self.intervals)} TFs = {total_streams} streams")
 
         while self.is_running:
             host_base = WS_HOSTS[self._current_host_idx % len(WS_HOSTS)]
@@ -109,7 +135,7 @@ class BinanceFeed:
                 session = await self._get_session()
                 async with session.ws_connect(stream_url, heartbeat=25, timeout=aiohttp.ClientTimeout(total=10)) as ws:
                     self._ws = ws
-                    logger.info("🟢 Binance Live WebSocket connected and streaming!")
+                    logger.info(f"🟢 Binance Multi-TF WebSocket connected! Streaming {total_streams} channels.")
 
                     async for msg in ws:
                         if not self.is_running:
@@ -133,14 +159,15 @@ class BinanceFeed:
                 await asyncio.sleep(3)
 
     async def _handle_kline_event(self, payload: Dict):
-        """Process incoming Binance kline stream packet."""
+        """Process incoming Binance kline stream packet (multi-TF aware)."""
         data = payload.get('data', payload)
         if 'k' not in data:
             return
 
         k = data['k']
-        is_closed = k.get('x', False)  # 'x' is True when candle has finished/closed
+        is_closed = k.get('x', False)
         symbol = k.get('s', '').upper()
+        interval = k.get('i', '1m')  # Binance includes the interval in the kline data
 
         if is_closed:
             candle = Candle(
@@ -152,15 +179,15 @@ class BinanceFeed:
                 volume=float(k.get('v', 0.0))
             )
             logger.info(
-                f"📊 [{symbol}] Candle Closed | O:{candle.open:.2f} H:{candle.high:.2f} "
+                f"📊 [{symbol}|{interval}] Candle Closed | O:{candle.open:.2f} H:{candle.high:.2f} "
                 f"L:{candle.low:.2f} C:{candle.close:.2f} V:{candle.volume:.1f}"
             )
 
             if self.on_candle_closed:
                 if asyncio.iscoroutinefunction(self.on_candle_closed):
-                    await self.on_candle_closed(symbol, candle)
+                    await self.on_candle_closed(symbol, interval, candle)
                 else:
-                    self.on_candle_closed(symbol, candle)
+                    self.on_candle_closed(symbol, interval, candle)
 
     async def stop(self):
         """Stop the WebSocket client."""
