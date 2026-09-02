@@ -164,62 +164,38 @@ class AssassinTelegramBot:
                     logger.error(f"Telegram plain text fallback failed to {cid}: {e2}")
 
     async def send_signal_alert(self, sig):
-        """Broadcast high-conviction signal detection alert."""
+        """Broadcast signal detection — lean version."""
         try:
-            import html
             icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
-            mode_str = "🧪 DEMO (Simulation)" if getattr(self.controller, 'simulation_mode', True) else "🟢 REAL (Live On-Chain)"
-            
-            # Calculate dynamic compounding parameters safely
             bal = 10.0
             if self.controller and getattr(self.controller, 'prdt_agent', None):
                 bal = getattr(self.controller.prdt_agent, 'simulated_balance', 10.0)
-            
-            dynamic_stake = self.controller.calculate_dynamic_stake(bal) if self.controller else 1.0
-            g1_rec = round(dynamic_stake * 2.2, 4)
-            g2_rec = round(dynamic_stake * 5.0, 4)
-            
-            confirmations_str = ""
-            if sig.metadata and 'confirmations' in sig.metadata:
-                escaped_confs = [html.escape(str(c)) for c in sig.metadata['confirmations']]
-                confirmations_str = "\n".join([f"  • {c}" for c in escaped_confs])
-            else:
-                confirmations_str = "  • " + html.escape(str(sig.trigger))
+            stake = self.controller.calculate_dynamic_stake(bal) if self.controller else 1.0
+            mode = "🧪 DEMO" if getattr(self.controller, 'simulation_mode', True) else "🟢 LIVE"
+            rec = "⚡ RECOVERY" if getattr(self.controller, 'is_in_mart_recovery', False) else "BASE"
 
             msg = (
-                f"{icon} <b>ASSASSIN SIGNAL DETECTED</b> {icon}\n\n"
-                f"🎯 <b>Asset:</b> <code>{sig.symbol}</code>\n"
-                f"⚡ <b>Action:</b> <b>{sig.action.upper()}</b>\n"
-                f"💰 <b>Price:</b> <code>${sig.price:.2f}</code>\n"
-                f"🏆 <b>Verdict:</b> <code>{sig.verdict} ({sig.confidence*100:.0f}% confidence)</code>\n"
-                f"📈 <b>DYNAMIC COMPOUNDING (5% Scaling):</b>\n"
-                f"  💵 <b>Live Balance:</b> <code>${bal:.2f}</code>\n"
-                f"  🎯 <b>Base Stake (Trade 1):</b> <code>${dynamic_stake:.2f}</code> (5%)\n"
-                f"  ⚡ <b>Gale 1 Recovery (Trade 2):</b> <code>${g1_rec:.2f}</code> (2.2x)\n"
-                f"  🛡️ <b>Max Risk Cap:</b> <code>16.0% (Gale 1 Max)</code>\n\n"
-                f"📝 <b>Key Drivers:</b>\n{confirmations_str}"
+                f"{icon} <b>{sig.symbol} — {sig.action.upper()} ({sig.confidence*100:.0f}%)</b>\n"
+                f"💵 Stake: <code>${stake:.2f}</code> [{rec}] | {mode}\n"
+                f"📌 Entry: <code>${sig.price:.4f}</code>\n"
+                f"⏱️ Expiry: <code>5 min</code>"
             )
             await self.send_message(msg)
         except Exception as e:
             logger.error(f"❌ Error formatting signal alert: {e}")
 
     async def send_trade_alert(self, sig, tx_or_reason: str, success: bool):
-        """Broadcast trade execution result."""
-        mode_str = "🧪 DEMO (Simulation)" if getattr(self.controller, 'simulation_mode', True) else "🟢 REAL ON-CHAIN"
-        status_icon = "✅" if success else "❌"
-        
-        tx_display = tx_or_reason
-        if len(tx_or_reason) > 30 and not tx_or_reason.startswith("0xsim"):
-            tx_display = f"<code>{tx_or_reason[:16]}...{tx_or_reason[-8:]}</code>\n🔗 <a href='https://bscscan.com/tx/{tx_or_reason}'>View on BscScan</a>"
-        else:
-            tx_display = f"<code>{tx_or_reason}</code>"
+        """Broadcast trade execution — lean version."""
+        mode = "🧪 DEMO" if getattr(self.controller, 'simulation_mode', True) else "🟢 LIVE"
+        icon = "✅" if success else "❌"
+        bal = 10.0
+        if self.controller and getattr(self.controller, 'prdt_agent', None):
+            bal = getattr(self.controller.prdt_agent, 'simulated_balance', 10.0)
+        stake = self.controller.calculate_dynamic_stake(bal) if self.controller else 1.0
 
         msg = (
-            f"{status_icon} <b>TRADE EXECUTION: {sig.symbol} {sig.action.upper()}</b>\n\n"
-            f"⚙️ <b>Mode:</b> <code>{mode_str}</code>\n"
-            f"💵 <b>Stake:</b> <code>{getattr(self.controller, 'stake_native', 0.01)} Native</code>\n"
-            f"⏱️ <b>Expiry:</b> <code>{sig.expiry_seconds}s (5m epoch)</code>\n"
-            f"🧾 <b>Tx / Result:</b> {tx_display}"
+            f"{icon} <b>{sig.symbol} {sig.action.upper()} — TRADE PLACED</b> | {mode}\n"
+            f"💵 Stake: <code>${stake:.2f}</code> | ⏱️ 5 min"
         )
         await self.send_message(msg)
 
@@ -246,24 +222,17 @@ class AssassinTelegramBot:
         losses: int,
         step_info: str = ""
     ):
-        """Broadcast crystal-clear round settlement WIN / LOSS outcome card."""
+        """Broadcast round settlement result — lean version."""
         total = wins + losses
         win_rate = (wins / total * 100.0) if total > 0 else 0.0
-        
-        diff = exit_price - entry_price
-        diff_str = f"+{diff:.2f}" if diff >= 0 else f"{diff:.2f}"
-        
         icon = "🏆" if is_win else "❌"
-        outcome_str = step_info if step_info else ("WIN ✅" if is_win else "LOSS ❌")
-        pnl_str = f"+{profit_loss:.4f}" if profit_loss >= 0 else f"{profit_loss:.4f}"
-        
+        outcome = "WIN" if is_win else "LOSS"
+        pnl_str = f"+{profit_loss:.2f}" if profit_loss >= 0 else f"{profit_loss:.2f}"
+
         msg = (
-            f"{icon} <b>TRADE RESULT: {symbol} {action.upper()} ({outcome_str})</b>\n\n"
-            f"🎯 <b>Entry Price:</b> <code>${entry_price:.2f}</code>\n"
-            f"🏁 <b>Expiry Price:</b> <code>${exit_price:.2f} ({diff_str})</code>\n"
-            f"💵 <b>Profit/Loss:</b> <code>{pnl_str} Native</code>\n"
-            f"💰 <b>Total Balance:</b> <code>{new_balance:.4f} Native</code>\n\n"
-            f"📊 <b>Scorecard:</b> <code>{wins} Wins - {losses} Losses ({win_rate:.0f}% Win Rate)</code>"
+            f"{icon} <b>{symbol} {action.upper()} — {outcome}</b>\n"
+            f"💰 P&L: <code>{pnl_str}</code> | Bal: <code>${new_balance:.2f}</code>\n"
+            f"📊 {wins}W – {losses}L ({win_rate:.0f}% WR)"
         )
         await self.send_message(msg)
 

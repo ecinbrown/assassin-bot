@@ -112,17 +112,21 @@ class AssassinController:
     def calculate_dynamic_stake(self, balance: float) -> float:
         """
         Dynamic Compounding Engine (6.1% Base Stake Scaling + 1-Trade Mart Recovery):
-        - If in Mart Recovery mode: sizes stake to recover the entire lost Mart + full target profit in 1 single trade.
+        - If in Mart Recovery: sizes stake to recover ALL cumulative losses + 6.1% target profit in 1 trade.
         - Otherwise: dynamically calculates 6.1% base stake as balance compounds.
+        - Payout: 90% (PRDT BTC/ETH/BNB tier) = 1.90x gross return on winning trade.
         """
         if balance <= 0:
             return self.stake_native
 
+        PAYOUT = 0.90  # 90% payout — BTC/ETH/BNB tier on PRDT
+
         if self.is_in_mart_recovery and self.lost_mart_amount > 0:
-            target_profit = balance * 0.061 * 0.86
-            rec_stake = round((self.lost_mart_amount + target_profit) / 0.86, 4)
-            # Safe risk cap at max 23% of balance
-            rec_stake = min(round(balance * 0.23, 4), rec_stake)
+            # Stake needed to recover full cumulative loss + target profit in ONE trade
+            target_profit = balance * 0.061 * PAYOUT
+            rec_stake = round((self.lost_mart_amount + target_profit) / PAYOUT, 4)
+            # Safety cap: max 25% of balance (slightly relaxed to ensure full recovery)
+            rec_stake = min(round(balance * 0.25, 4), rec_stake)
             return max(self.stake_native, rec_stake)
 
         # 6.1% base stake scaling with a hard minimum floor
@@ -143,25 +147,8 @@ async def main():
     logger.info("=" * 65)
 
     # 1. Configuration from Environment
-    # 120 High-Liquidity Pairs (All >$2M/day volume, PRDT oracle = zero slippage)
-    default_symbols = (
-        "BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,BNBUSDT,DOGEUSDT,SUIUSDT,PEPEUSDT,"
-        "UNIUSDT,ENAUSDT,TRXUSDT,TRUMPUSDT,NEARUSDT,ADAUSDT,LINKUSDT,TAOUSDT,"
-        "WLDUSDT,DASHUSDT,AAVEUSDT,AVAXUSDT,XLMUSDT,LTCUSDT,CAKEUSDT,FETUSDT,"
-        "ZKUSDT,POLUSDT,ONDOUSDT,PENGUUSDT,HEMIUSDT,PUMPUSDT,XAUTUSDT,SEIUSDT,"
-        "TIAUSDT,INJUSDT,ARBUSDT,OPUSDT,TONUSDT,BCHUSDT,APTUSDT,RENDERUSDT,"
-        "CRVUSDT,LDOUSDT,PENDLEUSDT,SHIBUSDT,BONKUSDT,STXUSDT,ZECUSDT,BMTUSDT,"
-        "DOTUSDT,FILUSDT,ICPUSDT,HBARUSDT,ALGOUSDT,ARUSDT,STRKUSDT,EIGENUSDT,"
-        "ETHFIUSDT,NOTUSDT,JASMYUSDT,PYTHUSDT,VIRTUALUSDT,ACEUSDT,PAXGUSDT,"
-        "PROMUSDT,SNDKBUSDT,ENSOUSDT,ZKCUSDT,MORPHOUSDT,NFPUSDT,ONTUSDT,"
-        "DOGSUSDT,MSTRBUSDT,SCUSDT,ONGUSDT,JSTUSDT,BICOUSDT,HFTUSDT,ZENUSDT,"
-        "ZROUSDT,DEXEUSDT,ACTUSDT,VANRYUSDT,STRAXUSDT,PLUMEUSDT,0GUSDT,"
-        "CRCLBUSDT,ASTERUSDT,ATMUSDT,IQUSDT,SKYUSDT,GRAMUSDT,WBTCUSDT,"
-        "CHIPUSDT,TWTUSDT,TUTUSDT,KITEUSDT,MIRAUSDT,KORUBUSDT,FFUSDT,"
-        "MITOUSDT,HEIUSDT,MUBUSDT,METABUSDT,SOMIUSDT,HOODBUSDT,SNXXBUSDT,"
-        "RLUSDUSDT,XPLUSDT,SKHYBUSDT,GIGGLEUSDT,EURIUSDT,QQQBUSDT,SOXLBUSDT,"
-        "SPCXBUSDT,WLFIUSDT,XUSDUSDT,USD1USDT,USDEUSDT,UUSDT"
-    )
+    # 3 High-Payout Majors ONLY (90% broker payout, deepest liquidity, highest limits)
+    default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT"
     symbols = os.environ.get("TRADING_SYMBOLS", default_symbols).split(",")
     symbols = [s.strip() for s in symbols if s.strip()]
     interval = os.environ.get("CANDLE_INTERVAL", "1m")
@@ -257,7 +244,7 @@ async def main():
                     # ─── SEQUENCE WIN (Base or Gale 1) ───
                     controller.wins += 1
                     controller.marts_since_loss += 1
-                    gross_payout = round(t.stake_native * 1.88, 4)
+                    gross_payout = round(t.stake_native * 1.90, 4)  # 90% payout = 1.90x gross
                     seq_profit = round(gross_payout - t.total_sequence_stake, 4)
                     prdt_agent.simulated_balance = round(prdt_agent.simulated_balance + gross_payout, 4)
                     save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
@@ -266,7 +253,7 @@ async def main():
                     if t.is_recovery_trade:
                         controller.is_in_mart_recovery = False
                         controller.lost_mart_amount = 0.0
-                        logger.critical("🎯 [1-TRADE RECOVERY COMPLETE] Designated recovery trade won! Loss 100% erased + profit banked! Resetting to normal 5% Base Stake.")
+                        logger.critical("🎯 [1-TRADE RECOVERY COMPLETE] Recovery trade won! Full loss + profit banked. Back to 6.1% base stake.")
 
                     outcome_title = "WIN ✅"
                     logger.critical(
@@ -325,12 +312,14 @@ async def main():
                         controller.marts_since_loss = 0
                         seq_loss = -round(t.total_sequence_stake, 4)
                         
-                        # Arm 1-Trade Mart Recovery for the very next signal
+                        # Arm 1-Trade Mart Recovery — ACCUMULATE losses for double-loss scenarios
                         controller.is_in_mart_recovery = True
-                        controller.lost_mart_amount = round(t.total_sequence_stake, 4)
+                        controller.lost_mart_amount = round(
+                            controller.lost_mart_amount + t.total_sequence_stake, 4
+                        )
                         logger.warning(
-                            f"⚡ [1-TRADE RECOVERY ARMED] Next signal will stake to recover "
-                            f"{controller.lost_mart_amount:.4f} Native in 1 single trade."
+                            f"⚡ [RECOVERY ARMED] Cumulative loss to recover: "
+                            f"{controller.lost_mart_amount:.4f} Native. Next signal will stake to recover all + profit."
                         )
                         
                         save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
