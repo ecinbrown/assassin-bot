@@ -155,9 +155,9 @@ async def main():
     # Tier-1 pairs (90% payout) — recovery trades ONLY execute on these
     TIER1_PAIRS = {"BTCUSDT", "ETHUSDT", "BNBUSDT"}
 
-    # Multi-Timeframe scanning (1m, 3m, 5m), standardized to 5-min trade expiry for stable structural reversals
+    # Multi-Timeframe scanning (1m, 3m, 5m), aligned to natural candle duration for precise 1-candle entries & same-coin Gales
     INTERVALS = ["1m", "3m", "5m"]
-    INTERVAL_EXPIRY = {"1m": 300, "3m": 300, "5m": 300}  # Solid 5m duration for all timeframes
+    INTERVAL_EXPIRY = {"1m": 60, "3m": 180, "5m": 300}  # 1-candle expiry per timeframe
 
     # Web3 Smart Contract Configuration
     rpc_url = os.environ.get("PRDT_RPC_URL", "https://bsc-dataseed.binance.org/")
@@ -295,41 +295,66 @@ async def main():
                             step_info=outcome_title
                         )
                 else:
-                    # ─── TRADE LOSS (NO GALE RETRY — SINGLE TRADE CLEAN ARCHITECTURE) ───
-                    controller.losses += 1
-                    controller.marts_since_loss = 0
-                    seq_loss = -round(t.total_sequence_stake, 4)
+                    # ─── AUTO 1-GALE ON SAME COIN (STRICT MAX GALE 1) ───
+                    max_allowed_gale = 1
 
-                    # Arm 1-Trade Mart Recovery for the NEXT signal (on BTC/ETH/BNB 90% payout)
-                    controller.is_in_mart_recovery = True
-                    controller.lost_mart_amount = round(
-                        controller.lost_mart_amount + t.total_sequence_stake, 4
-                    )
-                    logger.warning(
-                        f"⚡ [1-TRADE RECOVERY ARMED] Cumulative loss to recover: "
-                        f"{controller.lost_mart_amount:.4f} Native. Next signal will stake to recover all + profit."
-                    )
+                    if t.gale_level < max_allowed_gale:
+                        next_gale = t.gale_level + 1
+                        next_stake = round(t.stake_native * 2.2, 4)
+                        # Deduct next stake for simulation
+                        prdt_agent.simulated_balance = round(prdt_agent.simulated_balance - next_stake, 4)
+                        save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
 
-                    save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
-
-                    logger.warning(
-                        f"❌ [TRADE LOSS] {t.symbol} {t.action.upper()} | "
-                        f"Loss: {seq_loss:+.4f} Native | Score: {controller.wins}W - {controller.losses}L"
-                    )
-
-                    if tg_bot:
-                        await tg_bot.send_settlement_alert(
-                            symbol=t.symbol,
-                            action=t.action,
-                            entry_price=t.entry_price,
-                            exit_price=exit_price,
-                            is_win=False,
-                            profit_loss=seq_loss,
-                            new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
-                            wins=controller.wins,
-                            losses=controller.losses,
-                            step_info="LOSS ❌"
+                        logger.critical(
+                            f"⚡ [GALE {next_gale} SAME-COIN TRIGGERED] {t.symbol} {t.action.upper()} | "
+                            f"Entry: ${exit_price:.2f} | Stake: {next_stake:.4f} Native | Expiry: {t.expiry_time - t.entry_time:.0f}s"
                         )
+
+                        # Register immediate Gale recovery trade on the exact same coin
+                        trade_duration = t.expiry_time - t.entry_time
+                        remaining_trades.append(ActiveTrade(
+                            symbol=t.symbol,
+                            action=t.action.lower(),
+                            entry_price=exit_price,
+                            stake_native=next_stake,
+                            entry_time=now,
+                            expiry_time=now + trade_duration,
+                            epoch=prdt_agent.get_current_epoch(),
+                            gale_level=next_gale,
+                            total_sequence_stake=round(t.total_sequence_stake + next_stake, 4),
+                            is_recovery_trade=t.is_recovery_trade
+                        ))
+                    else:
+                        # ─── SEQUENCE LOSS (MISSED BASE + MISSED GALE 1) ───
+                        controller.losses += 1
+                        controller.marts_since_loss = 0
+                        seq_loss = -round(t.total_sequence_stake, 4)
+
+                        # Arm Mart Recovery for the next fresh signal
+                        controller.is_in_mart_recovery = True
+                        controller.lost_mart_amount = round(
+                            controller.lost_mart_amount + t.total_sequence_stake, 4
+                        )
+                        logger.warning(
+                            f"⚡ [SEQUENCE LOSS] {t.symbol} {t.action.upper()} missed Gale 1. "
+                            f"Total Sequence Loss: {seq_loss:+.4f} Native. Loss queued for next recovery."
+                        )
+
+                        save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
+
+                        if tg_bot:
+                            await tg_bot.send_settlement_alert(
+                                symbol=t.symbol,
+                                action=t.action,
+                                entry_price=t.entry_price,
+                                exit_price=exit_price,
+                                is_win=False,
+                                profit_loss=seq_loss,
+                                new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
+                                wins=controller.wins,
+                                losses=controller.losses,
+                                step_info="SEQUENCE LOSS ❌"
+                            )
             else:
                 remaining_trades.append(t)
         controller.active_trades = remaining_trades
