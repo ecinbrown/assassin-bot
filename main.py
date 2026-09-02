@@ -394,18 +394,12 @@ async def main():
                 continue
 
             # ═══════════════════════════════════════════════════════════════
-            # SMART DUAL-MODE SNIPER GATE (365-Day Backtested)
-            # NORMAL MODE:   Run>=4, Wick>=1.8x, Vol>=1.8x  (78.3% WR)
-            # RECOVERY MODE: Run>=6, Wick>=2.0x, Vol>=2.5x  (82.5%+ WR)
+            # SMART DUAL-MODE SNIPER GATE
+            # RECOVERY MODE: Strict 82.5%+ Climax Gates (Run>=6, Wick>=2.0x, Vol>=2.5x, 50-bar S/R)
+            # NORMAL MODE: High-Confluence Engine Execution (Exhaustion, Engulfing, QM, Doji)
             # ═══════════════════════════════════════════════════════════════
             history = engine.candle_history.get(symbol, [])
             is_recovery = controller.is_in_mart_recovery
-
-            # Select filter thresholds based on mode
-            run_min = AssassinController.RECOVERY_RUN_MIN if is_recovery else AssassinController.NORMAL_RUN_MIN
-            wick_min = AssassinController.RECOVERY_WICK_MIN if is_recovery else AssassinController.NORMAL_WICK_MIN
-            vol_min = AssassinController.RECOVERY_VOL_MIN if is_recovery else AssassinController.NORMAL_VOL_MIN
-            mode_tag = "RECOVERY 82.5%" if is_recovery else "NORMAL 78.3%"
 
             # ─── GATE 1: SESSION FILTER (Skip 03:00–06:00 UTC dead zone) ───
             from datetime import datetime, timezone
@@ -414,73 +408,71 @@ async def main():
                 logger.info(f"🛡️ [SESSION FILTER] {sig.symbol} skipped — UTC {utc_hour}:00 dead zone.")
                 continue
 
-            # ─── GATE 2: MINIMUM CANDLE RANGE (reject tiny flat candles) ───
+            # ─── GATE 2: MINIMUM CANDLE RANGE (reject tiny flat noise) ───
             candle_range = candle.high - candle.low
             if len(history) >= 20:
                 avg_range = sum(c.high - c.low for c in history[-20:]) / 20.0
-                if candle_range < avg_range:
-                    logger.info(f"🛡️ [RANGE FILTER] {sig.symbol} skipped — range {candle_range:.5f} < avg {avg_range:.5f}")
+                if candle_range < avg_range * 0.7:  # Reject only completely dead flat candles
+                    logger.info(f"🛡️ [RANGE FILTER] {sig.symbol} skipped — range {candle_range:.5f} < min {avg_range*0.7:.5f}")
                     continue
 
-            # ─── GATE 3: EXHAUSTION RUN (dynamic: 4 normal / 6 recovery) ───
-            run_ok = False
-            if len(history) >= run_min:
-                if sig.action.lower() == 'call':
-                    run_count = 0
-                    for hc in reversed(history[-run_min:]):
-                        if hc.close < hc.open:
-                            run_count += 1
-                        else:
-                            break
-                    run_ok = run_count >= run_min
-                else:
-                    run_count = 0
-                    for hc in reversed(history[-run_min:]):
-                        if hc.close > hc.open:
-                            run_count += 1
-                        else:
-                            break
-                    run_ok = run_count >= run_min
-            if not run_ok:
-                logger.info(f"🛡️ [RUN FILTER|{mode_tag}] {sig.symbol} skipped — no {run_min}+ exhaustion run.")
-                continue
+            # In RECOVERY mode: Apply strict 82.5%+ safety filters
+            if is_recovery:
+                run_min = AssassinController.RECOVERY_RUN_MIN
+                wick_min = AssassinController.RECOVERY_WICK_MIN
+                vol_min = AssassinController.RECOVERY_VOL_MIN
+                mode_tag = "RECOVERY 82.5%"
 
-            # ─── GATE 4: REJECTION WICK (dynamic: 1.8x normal / 2.0x recovery) ───
-            body = abs(candle.close - candle.open)
-            if body < 1e-10:
-                logger.info(f"🛡️ [WICK FILTER] {sig.symbol} skipped — zero body (doji).")
-                continue
-            upper_wick = candle.high - max(candle.open, candle.close)
-            lower_wick = min(candle.open, candle.close) - candle.low
-            max_wick = max(upper_wick, lower_wick)
-            if max_wick < wick_min * body:
-                logger.info(f"🛡️ [WICK FILTER|{mode_tag}] {sig.symbol} skipped — wick {max_wick/body:.1f}x < {wick_min}x.")
-                continue
-
-            # ─── GATE 5: VOLUME CLIMAX (dynamic: 1.8x normal / 2.5x recovery) ───
-            if len(history) >= 20:
-                avg_vol = sum(c.volume for c in history[-20:]) / 20.0
-                if avg_vol > 0 and candle.volume < vol_min * avg_vol:
-                    logger.info(f"🛡️ [VOL FILTER|{mode_tag}] {sig.symbol} skipped — vol {candle.volume/avg_vol:.1f}x < {vol_min}x.")
+                # Recovery Gate: Strict Exhaustion Run (6+)
+                run_ok = False
+                if len(history) >= run_min:
+                    if sig.action.lower() == 'call':
+                        run_count = sum(1 for hc in reversed(history[-run_min:]) if hc.close < hc.open)
+                        run_ok = run_count >= run_min
+                    else:
+                        run_count = sum(1 for hc in reversed(history[-run_min:]) if hc.close > hc.open)
+                        run_ok = run_count >= run_min
+                if not run_ok:
+                    logger.info(f"🛡️ [RUN FILTER|{mode_tag}] {sig.symbol} skipped — no {run_min}+ exhaustion run.")
                     continue
 
-            # ─── GATE 6: 50-BAR S/R PROXIMITY ───
-            if len(history) >= 50:
-                h50 = [c.high for c in history[-50:]]
-                l50 = [c.low for c in history[-50:]]
-                resistance = max(h50)
-                support = min(l50)
-                sr_tol = candle_range * 2.0
-                near_sr = False
-                if sig.action.lower() == 'call' and candle.low <= support + sr_tol:
-                    near_sr = True
-                elif sig.action.lower() == 'put' and candle.high >= resistance - sr_tol:
-                    near_sr = True
-                if not near_sr:
-                    logger.info(f"🛡️ [S/R FILTER] {sig.symbol} skipped — not near 50-bar S/R zone.")
+                # Recovery Gate: Strict Rejection Wick (2.0x)
+                body = abs(candle.close - candle.open)
+                if body < 1e-10:
+                    continue
+                upper_wick = candle.high - max(candle.open, candle.close)
+                lower_wick = min(candle.open, candle.close) - candle.low
+                max_wick = max(upper_wick, lower_wick)
+                if max_wick < wick_min * body:
+                    logger.info(f"🛡️ [WICK FILTER|{mode_tag}] {sig.symbol} skipped — wick {max_wick/body:.1f}x < {wick_min}x.")
                     continue
 
-            logger.info(f"✅ [{mode_tag}|{interval}] {sig.symbol} {sig.action.upper()} — All 6 gates cleared!")
+                # Recovery Gate: Strict Volume Spike (2.5x)
+                if len(history) >= 20:
+                    avg_vol = sum(c.volume for c in history[-20:]) / 20.0
+                    if avg_vol > 0 and candle.volume < vol_min * avg_vol:
+                        logger.info(f"🛡️ [VOL FILTER|{mode_tag}] {sig.symbol} skipped — vol {candle.volume/avg_vol:.1f}x < {vol_min}x.")
+                        continue
+
+                # Recovery Gate: 50-bar S/R Extreme
+                if len(history) >= 50:
+                    h50 = [c.high for c in history[-50:]]
+                    l50 = [c.low for c in history[-50:]]
+                    resistance = max(h50)
+                    support = min(l50)
+                    sr_tol = candle_range * 2.0
+                    near_sr = False
+                    if sig.action.lower() == 'call' and candle.low <= support + sr_tol:
+                        near_sr = True
+                    elif sig.action.lower() == 'put' and candle.high >= resistance - sr_tol:
+                        near_sr = True
+                    if not near_sr:
+                        logger.info(f"🛡️ [S/R FILTER] {sig.symbol} skipped — not near 50-bar S/R extreme.")
+                        continue
+            else:
+                mode_tag = "NORMAL CONFLUENCE"
+
+            logger.info(f"✅ [{mode_tag}|{interval}] {sig.symbol} {sig.action.upper()} — Trade gate passed!")
 
 
             verdict_icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
