@@ -43,9 +43,9 @@ class ExhaustionClimaxDetector:
         rsi_oversold: float = 25.0,
         rsi_overbought: float = 75.0,
         vol_period: int = 20,
-        vol_multiplier_min: float = 2.5,  # Strict: 2.5x 20-SMA volume
-        min_consecutive_run: int = 6,     # Strict: 6 consecutive bars
-        min_wick_ratio: float = 2.0       # Strict: 2.0x rejection wick
+        vol_multiplier_min: float = 1.8,  # Standard: 1.8x 20-SMA volume (aligned with main.py NORMAL mode)
+        min_consecutive_run: int = 4,     # Standard: 4 consecutive bars (aligned with main.py NORMAL mode)
+        min_wick_ratio: float = 1.8       # Standard: 1.8x rejection wick (aligned with main.py NORMAL mode)
     ):
         self.bb_period = bb_period
         self.bb_sigma = bb_sigma
