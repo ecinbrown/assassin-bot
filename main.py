@@ -99,12 +99,12 @@ class AssassinController:
         self.telegram_bot: Optional[AssassinTelegramBot] = None
         self.dispatcher: Optional[PRDTWebhookDispatcher] = None
 
-    # ─── Filter Thresholds (Strict 82.5% WR on ALL trades) ───
-    # Both modes use strict filters; frequency comes from 120 pairs, not looser gates
-    NORMAL_RUN_MIN = 6
-    NORMAL_WICK_MIN = 2.0
-    NORMAL_VOL_MIN = 2.5
-    # Recovery mode: same strict filters (82.5%+ WR)
+    # ─── Filter Thresholds ───
+    # NORMAL: Standard filters (78% WR) — enough signal flow on 8 pairs
+    NORMAL_RUN_MIN = 4
+    NORMAL_WICK_MIN = 1.8
+    NORMAL_VOL_MIN = 1.8
+    # RECOVERY: Strict filters (82.5%+ WR) — max accuracy for recovery trades
     RECOVERY_RUN_MIN = 6
     RECOVERY_WICK_MIN = 2.0
     RECOVERY_VOL_MIN = 2.5
