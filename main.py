@@ -17,6 +17,39 @@ from typing import List, Optional
 import aiohttp
 from aiohttp import web
 
+_liquid_pairs_cache = {"pairs": set(), "updated_at": 0.0}
+
+async def get_liquid_pairs(symbols: List[str], top_n: int = 3, refresh_seconds: int = 3600) -> set:
+    """
+    Return the top_n symbols (from our watchlist) by real 24h quote volume on Binance,
+    refreshed at most once per refresh_seconds. Falls back to the cached/static set on
+    any fetch failure so a network hiccup never blocks recovery trading.
+    """
+    now = time.time()
+    if _liquid_pairs_cache["pairs"] and (now - _liquid_pairs_cache["updated_at"]) < refresh_seconds:
+        return _liquid_pairs_cache["pairs"]
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                "https://api.binance.com/api/v3/ticker/24hr",
+                timeout=aiohttp.ClientTimeout(total=10)
+            ) as resp:
+                data = await resp.json()
+        vols = {row["symbol"]: float(row["quoteVolume"]) for row in data if row.get("symbol") in symbols}
+        ranked = sorted(vols.items(), key=lambda kv: kv[1], reverse=True)
+        top_pairs = {sym for sym, _ in ranked[:top_n]}
+        if top_pairs:
+            _liquid_pairs_cache["pairs"] = top_pairs
+            _liquid_pairs_cache["updated_at"] = now
+            logger.info(f"\U0001f4a7 [LIQUIDITY REFRESH] Top {top_n} most liquid pairs: {top_pairs}")
+            return top_pairs
+    except Exception as e:
+        logger.warning(f"Liquidity refresh failed ({e}). Using previous/fallback pairs.")
+
+    # Fallback: cached value if we have one, else the first top_n symbols in the watchlist
+    return _liquid_pairs_cache["pairs"] or set(symbols[:top_n])
+
 from assassin_strategy import (
     Candle,
     AssassinSignalEngine,
@@ -177,8 +210,9 @@ async def main():
     symbols = os.environ.get("TRADING_SYMBOLS", default_symbols).split(",")
     symbols = [s.strip() for s in symbols if s.strip()]
 
-    # Tier-1 pairs (90% payout) — recovery trades ONLY execute on these
-    TIER1_PAIRS = {"BTCUSDT", "ETHUSDT", "BNBUSDT"}
+    # Recovery trades execute ONLY on the most liquid pairs — refreshed hourly by real 24h volume
+    RECOVERY_PAIR_COUNT = 3
+    TIER1_PAIRS = {"BTCUSDT", "ETHUSDT", "BNBUSDT"}  # fallback if the liquidity fetch fails
 
     # Multi-Timeframe scanning (1m, 3m, 5m), aligned to natural candle duration for precise 1-candle entries & same-coin Gales
     INTERVALS = ["1m", "3m", "5m"]
@@ -454,23 +488,30 @@ async def main():
                     f"RSI={rsi_val:.1f} Vol={vol_ratio:.1f}x Body/ATR={body_ratio:.2f}"
                 )
 
+        liquid_pairs = None
+        if controller.is_in_mart_recovery:
+            liquid_pairs = await get_liquid_pairs(controller.symbols, top_n=RECOVERY_PAIR_COUNT)
+
         for sig in signals:
-            # ─── RECOVERY ISOLATION: Only Tier-1 pairs (90% payout) ───
+            # ─── RECOVERY ISOLATION: Only the most liquid pairs right now ───
             if controller.is_in_mart_recovery:
-                if sig.symbol not in TIER1_PAIRS:
-                    logger.info(f"⏸️ [RECOVERY TIER] {sig.symbol} — recovery only on BTC/ETH/BNB. Skipping.")
+                if sig.symbol not in liquid_pairs:
+                    logger.info(f"⏸️ [RECOVERY LIQUIDITY] {sig.symbol} not in top {RECOVERY_PAIR_COUNT} liquid pairs {liquid_pairs}. Skipping.")
                     continue
                 if len(controller.active_trades) >= 1:
                     logger.info(f"⏸️ [RECOVERY ISOLATION] Waiting for trades to settle. Skipping {sig.symbol}.")
                     continue
             else:
-                # ─── CONCURRENCY GUARD ───
+                # ─── CONCURRENCY GUARD — hard ceiling stays at 2 total trades ───
                 if len(controller.active_trades) >= 2:
                     logger.info(f"⏸️ [CONCURRENCY CAP] 2 trades active. Skipping {sig.symbol}.")
                     continue
+                # Both slots may now be filled in the same direction if that's what qualifies —
+                # the 2-trade cap above is the real risk limiter, this just stops double-booking
+                # more same-direction trades than there are open slots.
                 same_dir = [t for t in controller.active_trades if t.action == sig.action.lower()]
-                if len(same_dir) >= 1:
-                    logger.info(f"⏸️ [CORRELATION GUARD] Already have {sig.action.upper()} trade. Skipping {sig.symbol}.")
+                if len(same_dir) >= 2:
+                    logger.info(f"⏸️ [CORRELATION GUARD] Already have max same-direction trades. Skipping {sig.symbol}.")
                     continue
 
             if sig.symbol in active_symbols:

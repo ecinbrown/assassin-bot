@@ -4,6 +4,7 @@ Doji Detection & Breakout Range Box Module
 Identifies indecision Doji candles, maintains breakout range boxes,
 and handles directional invalidation rules.
 """
+from numpy import append
 from dataclasses import dataclass
 from typing import Optional, List, Dict, Tuple
 from .candle_utils import Candle, detect_gap
