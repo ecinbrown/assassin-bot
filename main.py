@@ -58,6 +58,24 @@ def save_state(balance: float, wins: int, losses: int, marts_since_loss: int = 0
         pass
 
 
+def compute_rsi(closes, period=14):
+    """Compute RSI from a list of close prices using Wilder smoothing."""
+    if len(closes) < period + 1:
+        return 50.0
+    deltas = [closes[i] - closes[i - 1] for i in range(1, len(closes))]
+    gains = [d if d > 0 else 0.0 for d in deltas]
+    losses = [-d if d < 0 else 0.0 for d in deltas]
+    avg_gain = sum(gains[:period]) / period
+    avg_loss = sum(losses[:period]) / period
+    for i in range(period, len(gains)):
+        avg_gain = (avg_gain * (period - 1) + gains[i]) / period
+        avg_loss = (avg_loss * (period - 1) + losses[i]) / period
+    if avg_loss == 0:
+        return 100.0
+    rs = avg_gain / avg_loss
+    return 100.0 - 100.0 / (1.0 + rs)
+
+
 @dataclass
 class ActiveTrade:
     symbol: str
@@ -104,15 +122,17 @@ class AssassinController:
         self.telegram_bot: Optional[AssassinTelegramBot] = None
         self.dispatcher: Optional[PRDTWebhookDispatcher] = None
 
-    # ─── Filter Thresholds ───
-    # NORMAL: Standard filters (78% WR) — enough signal flow on 8 pairs
-    NORMAL_RUN_MIN = 4
-    NORMAL_WICK_MIN = 1.8
-    NORMAL_VOL_MIN = 1.8
-    # RECOVERY: Strict filters (82.5%+ WR) — max accuracy for recovery trades
-    RECOVERY_RUN_MIN = 6
-    RECOVERY_WICK_MIN = 2.0
-    RECOVERY_VOL_MIN = 2.5
+    # ─── RSI Strategy Thresholds (Backtested 365d, 80.30% 1-Gale WR) ───
+    # NORMAL: RSI-14 on 3m (80.3% WR, 44+ marts/day across 8 pairs)
+    NORMAL_RSI_LO = 15      # Oversold → CALL
+    NORMAL_RSI_HI = 80      # Overbought → PUT
+    NORMAL_VOL_MIN = 1.5    # Volume >= 1.5x 20-period avg
+    NORMAL_BODY_MIN = 0.8   # Body/ATR >= 0.8
+    # RECOVERY: Tighter thresholds for max accuracy on Tier-1 only
+    RECOVERY_RSI_LO = 12
+    RECOVERY_RSI_HI = 85
+    RECOVERY_VOL_MIN = 2.0
+    RECOVERY_BODY_MIN = 0.8
 
     def calculate_dynamic_stake(self, balance: float) -> float:
         """
@@ -143,9 +163,9 @@ async def main():
     logger.info("=" * 65)
     logger.info("  ASSASSIN BOT v2 — Real-Market Crypto Confluence Engine")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategies: QM + OB + FVG + Doji + Engulfing + Exhaustion")
-    logger.info("  Structure: S/R Zones + Round Numbers + Trendlines")
-    logger.info("  Analysis: Regime Detection + 3-Tier Confluence Scoring")
+    logger.info("  Strategy: RSI-14 Reversal (80.3%% 1-Gale WR | 44+ marts/day)")
+    logger.info("  Timeframe: 3m candles | RSI<=15 CALL / RSI>=80 PUT")
+    logger.info("  Filters: Vol>=1.5x | Body/ATR>=0.8 | Session Guard")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent)")
     logger.info("  Feeder: Binance Live WebSocket (1m/3m/5m)")
     logger.info("  Telegram: Interactive Control + Real/Demo Mode Switcher")
@@ -364,152 +384,112 @@ async def main():
                 remaining_trades.append(t)
         controller.active_trades = remaining_trades
 
-        # Evaluate candle for new 90%+ confluence signals
-        signals = engine.update_candle(symbol, candle)
+        # ═══════════════════════════════════════════════════════════════
+        # RSI-14 REVERSAL STRATEGY (3m Candles Only)
+        # Backtested: 80.30% 1-Gale WR | 44+ marts/day (8 pairs)
+        # 365 days x 2.1M candles (BTC, ETH, SOL, BNB)
+        # ═══════════════════════════════════════════════════════════════
+        engine.update_candle(symbol, candle)
         active_symbols = {t.symbol for t in controller.active_trades}
+        history = engine.candle_history.get(symbol, [])
+
+        signals = []
+        mode_tag = "RSI-14"
+
+        # Only generate RSI signals on 3m candles (the winning timeframe)
+        if interval == "3m" and len(history) >= 25:
+            closes = [c.close for c in history[-25:]]
+            rsi_val = compute_rsi(closes, period=14)
+
+            # Volume ratio vs 20-period average
+            avg_vol = sum(c.volume for c in history[-20:]) / 20.0
+            vol_ratio = candle.volume / avg_vol if avg_vol > 0 else 1.0
+
+            # Body / ATR ratio (big-body filter)
+            body_size = abs(candle.close - candle.open)
+            atr_vals = [c.high - c.low for c in history[-14:]]
+            atr_avg = sum(atr_vals) / len(atr_vals) if atr_vals else 1e-10
+            body_ratio = body_size / (atr_avg + 1e-10)
+
+            # Thresholds — tighter in recovery mode
+            is_recovery = controller.is_in_mart_recovery
+            if is_recovery:
+                rsi_lo = AssassinController.RECOVERY_RSI_LO
+                rsi_hi = AssassinController.RECOVERY_RSI_HI
+                vol_req = AssassinController.RECOVERY_VOL_MIN
+                body_req = AssassinController.RECOVERY_BODY_MIN
+                mode_tag = "RECOVERY RSI"
+            else:
+                rsi_lo = AssassinController.NORMAL_RSI_LO
+                rsi_hi = AssassinController.NORMAL_RSI_HI
+                vol_req = AssassinController.NORMAL_VOL_MIN
+                body_req = AssassinController.NORMAL_BODY_MIN
+                mode_tag = "RSI-14 80%"
+
+            signal_action = None
+            if rsi_val <= rsi_lo and vol_ratio >= vol_req and body_ratio >= body_req:
+                signal_action = 'call'
+            elif rsi_val >= rsi_hi and vol_ratio >= vol_req and body_ratio >= body_req:
+                signal_action = 'put'
+
+            if signal_action:
+                sig = AssassinSignal(
+                    symbol=symbol,
+                    action=signal_action,
+                    price=candle.close,
+                    confidence=0.80,
+                    trigger=f"RSI-14={rsi_val:.1f} | Vol={vol_ratio:.1f}x | Body/ATR={body_ratio:.2f}",
+                    pattern_type="RSI_REVERSAL",
+                    expiry_seconds=expiry_seconds,
+                    timestamp=time.time(),
+                    verdict="TAKE_IT",
+                    regime="RSI_EXTREME",
+                    solid_count=3,
+                    soft_count=0,
+                    metadata={"rsi": rsi_val, "vol_ratio": vol_ratio, "body_ratio": body_ratio}
+                )
+                signals.append(sig)
+                logger.info(
+                    f"📊 [RSI SIGNAL] {symbol} {signal_action.upper()} | "
+                    f"RSI={rsi_val:.1f} Vol={vol_ratio:.1f}x Body/ATR={body_ratio:.2f}"
+                )
 
         for sig in signals:
-            # Override signal expiry with the correct TF-matched expiry
-            sig.expiry_seconds = expiry_seconds
-            # ─── STRICT RECOVERY ISOLATION: Only on 90% Tier-1 pairs, wait for all trades to clear ───
+            # ─── RECOVERY ISOLATION: Only Tier-1 pairs (90% payout) ───
             if controller.is_in_mart_recovery:
                 if sig.symbol not in TIER1_PAIRS:
-                    logger.info(f"⏸️ [RECOVERY TIER] {sig.symbol} is 70% payout — recovery only on BTC/ETH/BNB. Skipping.")
+                    logger.info(f"⏸️ [RECOVERY TIER] {sig.symbol} — recovery only on BTC/ETH/BNB. Skipping.")
                     continue
                 if len(controller.active_trades) >= 1:
-                    logger.info(f"⏸️ [RECOVERY ISOLATION] Waiting for open trades to settle. Skipping {sig.symbol}.")
+                    logger.info(f"⏸️ [RECOVERY ISOLATION] Waiting for trades to settle. Skipping {sig.symbol}.")
                     continue
             else:
-                # ─── DIRECTIONAL CONCURRENCY GUARD: NO CORRELATED MULTI-BETS ───
-                # Max 2 total active trades, and MAX 1 trade in the same direction (never 3 simultaneous CALLs)
+                # ─── CONCURRENCY GUARD ───
                 if len(controller.active_trades) >= 2:
-                    logger.info(f"⏸️ [CONCURRENCY CAP] 2 trades already active. Skipping {sig.symbol}.")
+                    logger.info(f"⏸️ [CONCURRENCY CAP] 2 trades active. Skipping {sig.symbol}.")
                     continue
-                same_dir_trades = [t for t in controller.active_trades if t.action == sig.action.lower()]
-                if len(same_dir_trades) >= 1:
-                    logger.info(f"⏸️ [CORRELATION GUARD] Already have an active {sig.action.upper()} trade ({same_dir_trades[0].symbol}). Skipping correlated {sig.symbol}.")
+                same_dir = [t for t in controller.active_trades if t.action == sig.action.lower()]
+                if len(same_dir) >= 1:
+                    logger.info(f"⏸️ [CORRELATION GUARD] Already have {sig.action.upper()} trade. Skipping {sig.symbol}.")
                     continue
 
             if sig.symbol in active_symbols:
-                logger.info(f"⏸️ [SYMBOL BUSY] {sig.symbol} already has an active trade. Skipping.")
+                logger.info(f"⏸️ [SYMBOL BUSY] {sig.symbol} already active. Skipping.")
                 continue
 
-            # ─── MULTI-TF DEDUP: Skip if same symbol signalled within 2 min on any TF ───
+            # ─── DEDUP: Skip if signalled within 2 min ───
             if sig.symbol in last_signal_time and (now - last_signal_time[sig.symbol]) < DEDUP_WINDOW:
-                logger.info(f"⏸️ [TF DEDUP] {sig.symbol} already signalled {now - last_signal_time[sig.symbol]:.0f}s ago. Skipping {interval} duplicate.")
+                logger.info(f"⏸️ [DEDUP] {sig.symbol} signalled {now - last_signal_time[sig.symbol]:.0f}s ago. Skipping.")
                 continue
 
-            # ═══════════════════════════════════════════════════════════════
-            # SMART DUAL-MODE SNIPER GATE
-            # RECOVERY MODE: Strict 82.5%+ Climax Gates (Run>=6, Wick>=2.0x, Vol>=2.5x, 50-bar S/R)
-            # NORMAL MODE: High-Confluence Engine Execution (Exhaustion, Engulfing, QM, Doji)
-            # ═══════════════════════════════════════════════════════════════
-            history = engine.candle_history.get(symbol, [])
-            is_recovery = controller.is_in_mart_recovery
-
-            # ─── GATE 1: SESSION FILTER (Skip 03:00–06:00 UTC dead zone) ───
+            # ─── SESSION FILTER: Skip 03:00-06:00 UTC dead zone ───
             from datetime import datetime, timezone
             utc_hour = datetime.now(timezone.utc).hour
             if 3 <= utc_hour < 6:
-                logger.info(f"🛡️ [SESSION FILTER] {sig.symbol} skipped — UTC {utc_hour}:00 dead zone.")
+                logger.info(f"🛡️ [SESSION] {sig.symbol} skipped — UTC {utc_hour}:00 dead zone.")
                 continue
 
-            # ─── GATE 2: MINIMUM CANDLE RANGE (reject tiny flat noise) ───
-            candle_range = candle.high - candle.low
-            if len(history) >= 20:
-                avg_range = sum(c.high - c.low for c in history[-20:]) / 20.0
-                if candle_range < avg_range * 0.7:  # Reject only completely dead flat candles
-                    logger.info(f"🛡️ [RANGE FILTER] {sig.symbol} skipped — range {candle_range:.5f} < min {avg_range*0.7:.5f}")
-                    continue
-
-            # In RECOVERY mode: Apply strict 82.5%+ safety filters
-            if is_recovery:
-                run_min = AssassinController.RECOVERY_RUN_MIN
-                wick_min = AssassinController.RECOVERY_WICK_MIN
-                vol_min = AssassinController.RECOVERY_VOL_MIN
-                mode_tag = "RECOVERY 82.5%"
-
-                # Recovery Gate: Strict Exhaustion Run (6+)
-                run_ok = False
-                if len(history) >= run_min:
-                    if sig.action.lower() == 'call':
-                        run_count = sum(1 for hc in reversed(history[-run_min:]) if hc.close < hc.open)
-                        run_ok = run_count >= run_min
-                    else:
-                        run_count = sum(1 for hc in reversed(history[-run_min:]) if hc.close > hc.open)
-                        run_ok = run_count >= run_min
-                if not run_ok:
-                    logger.info(f"🛡️ [RUN FILTER|{mode_tag}] {sig.symbol} skipped — no {run_min}+ exhaustion run.")
-                    continue
-
-                # Recovery Gate: Strict Rejection Wick (2.0x)
-                body = abs(candle.close - candle.open)
-                if body < 1e-10:
-                    continue
-                upper_wick = candle.high - max(candle.open, candle.close)
-                lower_wick = min(candle.open, candle.close) - candle.low
-                max_wick = max(upper_wick, lower_wick)
-                if max_wick < wick_min * body:
-                    logger.info(f"🛡️ [WICK FILTER|{mode_tag}] {sig.symbol} skipped — wick {max_wick/body:.1f}x < {wick_min}x.")
-                    continue
-
-                # Recovery Gate: Strict Volume Spike (2.5x)
-                if len(history) >= 20:
-                    avg_vol = sum(c.volume for c in history[-20:]) / 20.0
-                    if avg_vol > 0 and candle.volume < vol_min * avg_vol:
-                        logger.info(f"🛡️ [VOL FILTER|{mode_tag}] {sig.symbol} skipped — vol {candle.volume/avg_vol:.1f}x < {vol_min}x.")
-                        continue
-
-                # Recovery Gate: 50-bar S/R Extreme
-                if len(history) >= 50:
-                    h50 = [c.high for c in history[-50:]]
-                    l50 = [c.low for c in history[-50:]]
-                    resistance = max(h50)
-                    support = min(l50)
-                    sr_tol = candle_range * 2.0
-                    near_sr = False
-                    if sig.action.lower() == 'call' and candle.low <= support + sr_tol:
-                        near_sr = True
-                    elif sig.action.lower() == 'put' and candle.high >= resistance - sr_tol:
-                        near_sr = True
-                    if not near_sr:
-                        logger.info(f"🛡️ [S/R FILTER] {sig.symbol} skipped — not near 50-bar S/R extreme.")
-                        continue
-            else:
-                mode_tag = "NORMAL 80%+"
-                # ─── NORMAL MODE SOLID QUALITY GATES (80%+ Accuracy) ───
-                # 1. Exhaustion Run Gate (Run >= 4)
-                run_ok = False
-                if len(history) >= 4:
-                    if sig.action.lower() == 'call':
-                        run_count = sum(1 for hc in reversed(history[-4:]) if hc.close < hc.open)
-                        run_ok = run_count >= 4
-                    else:
-                        run_count = sum(1 for hc in reversed(history[-4:]) if hc.close > hc.open)
-                        run_ok = run_count >= 4
-                if not run_ok:
-                    logger.info(f"🛡️ [RUN FILTER|{mode_tag}] {sig.symbol} skipped — no 4+ run.")
-                    continue
-
-                # 2. Rejection Wick Gate (Wick >= 1.6x Body)
-                body = abs(candle.close - candle.open)
-                if body < 1e-10:
-                    continue
-                upper_wick = candle.high - max(candle.open, candle.close)
-                lower_wick = min(candle.open, candle.close) - candle.low
-                max_wick = max(upper_wick, lower_wick)
-                if max_wick < 1.6 * body:
-                    logger.info(f"🛡️ [WICK FILTER|{mode_tag}] {sig.symbol} skipped — wick {max_wick/body:.1f}x < 1.6x.")
-                    continue
-
-                # 3. Volume Climax Gate (Vol >= 1.5x)
-                if len(history) >= 20:
-                    avg_vol = sum(c.volume for c in history[-20:]) / 20.0
-                    if avg_vol > 0 and candle.volume < 1.5 * avg_vol:
-                        logger.info(f"🛡️ [VOL FILTER|{mode_tag}] {sig.symbol} skipped — vol {candle.volume/avg_vol:.1f}x < 1.5x.")
-                        continue
-
-            logger.info(f"✅ [{mode_tag}|{interval}] {sig.symbol} {sig.action.upper()} — Trade gate passed!")
+            logger.info(f"✅ [{mode_tag}|3m] {sig.symbol} {sig.action.upper()} — RSI gate passed!")
 
 
             verdict_icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"

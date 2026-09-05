@@ -206,10 +206,12 @@ class AssassinTelegramBot:
         open_count = len(getattr(self.controller, 'active_trades', []))
         exp_m = max(1, sig.expiry_seconds // 60)
 
+        trigger = getattr(sig, 'trigger', '')
         msg = (
             f"⚡ <b>TRADE OPENED: {sig.symbol} {sig.action.upper()}</b> | {mode}\n"
             f"💵 Stake: <code>${stake:.2f}</code>{rec_tag} | ⏱️ <code>{exp_m} min</code>\n"
             f"📌 Entry: <code>${sig.price:.4f}</code>\n"
+            f"📊 {trigger}\n"
             f"📂 Active Trades Open: <b>{open_count}</b>"
         )
         await self.send_message(msg)
