@@ -82,6 +82,8 @@ class AssassinSignalEngine:
 
         # Per-symbol candle history
         self.candle_history: Dict[str, List[Candle]] = {}
+        self.candle_counts: Dict[str, int] = {}   # Monotonic index, decoupled from list length
+        self.max_history = 500                    # Bounded memory — well above any lookback window used
         self.last_signals: Dict[str, float] = {}
         self.signal_cooldown = 120.0  # 2min cooldown per symbol (prevents 10+ trades on same asset in 15min)
 
@@ -95,11 +97,18 @@ class AssassinSignalEngine:
         """
         if symbol not in self.candle_history:
             self.candle_history[symbol] = []
+            self.candle_counts[symbol] = -1
 
         history = self.candle_history[symbol]
         prev_candle = history[-1] if history else None
         history.append(candle)
-        current_idx = len(history) - 1
+        self.candle_counts[symbol] += 1
+        current_idx = self.candle_counts[symbol]
+
+        # Bound memory: trim oldest candles once history exceeds max_history.
+        # current_idx keeps counting monotonically so Doji box aging stays correct.
+        if len(history) > self.max_history:
+            del history[: len(history) - self.max_history]
 
         # Don't generate signals until we have enough data (seeded on boot)
         if len(history) < 10:
@@ -198,7 +207,8 @@ class AssassinSignalEngine:
             ))
 
         # 3d. Exhaustion Climax Reversals (EMA-RSI 2.5-sigma Sniper)
-        climax_sig = self.climax_detector.detect(history, symbol=symbol)
+        climax_window = history[-300:] if len(history) > 300 else history
+        climax_sig = self.climax_detector.detect(climax_window, symbol=symbol)
         if climax_sig:
             confirmations.append(Confirmation(
                 source='EXHAUSTION_CLIMAX',
@@ -294,7 +304,8 @@ class AssassinSignalEngine:
         # ═══════════════════════════════════════════════
         verdict = self.confluence_scorer.score(
             confirmations,
-            post_run_caution=state.post_run_caution
+            post_run_caution=state.post_run_caution,
+            run_color=state.run_color
         )
 
         # ═══════════════════════════════════════════════

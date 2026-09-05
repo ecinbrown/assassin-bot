@@ -43,12 +43,17 @@ def load_saved_state():
                 return json.load(f)
         except Exception:
             pass
-    return {"balance": 10.0, "wins": 0, "losses": 0}
+    return {"balance": 10.0, "wins": 0, "losses": 0, "marts_since_loss": 0}
 
-def save_state(balance: float, wins: int, losses: int):
+def save_state(balance: float, wins: int, losses: int, marts_since_loss: int = 0):
     try:
         with open(STATE_FILE, "w") as f:
-            json.dump({"balance": round(balance, 4), "wins": wins, "losses": losses}, f, indent=2)
+            json.dump({
+                "balance": round(balance, 4),
+                "wins": wins,
+                "losses": losses,
+                "marts_since_loss": marts_since_loss
+            }, f, indent=2)
     except Exception:
         pass
 
@@ -86,9 +91,9 @@ class AssassinController:
 
         # Live performance stats (Restored from state)
         saved = load_saved_state()
-        self.wins: int = saved.get("wins", 18)
+        self.wins: int = saved.get("wins", 0)
         self.losses: int = saved.get("losses", 0)
-        self.marts_since_loss: int = 10  # Starts in Golden Rebound state
+        self.marts_since_loss: int = saved.get("marts_since_loss", 0)
         self.is_in_mart_recovery: bool = False
         self.lost_mart_amount: float = 0.0
         self.active_trades: List[ActiveTrade] = []
@@ -167,7 +172,7 @@ async def main():
     simulation_mode = os.environ.get("SIMULATION_MODE", "true").lower() in ("true", "1", "yes")
 
     # Telegram Credentials (supports ASSASSIN_TG_TOKEN & TELEGRAM_BOT_TOKEN)
-    tg_token = os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("BOT_TOKEN", "8295109367:AAHeUa5k_eIpl-OQb9LcuOUekBiGL7D8FQQ")
+    tg_token = os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("BOT_TOKEN", "")
     tg_chat_id = os.environ.get("ASSASSIN_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID") or "6363315804"
 
     # Optional Webhook fallback URL
@@ -208,7 +213,7 @@ async def main():
     prdt_agent.initialize()
     # Restore saved simulated balance if available
     saved_state = load_saved_state()
-    prdt_agent.simulated_balance = saved_state.get("balance", 80.4737)
+    prdt_agent.simulated_balance = saved_state.get("balance", 10.0)
     controller.prdt_agent = prdt_agent
 
     # Webhook Dispatcher (if configured)
@@ -264,7 +269,7 @@ async def main():
                     gross_payout = round(t.stake_native * 1.90, 4)  # 90% payout = 1.90x gross
                     seq_profit = round(gross_payout - t.total_sequence_stake, 4)
                     prdt_agent.simulated_balance = round(prdt_agent.simulated_balance + gross_payout, 4)
-                    save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
+                    save_state(prdt_agent.simulated_balance, controller.wins, controller.losses, controller.marts_since_loss)
 
                     # Reset 1-Trade Mart Recovery mode ONLY if this trade was the designated recovery trade!
                     if t.is_recovery_trade:
@@ -303,7 +308,7 @@ async def main():
                         next_stake = round(t.stake_native * 2.2, 4)
                         # Deduct next stake for simulation
                         prdt_agent.simulated_balance = round(prdt_agent.simulated_balance - next_stake, 4)
-                        save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
+                        save_state(prdt_agent.simulated_balance, controller.wins, controller.losses, controller.marts_since_loss)
 
                         logger.critical(
                             f"⚡ [GALE {next_gale} SAME-COIN TRIGGERED] {t.symbol} {t.action.upper()} | "
@@ -340,7 +345,7 @@ async def main():
                             f"Total Sequence Loss: {seq_loss:+.4f} Native. Loss queued for next recovery."
                         )
 
-                        save_state(prdt_agent.simulated_balance, controller.wins, controller.losses)
+                        save_state(prdt_agent.simulated_balance, controller.wins, controller.losses, controller.marts_since_loss)
 
                         if tg_bot:
                             await tg_bot.send_settlement_alert(

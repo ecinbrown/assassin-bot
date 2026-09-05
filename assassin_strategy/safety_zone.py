@@ -124,6 +124,3 @@ class MarginOfSafetyFilter:
 
         self.pending_setups[symbol] = still_pending
         return ready_to_execute
-
-
-Tuple_RN = tuple

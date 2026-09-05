@@ -30,7 +30,7 @@ class AssassinTelegramBot:
     """Interactive Telegram interface for Assassin Bot."""
 
     def __init__(self, token: Optional[str] = None, chat_id: Optional[str] = None, main_controller=None):
-        self.token = token or os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN", "8295109367:AAHeUa5k_eIpl-OQb9LcuOUekBiGL7D8FQQ")
+        self.token = token or os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN", "")
         chat_id_val = chat_id or os.environ.get("ASSASSIN_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID") or "6363315804"
         self.chat_id = int(chat_id_val) if str(chat_id_val).lstrip('-').isdigit() else 6363315804
         
@@ -53,11 +53,17 @@ class AssassinTelegramBot:
         return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
     async def _check_auth(self, update: Update) -> bool:
-        """Authorize message sender against configured chat_id."""
+        """Authorize message sender against the configured allow-list only."""
         if not update or not update.effective_chat:
             return False
         user_id = update.effective_chat.id
-        self.chat_ids.add(user_id)
+        if user_id not in self.chat_ids:
+            logger.warning(f"🚫 Unauthorized Telegram access attempt from chat_id={user_id}")
+            try:
+                await update.effective_chat.send_message("⛔ You are not authorized to control this bot.")
+            except Exception:
+                pass
+            return False
         self.chat_id = user_id
         return True
 

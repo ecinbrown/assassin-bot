@@ -151,6 +151,12 @@ class BinanceFeed:
                             logger.warning(f"Binance WS connection closed: {msg.type}")
                             break
 
+                # Loop exited cleanly (no exception) — still rotate + back off before reconnecting
+                if self.is_running:
+                    self._current_host_idx += 1
+                    logger.info("Connection ended cleanly. Rotating to next endpoint after short delay...")
+                    await asyncio.sleep(3)
+
             except asyncio.CancelledError:
                 break
             except Exception as e:

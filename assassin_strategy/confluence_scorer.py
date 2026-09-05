@@ -56,13 +56,14 @@ class ConfluenceScorer:
         self.lean_threshold = lean_threshold
         self.lean_soft_required = lean_soft_required
 
-    def score(self, confirmations: List[Confirmation], post_run_caution: bool = False) -> ConfluenceVerdict:
+    def score(self, confirmations: List[Confirmation], post_run_caution: bool = False, run_color: Optional[str] = None) -> ConfluenceVerdict:
         """
         Score a list of confirmations and return a verdict.
         
         Args:
             confirmations: All evidence gathered from pattern/structure detectors.
             post_run_caution: If True (3+ same-color candles), penalize continuation signals.
+            run_color: Color of the run ('green' or 'red') if post_run_caution is active.
         """
         if not confirmations:
             return ConfluenceVerdict(
@@ -103,10 +104,13 @@ class ConfluenceScorer:
                 reasoning="Equal call/put pressure — no directional edge."
             )
 
-        # Post-run caution: if 3+ same-color candles and signal is continuation, penalize
-        if post_run_caution and solid_count > 0:
-            # Don't penalize reversal signals, only continuation
-            pass  # Applied externally via regime detector context
+        # Post-run caution: if 3+ same-color candles and signal continues that run, penalize.
+        # Reversal signals (opposite direction of the run) are left untouched.
+        continuation_penalty = 0.0
+        if post_run_caution and run_color in ('green', 'red'):
+            continuation_action = 'call' if run_color == 'green' else 'put'
+            if action == continuation_action:
+                continuation_penalty = 0.05
 
         # Opposing solid confirmations negate ours
         net_solid = solid_count - opposing
@@ -154,6 +158,10 @@ class ConfluenceScorer:
             confidence = max(0.10, net_solid * 0.15 + soft_count * 0.05)
             missing = self.lean_threshold - net_solid
             reasoning = f"Leave it - only {net_solid} solid ({missing} more needed). Not enough structure."
+
+        if continuation_penalty > 0 and verdict != 'LEAVE_IT':
+            confidence = max(0.10, confidence - continuation_penalty)
+            reasoning += f" [Post-run caution: -{continuation_penalty*100:.0f}% continuation penalty]"
 
         return ConfluenceVerdict(
             verdict=verdict,
