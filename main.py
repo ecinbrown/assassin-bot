@@ -466,6 +466,14 @@ async def main():
             elif rsi_val >= rsi_hi and vol_ratio >= vol_req and body_ratio >= body_req:
                 signal_action = 'put'
 
+            # Debug visibility: log every 3m check so we can see how close conditions
+            # are getting, even when no signal fires. Remove once signal rate is confirmed healthy.
+            logger.info(
+                f"\U0001f50d [RSI CHECK] {symbol} | RSI={rsi_val:.1f} (need <={rsi_lo} or >={rsi_hi}) | "
+                f"Vol={vol_ratio:.2f}x (need >={vol_req}) | Body/ATR={body_ratio:.2f} (need >={body_req}) | "
+                f"{'SIGNAL' if signal_action else 'no signal'}"
+            )
+
             if signal_action:
                 sig = AssassinSignal(
                     symbol=symbol,
