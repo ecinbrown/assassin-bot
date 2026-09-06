@@ -97,7 +97,11 @@ class AssassinSignalEngine:
         """
         if symbol not in self.candle_history:
             self.candle_history[symbol] = []
-            self.candle_counts[symbol] = -1
+        if symbol not in self.candle_counts:
+            # Account for candles already present (e.g. seeded via preload) so the
+            # count stays consistent even when history existed before this symbol
+            # was first seen by update_candle.
+            self.candle_counts[symbol] = len(self.candle_history[symbol]) - 1
 
         history = self.candle_history[symbol]
         prev_candle = history[-1] if history else None
