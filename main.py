@@ -155,15 +155,16 @@ class AssassinController:
         self.telegram_bot: Optional[AssassinTelegramBot] = None
         self.dispatcher: Optional[PRDTWebhookDispatcher] = None
 
-    # ─── RSI Strategy Thresholds (Backtested 365d, 80.30% 1-Gale WR) ───
-    # NORMAL: RSI-14 on 3m (80.3% WR, 44+ marts/day across 8 pairs)
-    NORMAL_RSI_LO = 15      # Oversold → CALL
+    # ─── RSI Strategy Thresholds (Sweep-optimised 365d, 82.92% 1-Gale WR) ───
+    # NORMAL: RSI-14 on 3m + counter-trend EMA + 3-candle cooldown
+    NORMAL_RSI_LO = 10      # Oversold → CALL  (was 15, tighter = higher quality)
     NORMAL_RSI_HI = 80      # Overbought → PUT
     NORMAL_VOL_MIN = 1.5    # Volume >= 1.5x 20-period avg
     NORMAL_BODY_MIN = 0.8   # Body/ATR >= 0.8
-    # RECOVERY: Tighter thresholds for max accuracy on Tier-1 only
-    RECOVERY_RSI_LO = 12
-    RECOVERY_RSI_HI = 85
+    SIGNAL_COOLDOWN = 3     # Min 3 candles between signals on same symbol
+    # RECOVERY: Even tighter thresholds for max accuracy on Tier-1 only
+    RECOVERY_RSI_LO = 8
+    RECOVERY_RSI_HI = 87
     RECOVERY_VOL_MIN = 2.0
     RECOVERY_BODY_MIN = 0.8
 
@@ -196,9 +197,10 @@ async def main():
     logger.info("=" * 65)
     logger.info("  ASSASSIN BOT v2 — Real-Market Crypto Confluence Engine")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: RSI-14 Reversal (80.3%% 1-Gale WR | 44+ marts/day)")
-    logger.info("  Timeframe: 3m candles | RSI<=15 CALL / RSI>=80 PUT")
-    logger.info("  Filters: Vol>=1.5x | Body/ATR>=0.8 | Session Guard")
+    logger.info("  Strategy: RSI-14 Reversal (82.9%% 1-Gale WR | ~8/day)")
+    logger.info("  Timeframe: 3m candles | RSI<=10 CALL / RSI>=80 PUT")
+    logger.info("  Filters: Vol>=1.5x | Body/ATR>=0.8 | Counter-Trend EMA")
+    logger.info("  Guards: 3-candle cooldown | Session Guard")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent)")
     logger.info("  Feeder: Binance Live WebSocket (1m/3m/5m)")
     logger.info("  Telegram: Interactive Control + Real/Demo Mode Switcher")
@@ -293,6 +295,9 @@ async def main():
     # 5. Multi-TF Deduplication Guard: tracks last signal time per symbol
     last_signal_time: dict = {}  # { "BTCUSDT": timestamp }
     DEDUP_WINDOW = 120  # Skip if same symbol fired within 2 minutes on any TF
+
+    # 5b. Per-symbol candle cooldown: tracks last signal candle index per symbol
+    last_signal_candle: dict = {}  # { "BTCUSDT": candle_count_at_last_signal }
 
     # 5. Define Callback for Closed Candles (MULTI-TF AWARE)
     async def on_candle_closed(symbol: str, interval: str, candle: Candle):
@@ -420,8 +425,10 @@ async def main():
 
         # ═══════════════════════════════════════════════════════════════
         # RSI-14 REVERSAL STRATEGY (3m Candles Only)
-        # Backtested: 80.30% 1-Gale WR | 44+ marts/day (8 pairs)
-        # 365 days x 2.1M candles (BTC, ETH, SOL, BNB)
+        # Sweep-optimised: 82.92% 1-Gale WR | ~8.2 trades/day (8 pairs)
+        # 365 days x 700k 3m candles (BTC, ETH, SOL, BNB)
+        # Filters: RSI<=10/>=80, vol>=1.5x, body/ATR>=0.8,
+        #          counter-trend EMA20/50, 3-candle cooldown
         # ═══════════════════════════════════════════════════════════════
         engine.update_candle(symbol, candle)
         active_symbols = {t.symbol for t in controller.active_trades}
@@ -431,9 +438,9 @@ async def main():
         mode_tag = "RSI-14"
 
         # Only generate RSI signals on 3m candles (the winning timeframe)
-        if interval == "3m" and len(history) >= 25:
-            closes = [c.close for c in history[-25:]]
-            rsi_val = compute_rsi(closes, period=14)
+        if interval == "3m" and len(history) >= 50:
+            closes = [c.close for c in history[-50:]]  # need 50 for EMA50
+            rsi_val = compute_rsi(closes[-25:], period=14)
 
             # Volume ratio vs 20-period average
             avg_vol = sum(c.volume for c in history[-20:]) / 20.0
@@ -444,6 +451,17 @@ async def main():
             atr_vals = [c.high - c.low for c in history[-14:]]
             atr_avg = sum(atr_vals) / len(atr_vals) if atr_vals else 1e-10
             body_ratio = body_size / (atr_avg + 1e-10)
+
+            # EMA20 / EMA50 for counter-trend filter
+            import numpy as np
+            closes_arr = np.array(closes, dtype=float)
+            alpha20 = 2.0 / 21.0
+            alpha50 = 2.0 / 51.0
+            ema20 = closes_arr[0]
+            ema50 = closes_arr[0]
+            for px in closes_arr[1:]:
+                ema20 = alpha20 * px + (1 - alpha20) * ema20
+                ema50 = alpha50 * px + (1 - alpha50) * ema50
 
             # Thresholds — tighter in recovery mode
             is_recovery = controller.is_in_mart_recovery
@@ -458,7 +476,7 @@ async def main():
                 rsi_hi = AssassinController.NORMAL_RSI_HI
                 vol_req = AssassinController.NORMAL_VOL_MIN
                 body_req = AssassinController.NORMAL_BODY_MIN
-                mode_tag = "RSI-14 80%"
+                mode_tag = "RSI-14 83%"
 
             signal_action = None
             if rsi_val <= rsi_lo and vol_ratio >= vol_req and body_ratio >= body_req:
@@ -466,21 +484,43 @@ async def main():
             elif rsi_val >= rsi_hi and vol_ratio >= vol_req and body_ratio >= body_req:
                 signal_action = 'put'
 
-            # Debug visibility: log every 3m check so we can see how close conditions
-            # are getting, even when no signal fires. Remove once signal rate is confirmed healthy.
+            # ─── COUNTER-TREND FILTER ───
+            # Only take signals that go AGAINST the EMA trend (reversal plays)
+            # CALL only when EMA20 < EMA50 (downtrend → oversold bounce)
+            # PUT only when EMA20 > EMA50 (uptrend → overbought rejection)
+            if signal_action == 'call' and ema20 > ema50:
+                logger.debug(f"[TREND FILTER] {symbol} CALL blocked — EMA20 > EMA50 (uptrend, not counter-trend)")
+                signal_action = None
+            elif signal_action == 'put' and ema20 < ema50:
+                logger.debug(f"[TREND FILTER] {symbol} PUT blocked — EMA20 < EMA50 (downtrend, not counter-trend)")
+                signal_action = None
+
+            # ─── COOLDOWN FILTER ───
+            # Min 3 candles between signals on same symbol
+            candle_idx = engine.candle_counts.get(symbol, 0)
+            cooldown = AssassinController.SIGNAL_COOLDOWN
+            if signal_action and cooldown > 0:
+                last_idx = last_signal_candle.get(symbol, -999)
+                if (candle_idx - last_idx) < cooldown:
+                    logger.debug(f"[COOLDOWN] {symbol} — only {candle_idx - last_idx} candles since last signal (need {cooldown})")
+                    signal_action = None
+
+            # Debug visibility
+            trend_tag = 'UP' if ema20 > ema50 else 'DOWN'
             logger.info(
                 f"\U0001f50d [RSI CHECK] {symbol} | RSI={rsi_val:.1f} (need <={rsi_lo} or >={rsi_hi}) | "
                 f"Vol={vol_ratio:.2f}x (need >={vol_req}) | Body/ATR={body_ratio:.2f} (need >={body_req}) | "
-                f"{'SIGNAL' if signal_action else 'no signal'}"
+                f"Trend={trend_tag} | {'SIGNAL' if signal_action else 'no signal'}"
             )
 
             if signal_action:
+                last_signal_candle[symbol] = candle_idx
                 sig = AssassinSignal(
                     symbol=symbol,
                     action=signal_action,
                     price=candle.close,
-                    confidence=0.80,
-                    trigger=f"RSI-14={rsi_val:.1f} | Vol={vol_ratio:.1f}x | Body/ATR={body_ratio:.2f}",
+                    confidence=0.83,
+                    trigger=f"RSI-14={rsi_val:.1f} | Vol={vol_ratio:.1f}x | Body/ATR={body_ratio:.2f} | Trend={trend_tag}",
                     pattern_type="RSI_REVERSAL",
                     expiry_seconds=expiry_seconds,
                     timestamp=time.time(),
@@ -488,12 +528,12 @@ async def main():
                     regime="RSI_EXTREME",
                     solid_count=3,
                     soft_count=0,
-                    metadata={"rsi": rsi_val, "vol_ratio": vol_ratio, "body_ratio": body_ratio}
+                    metadata={"rsi": rsi_val, "vol_ratio": vol_ratio, "body_ratio": body_ratio, "ema_trend": trend_tag}
                 )
                 signals.append(sig)
                 logger.info(
                     f"📊 [RSI SIGNAL] {symbol} {signal_action.upper()} | "
-                    f"RSI={rsi_val:.1f} Vol={vol_ratio:.1f}x Body/ATR={body_ratio:.2f}"
+                    f"RSI={rsi_val:.1f} Vol={vol_ratio:.1f}x Body/ATR={body_ratio:.2f} Trend={trend_tag}"
                 )
 
         liquid_pairs = None
