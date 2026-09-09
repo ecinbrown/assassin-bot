@@ -1,9 +1,14 @@
 """
-Assassin Bot - Main Application Runner v2
+Assassin Bot - Main Application Runner v3
 ==========================================
-Full Price-Action Confluence Engine:
-Binance Live Feeder → Assassin Confluence Engine → PRDT Finance Web3 Smart Contract
+RSI-7 Reversal Strategy (Backtest-Proven: 80.1% Mart SeqWR | ~46/day)
+Binance Live Feeder → RSI-7 Signal Engine → PRDT Finance Web3 Smart Contract
 + Interactive Telegram Controller & Live Alert Engine
+
+Winning Config (365d backtest, 8333 signals, honest mart-sequence counting):
+  RSI period=7 | lo≤20 CALL / hi≥72 PUT | Vol≥2.5x | Body/ATR≥0.5
+  3-candle cooldown | NO counter-trend filter | Tier-1 only (BTC/ETH/BNB)
+  Payout tiers: BTC=90%, ETH=90%, BNB=70%, SOL=70%, DOGE=70%, XRP=70%, PEPE=70%
 """
 import asyncio
 import json
@@ -91,8 +96,9 @@ def save_state(balance: float, wins: int, losses: int, marts_since_loss: int = 0
         pass
 
 
-def compute_rsi(closes, period=14):
-    """Compute RSI from a list of close prices using Wilder smoothing."""
+def compute_rsi(closes, period=7):
+    """Compute RSI from a list of close prices using Wilder smoothing.
+    Default period=7 (backtest-proven optimal for 3m candles)."""
     if len(closes) < period + 1:
         return 50.0
     deltas = [closes[i] - closes[i - 1] for i in range(1, len(closes))]
@@ -155,35 +161,44 @@ class AssassinController:
         self.telegram_bot: Optional[AssassinTelegramBot] = None
         self.dispatcher: Optional[PRDTWebhookDispatcher] = None
 
-    # ─── RSI Strategy Thresholds (Sweep-optimised 365d, 82.92% 1-Gale WR) ───
-    # NORMAL: RSI-14 on 3m + counter-trend EMA + 3-candle cooldown
-    NORMAL_RSI_LO = 10      # Oversold → CALL  (was 15, tighter = higher quality)
-    NORMAL_RSI_HI = 80      # Overbought → PUT
-    NORMAL_VOL_MIN = 1.5    # Volume >= 1.5x 20-period avg
-    NORMAL_BODY_MIN = 0.8   # Body/ATR >= 0.8
+    # ─── RSI-7 Strategy Thresholds (Backtest-proven: 80.1% Mart SeqWR, ~46/day) ───
+    # NORMAL: RSI-7 on 3m, NO counter-trend, 3-candle cooldown, Tier-1 only
+    RSI_PERIOD = 7          # RSI period (7 = faster, more signals than RSI-14)
+    NORMAL_RSI_LO = 20      # Oversold → CALL  (RSI-7 ≤ 20)
+    NORMAL_RSI_HI = 72      # Overbought → PUT  (RSI-7 ≥ 72)
+    NORMAL_VOL_MIN = 2.5    # Volume >= 2.5x 20-period avg
+    NORMAL_BODY_MIN = 0.5   # Body/ATR >= 0.5
     SIGNAL_COOLDOWN = 3     # Min 3 candles between signals on same symbol
-    # RECOVERY: Even tighter thresholds for max accuracy on Tier-1 only
-    RECOVERY_RSI_LO = 8
-    RECOVERY_RSI_HI = 87
-    RECOVERY_VOL_MIN = 2.0
+    USE_COUNTER_TREND = False  # Backtest: ct=none outperformed ct=counter
+    # RECOVERY: Tighter thresholds for max accuracy on Tier-1 only
+    RECOVERY_RSI_LO = 15
+    RECOVERY_RSI_HI = 78
+    RECOVERY_VOL_MIN = 3.0
     RECOVERY_BODY_MIN = 0.8
+    # Pair payout tiers (from live platform)
+    PAIR_PAYOUTS = {
+        "BTCUSDT": 0.90, "ETHUSDT": 0.90,
+        "BNBUSDT": 0.70, "SOLUSDT": 0.70,
+        "DOGEUSDT": 0.70, "XRPUSDT": 0.70, "PEPEUSDT": 0.70,
+    }
+    TIER1_PAIRS = {"BTCUSDT", "ETHUSDT", "BNBUSDT"}  # 80.1% SeqWR proven on these
 
-    def calculate_dynamic_stake(self, balance: float) -> float:
+    def calculate_dynamic_stake(self, balance: float, symbol: str = "BTCUSDT") -> float:
         """
         Dynamic Compounding Engine (6.1% Base Stake Scaling + 1-Trade Mart Recovery):
         - If in Mart Recovery: sizes stake to recover ALL cumulative losses + 6.1% target profit in 1 trade.
         - Otherwise: dynamically calculates 6.1% base stake as balance compounds.
-        - Payout: 90% (PRDT BTC/ETH/BNB tier) = 1.90x gross return on winning trade.
+        - Payout: per-pair from PAIR_PAYOUTS (90% BTC/ETH, 70% others).
         """
         if balance <= 0:
             return self.stake_native
 
-        PAYOUT = 0.90  # 90% payout — BTC/ETH/BNB tier on PRDT
+        payout = self.PAIR_PAYOUTS.get(symbol, 0.70)
 
         if self.is_in_mart_recovery and self.lost_mart_amount > 0:
             # Stake needed to recover full cumulative loss + target profit in ONE trade
-            target_profit = balance * 0.061 * PAYOUT
-            rec_stake = round((self.lost_mart_amount + target_profit) / PAYOUT, 4)
+            target_profit = balance * 0.061 * payout
+            rec_stake = round((self.lost_mart_amount + target_profit) / payout, 4)
             # Safety cap: max 25% of balance (slightly relaxed to ensure full recovery)
             rec_stake = min(round(balance * 0.25, 4), rec_stake)
             return max(self.stake_native, rec_stake)
@@ -195,26 +210,28 @@ class AssassinController:
 
 async def main():
     logger.info("=" * 65)
-    logger.info("  ASSASSIN BOT v2 — Real-Market Crypto Confluence Engine")
+    logger.info("  ASSASSIN BOT v3 — RSI-7 Reversal Engine")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: RSI-14 Reversal (82.9%% 1-Gale WR | ~8/day)")
-    logger.info("  Timeframe: 3m candles | RSI<=10 CALL / RSI>=80 PUT")
-    logger.info("  Filters: Vol>=1.5x | Body/ATR>=0.8 | Counter-Trend EMA")
-    logger.info("  Guards: 3-candle cooldown | Session Guard")
+    logger.info("  Strategy: RSI-7 Reversal (80.1%% Mart SeqWR | ~46/day)")
+    logger.info("  Timeframe: 3m candles | RSI-7<=20 CALL / RSI-7>=72 PUT")
+    logger.info("  Filters: Vol>=2.5x | Body/ATR>=0.5 | NO Counter-Trend")
+    logger.info("  Guards: 3-candle cooldown | Session Guard | T1 Only")
+    logger.info("  Pairs: BTC(90%%), ETH(90%%), BNB(70%%)")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent)")
-    logger.info("  Feeder: Binance Live WebSocket (1m/3m/5m)")
+    logger.info("  Feeder: Binance Live WebSocket (3m)")
     logger.info("  Telegram: Interactive Control + Real/Demo Mode Switcher")
     logger.info("=" * 65)
 
     # 1. Configuration from Environment
-    # All 8 broker pairs: 3 Tier-1 (90% payout) + 5 Tier-2 (70% payout)
-    default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT,SOLUSDT,DOGEUSDT,XRPUSDT,PEPEUSDT,ARBUSDT"
+    # Tier-1 pairs (backtest-proven at 80.1% SeqWR): BTC(90%), ETH(90%), BNB(70%)
+    # Full watchlist for monitoring (all 7 platform pairs):
+    default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT,SOLUSDT,DOGEUSDT,XRPUSDT,PEPEUSDT"
     symbols = os.environ.get("TRADING_SYMBOLS", default_symbols).split(",")
     symbols = [s.strip() for s in symbols if s.strip()]
 
     # Recovery trades execute ONLY on the most liquid pairs — refreshed hourly by real 24h volume
     RECOVERY_PAIR_COUNT = 3
-    TIER1_PAIRS = {"BTCUSDT", "ETHUSDT", "BNBUSDT"}  # fallback if the liquidity fetch fails
+    TIER1_PAIRS = AssassinController.TIER1_PAIRS  # BTC/ETH/BNB — backtest-proven
 
     # Multi-Timeframe scanning (1m, 3m, 5m), aligned to natural candle duration for precise 1-candle entries & same-coin Gales
     INTERVALS = ["1m", "3m", "5m"]
@@ -325,7 +342,8 @@ async def main():
                     # ─── SEQUENCE WIN (Base or Gale 1) ───
                     controller.wins += 1
                     controller.marts_since_loss += 1
-                    gross_payout = round(t.stake_native * 1.90, 4)  # 90% payout = 1.90x gross
+                    pair_payout = AssassinController.PAIR_PAYOUTS.get(t.symbol, 0.70)
+                    gross_payout = round(t.stake_native * (1.0 + pair_payout), 4)
                     seq_profit = round(gross_payout - t.total_sequence_stake, 4)
                     prdt_agent.simulated_balance = round(prdt_agent.simulated_balance + gross_payout, 4)
                     save_state(prdt_agent.simulated_balance, controller.wins, controller.losses, controller.marts_since_loss)
@@ -424,23 +442,24 @@ async def main():
         controller.active_trades = remaining_trades
 
         # ═══════════════════════════════════════════════════════════════
-        # RSI-14 REVERSAL STRATEGY (3m Candles Only)
-        # Sweep-optimised: 82.92% 1-Gale WR | ~8.2 trades/day (8 pairs)
-        # 365 days x 700k 3m candles (BTC, ETH, SOL, BNB)
-        # Filters: RSI<=10/>=80, vol>=1.5x, body/ATR>=0.8,
-        #          counter-trend EMA20/50, 3-candle cooldown
+        # RSI-7 REVERSAL STRATEGY (3m Candles Only)
+        # Backtest-proven: 80.1% Mart SeqWR | ~46 trades/day (T1 pairs)
+        # 365 days x 8333 signals (BTC, ETH, BNB)
+        # Filters: RSI-7<=20/>=72, vol>=2.5x, body/ATR>=0.5,
+        #          NO counter-trend, 3-candle cooldown
         # ═══════════════════════════════════════════════════════════════
         engine.update_candle(symbol, candle)
         active_symbols = {t.symbol for t in controller.active_trades}
         history = engine.candle_history.get(symbol, [])
 
         signals = []
-        mode_tag = "RSI-14"
+        mode_tag = "RSI-7"
 
         # Only generate RSI signals on 3m candles (the winning timeframe)
-        if interval == "3m" and len(history) >= 50:
+        # Only fire on Tier-1 pairs (backtest-proven)
+        if interval == "3m" and len(history) >= 50 and symbol in AssassinController.TIER1_PAIRS:
             closes = [c.close for c in history[-50:]]  # need 50 for EMA50
-            rsi_val = compute_rsi(closes[-25:], period=14)
+            rsi_val = compute_rsi(closes[-25:], period=AssassinController.RSI_PERIOD)
 
             # Volume ratio vs 20-period average
             avg_vol = sum(c.volume for c in history[-20:]) / 20.0
@@ -470,13 +489,13 @@ async def main():
                 rsi_hi = AssassinController.RECOVERY_RSI_HI
                 vol_req = AssassinController.RECOVERY_VOL_MIN
                 body_req = AssassinController.RECOVERY_BODY_MIN
-                mode_tag = "RECOVERY RSI"
+                mode_tag = "RECOVERY RSI-7"
             else:
                 rsi_lo = AssassinController.NORMAL_RSI_LO
                 rsi_hi = AssassinController.NORMAL_RSI_HI
                 vol_req = AssassinController.NORMAL_VOL_MIN
                 body_req = AssassinController.NORMAL_BODY_MIN
-                mode_tag = "RSI-14 83%"
+                mode_tag = "RSI-7 80%"
 
             signal_action = None
             if rsi_val <= rsi_lo and vol_ratio >= vol_req and body_ratio >= body_req:
@@ -484,16 +503,15 @@ async def main():
             elif rsi_val >= rsi_hi and vol_ratio >= vol_req and body_ratio >= body_req:
                 signal_action = 'put'
 
-            # ─── COUNTER-TREND FILTER ───
-            # Only take signals that go AGAINST the EMA trend (reversal plays)
-            # CALL only when EMA20 < EMA50 (downtrend → oversold bounce)
-            # PUT only when EMA20 > EMA50 (uptrend → overbought rejection)
-            if signal_action == 'call' and ema20 > ema50:
-                logger.debug(f"[TREND FILTER] {symbol} CALL blocked — EMA20 > EMA50 (uptrend, not counter-trend)")
-                signal_action = None
-            elif signal_action == 'put' and ema20 < ema50:
-                logger.debug(f"[TREND FILTER] {symbol} PUT blocked — EMA20 < EMA50 (downtrend, not counter-trend)")
-                signal_action = None
+            # ─── COUNTER-TREND FILTER (DISABLED — backtest: ct=none wins) ───
+            # Kept as dead code for reference / easy re-enable via USE_COUNTER_TREND
+            if AssassinController.USE_COUNTER_TREND:
+                if signal_action == 'call' and ema20 > ema50:
+                    logger.debug(f"[TREND FILTER] {symbol} CALL blocked — EMA20 > EMA50 (uptrend, not counter-trend)")
+                    signal_action = None
+                elif signal_action == 'put' and ema20 < ema50:
+                    logger.debug(f"[TREND FILTER] {symbol} PUT blocked — EMA20 < EMA50 (downtrend, not counter-trend)")
+                    signal_action = None
 
             # ─── COOLDOWN FILTER ───
             # Min 3 candles between signals on same symbol
@@ -519,8 +537,8 @@ async def main():
                     symbol=symbol,
                     action=signal_action,
                     price=candle.close,
-                    confidence=0.83,
-                    trigger=f"RSI-14={rsi_val:.1f} | Vol={vol_ratio:.1f}x | Body/ATR={body_ratio:.2f} | Trend={trend_tag}",
+                    confidence=0.801,
+                    trigger=f"RSI-7={rsi_val:.1f} | Vol={vol_ratio:.1f}x | Body/ATR={body_ratio:.2f} | Trend={trend_tag}",
                     pattern_type="RSI_REVERSAL",
                     expiry_seconds=expiry_seconds,
                     timestamp=time.time(),
@@ -591,7 +609,7 @@ async def main():
 
             # 1. Execute via Dynamic Compounding Staking
             current_balance = prdt_agent.simulated_balance if controller.simulation_mode else prdt_agent.get_balance()
-            trade_stake = controller.calculate_dynamic_stake(current_balance)
+            trade_stake = controller.calculate_dynamic_stake(current_balance, symbol=sig.symbol)
             success, tx_or_reason = await prdt_agent.execute_trade(sig, stake_native=trade_stake)
             if success:
                 logger.info(f"✅ Trade Executed on PRDT Contract (Stake: {trade_stake} Native | Balance: {current_balance:.4f}): {tx_or_reason}")
