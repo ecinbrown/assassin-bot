@@ -323,10 +323,90 @@ async def main():
 
     # 5. Multi-TF Deduplication Guard: tracks last signal time per symbol
     last_signal_time: dict = {}  # { "BTCUSDT": timestamp }
-    DEDUP_WINDOW = 120  # Skip if same symbol fired within 2 minutes on any TF
+    DEDUP_WINDOW = 30  # Reduced from 120s — 3-candle cooldown already handles spacing
 
     # 5b. Per-symbol candle cooldown: tracks last signal candle index per symbol
     last_signal_candle: dict = {}  # { "BTCUSDT": candle_count_at_last_signal }
+
+    # 5a. Background Trade Settler — runs every 5s independently of candle callbacks
+    #     Prevents zombie trades from blocking the concurrency guard forever
+    async def background_trade_settler():
+        while True:
+            try:
+                await asyncio.sleep(5)
+                if controller.paused or not controller.active_trades:
+                    continue
+                now = time.time()
+                remaining = []
+                for t in controller.active_trades:
+                    if now >= t.expiry_time:
+                        # Use latest known price for settlement
+                        exit_price = controller.latest_prices.get(t.symbol, t.entry_price)
+                        is_win = (exit_price > t.entry_price) if t.action == 'call' else (exit_price < t.entry_price)
+                        step_name = "BASE" if t.gale_level == 0 else f"GALE {t.gale_level}"
+
+                        if is_win:
+                            controller.wins += 1
+                            controller.marts_since_loss += 1
+                            pair_payout = AssassinController.PAIR_PAYOUTS.get(t.symbol, 0.70)
+                            gross_payout = round(t.stake_native * (1.0 + pair_payout), 4)
+                            seq_profit = round(gross_payout - t.total_sequence_stake, 4)
+                            prdt_agent.simulated_balance = round(prdt_agent.simulated_balance + gross_payout, 4)
+                            if t.is_recovery_trade:
+                                controller.is_in_mart_recovery = False
+                                controller.lost_mart_amount = 0.0
+                            save_state(prdt_agent.simulated_balance, controller.wins, controller.losses, controller.marts_since_loss)
+                            logger.critical(f"[BG-SETTLER] WIN {t.symbol} {t.action.upper()} {step_name} | Profit: {seq_profit:+.4f} | Bal: {prdt_agent.simulated_balance:.4f}")
+                            if tg_bot:
+                                await tg_bot.send_settlement_alert(
+                                    symbol=t.symbol, action=t.action,
+                                    entry_price=t.entry_price, exit_price=exit_price,
+                                    is_win=True, profit_loss=seq_profit,
+                                    new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
+                                    wins=controller.wins, losses=controller.losses, step_info=f"WIN {step_name}"
+                                )
+                        else:
+                            max_allowed_gale = 1
+                            if t.gale_level < max_allowed_gale:
+                                next_gale = t.gale_level + 1
+                                next_stake = round(t.stake_native * 2.2, 4)
+                                prdt_agent.simulated_balance = round(prdt_agent.simulated_balance - next_stake, 4)
+                                save_state(prdt_agent.simulated_balance, controller.wins, controller.losses, controller.marts_since_loss)
+                                trade_duration = t.expiry_time - t.entry_time
+                                remaining.append(ActiveTrade(
+                                    symbol=t.symbol, action=t.action.lower(),
+                                    entry_price=exit_price, stake_native=next_stake,
+                                    entry_time=now, expiry_time=now + trade_duration,
+                                    epoch=prdt_agent.get_current_epoch(),
+                                    gale_level=next_gale,
+                                    total_sequence_stake=round(t.total_sequence_stake + next_stake, 4),
+                                    is_recovery_trade=t.is_recovery_trade
+                                ))
+                                logger.critical(f"[BG-SETTLER] GALE {next_gale} triggered {t.symbol} {t.action.upper()} | Stake: {next_stake:.4f}")
+                            else:
+                                controller.losses += 1
+                                controller.marts_since_loss = 0
+                                controller.is_in_mart_recovery = True
+                                controller.lost_mart_amount = round(controller.lost_mart_amount + t.total_sequence_stake, 4)
+                                save_state(prdt_agent.simulated_balance, controller.wins, controller.losses, controller.marts_since_loss)
+                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} | Lost: {t.total_sequence_stake:.4f}")
+                                if tg_bot:
+                                    await tg_bot.send_settlement_alert(
+                                        symbol=t.symbol, action=t.action,
+                                        entry_price=t.entry_price, exit_price=exit_price,
+                                        is_win=False, profit_loss=-t.total_sequence_stake,
+                                        new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
+                                        wins=controller.wins, losses=controller.losses, step_info="SEQUENCE LOSS"
+                                    )
+                    else:
+                        remaining.append(t)
+                controller.active_trades = remaining
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"[BG-SETTLER] Error: {e}")
+
+    settler_task = asyncio.create_task(background_trade_settler())
 
     # 5. Define Callback for Closed Candles (MULTI-TF AWARE)
     async def on_candle_closed(symbol: str, interval: str, candle: Candle):
@@ -577,20 +657,16 @@ async def main():
                 if sig.symbol not in liquid_pairs:
                     logger.info(f"⏸️ [RECOVERY LIQUIDITY] {sig.symbol} not in top {RECOVERY_PAIR_COUNT} liquid pairs {liquid_pairs}. Skipping.")
                     continue
-                if len(controller.active_trades) >= 1:
-                    logger.info(f"⏸️ [RECOVERY ISOLATION] Waiting for trades to settle. Skipping {sig.symbol}.")
+                # Only block if a BASE trade (gale_level==0) is active in recovery
+                base_trades = [t for t in controller.active_trades if t.gale_level == 0]
+                if len(base_trades) >= 1:
+                    logger.info(f"⏸️ [RECOVERY ISOLATION] Waiting for base trade to settle. Skipping {sig.symbol}.")
                     continue
             else:
-                # ─── CONCURRENCY GUARD — hard ceiling stays at 2 total trades ───
-                if len(controller.active_trades) >= 2:
-                    logger.info(f"⏸️ [CONCURRENCY CAP] 2 trades active. Skipping {sig.symbol}.")
-                    continue
-                # Both slots may now be filled in the same direction if that's what qualifies —
-                # the 2-trade cap above is the real risk limiter, this just stops double-booking
-                # more same-direction trades than there are open slots.
-                same_dir = [t for t in controller.active_trades if t.action == sig.action.lower()]
-                if len(same_dir) >= 2:
-                    logger.info(f"⏸️ [CORRELATION GUARD] Already have max same-direction trades. Skipping {sig.symbol}.")
+                # ─── CONCURRENCY GUARD — count only base-level trades (gales don't block new signals) ───
+                base_trades = [t for t in controller.active_trades if t.gale_level == 0]
+                if len(base_trades) >= 2:
+                    logger.info(f"⏸️ [CONCURRENCY CAP] 2 base trades active. Skipping {sig.symbol}.")
                     continue
 
             if sig.symbol in active_symbols:
@@ -719,6 +795,7 @@ async def main():
         logger.info("Shutting down Assassin Bot...")
     finally:
         claim_task.cancel()
+        settler_task.cancel()
         await runner.cleanup()
         if tg_bot:
             await tg_bot.stop()
