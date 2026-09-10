@@ -1,14 +1,20 @@
 """
-Assassin Bot - Main Application Runner v3
-==========================================
-RSI-7 Reversal Strategy (Backtest-Proven: 80.1% Mart SeqWR | ~46/day)
+Assassin Bot - Main Application Runner v3.1
+=============================================
+RSI-7 Reversal Strategy (Backtest-Proven: 80.6% Mart SeqWR | ~16/day)
 Binance Live Feeder → RSI-7 Signal Engine → PRDT Finance Web3 Smart Contract
 + Interactive Telegram Controller & Live Alert Engine
 
-Winning Config (365d backtest, 8333 signals, honest mart-sequence counting):
+Winning Config (365d backtest, 5972 signals, honest mart-sequence counting):
   RSI period=7 | lo≤20 CALL / hi≥72 PUT | Vol≥2.5x | Body/ATR≥0.5
-  3-candle cooldown | NO counter-trend filter | Tier-1 only (BTC/ETH/BNB)
-  Payout tiers: BTC=90%, ETH=90%, BNB=70%, SOL=70%, DOGE=70%, XRP=70%, PEPE=70%
+  3-candle cooldown | NO counter-trend filter | BTC+ETH ONLY (90% payout)
+  
+Nuance-validated (validate_v3_nuances.py):
+  - RSI window: 50 closes (0.03% mismatch vs full history)
+  - BTC EV: +0.1164×stake | ETH EV: +0.1322×stake
+  - BNB/SOL/70% pairs: NEGATIVE EV, excluded
+  - Session filter: REMOVED (dead zone has 81.1% WR, better than avg)
+  - Concurrency cap: 0.4% impact, negligible
 """
 import asyncio
 import json
@@ -161,16 +167,18 @@ class AssassinController:
         self.telegram_bot: Optional[AssassinTelegramBot] = None
         self.dispatcher: Optional[PRDTWebhookDispatcher] = None
 
-    # ─── RSI-7 Strategy Thresholds (Backtest-proven: 80.1% Mart SeqWR, ~46/day) ───
-    # NORMAL: RSI-7 on 3m, NO counter-trend, 3-candle cooldown, Tier-1 only
+    # ─── RSI-7 Strategy Thresholds (Nuance-validated: 80.6% Mart SeqWR, ~16/day) ───
+    # BTC+ETH ONLY (90% payout, positive dollar EV)
+    # 70% payout pairs (BNB/SOL/DOGE/XRP/PEPE) have NEGATIVE EV — excluded
     RSI_PERIOD = 7          # RSI period (7 = faster, more signals than RSI-14)
+    RSI_HISTORY = 50        # Use 50 closes for RSI (0.03% mismatch vs full history)
     NORMAL_RSI_LO = 20      # Oversold → CALL  (RSI-7 ≤ 20)
     NORMAL_RSI_HI = 72      # Overbought → PUT  (RSI-7 ≥ 72)
     NORMAL_VOL_MIN = 2.5    # Volume >= 2.5x 20-period avg
     NORMAL_BODY_MIN = 0.5   # Body/ATR >= 0.5
     SIGNAL_COOLDOWN = 3     # Min 3 candles between signals on same symbol
     USE_COUNTER_TREND = False  # Backtest: ct=none outperformed ct=counter
-    # RECOVERY: Tighter thresholds for max accuracy on Tier-1 only
+    # RECOVERY: Tighter thresholds
     RECOVERY_RSI_LO = 15
     RECOVERY_RSI_HI = 78
     RECOVERY_VOL_MIN = 3.0
@@ -181,7 +189,9 @@ class AssassinController:
         "BNBUSDT": 0.70, "SOLUSDT": 0.70,
         "DOGEUSDT": 0.70, "XRPUSDT": 0.70, "PEPEUSDT": 0.70,
     }
-    TIER1_PAIRS = {"BTCUSDT", "ETHUSDT", "BNBUSDT"}  # 80.1% SeqWR proven on these
+    # ONLY trade pairs with positive dollar EV (90% payout, raw WR > 52.6%)
+    TRADEABLE_PAIRS = {"BTCUSDT", "ETHUSDT"}  # 80.6% SeqWR, EV +0.12/+0.13
+    TIER1_PAIRS = {"BTCUSDT", "ETHUSDT"}      # Recovery also BTC/ETH only
 
     def calculate_dynamic_stake(self, balance: float, symbol: str = "BTCUSDT") -> float:
         """
@@ -210,28 +220,29 @@ class AssassinController:
 
 async def main():
     logger.info("=" * 65)
-    logger.info("  ASSASSIN BOT v3 — RSI-7 Reversal Engine")
+    logger.info("  ASSASSIN BOT v3.1 — RSI-7 Reversal Engine (Nuance-Fixed)")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: RSI-7 Reversal (80.1%% Mart SeqWR | ~46/day)")
+    logger.info("  Strategy: RSI-7 Reversal (80.6%% Mart SeqWR | ~16/day)")
     logger.info("  Timeframe: 3m candles | RSI-7<=20 CALL / RSI-7>=72 PUT")
     logger.info("  Filters: Vol>=2.5x | Body/ATR>=0.5 | NO Counter-Trend")
-    logger.info("  Guards: 3-candle cooldown | Session Guard | T1 Only")
-    logger.info("  Pairs: BTC(90%%), ETH(90%%), BNB(70%%)")
+    logger.info("  Guards: 3-candle cooldown | NO session filter")
+    logger.info("  Pairs: BTC(90%%) + ETH(90%%) ONLY (positive $ EV)")
+    logger.info("  Excluded: BNB/SOL/DOGE/XRP/PEPE (70%% payout = negative EV)")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent)")
     logger.info("  Feeder: Binance Live WebSocket (3m)")
     logger.info("  Telegram: Interactive Control + Real/Demo Mode Switcher")
     logger.info("=" * 65)
 
     # 1. Configuration from Environment
-    # Tier-1 pairs (backtest-proven at 80.1% SeqWR): BTC(90%), ETH(90%), BNB(70%)
-    # Full watchlist for monitoring (all 7 platform pairs):
+    # Trade ONLY BTC+ETH (90% payout = positive dollar EV)
+    # Monitor all 7 pairs on feed, but only generate signals on TRADEABLE_PAIRS
     default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT,SOLUSDT,DOGEUSDT,XRPUSDT,PEPEUSDT"
     symbols = os.environ.get("TRADING_SYMBOLS", default_symbols).split(",")
     symbols = [s.strip() for s in symbols if s.strip()]
 
     # Recovery trades execute ONLY on the most liquid pairs — refreshed hourly by real 24h volume
     RECOVERY_PAIR_COUNT = 3
-    TIER1_PAIRS = AssassinController.TIER1_PAIRS  # BTC/ETH/BNB — backtest-proven
+    TIER1_PAIRS = AssassinController.TIER1_PAIRS  # BTC/ETH — positive EV proven
 
     # Multi-Timeframe scanning (1m, 3m, 5m), aligned to natural candle duration for precise 1-candle entries & same-coin Gales
     INTERVALS = ["1m", "3m", "5m"]
@@ -456,10 +467,11 @@ async def main():
         mode_tag = "RSI-7"
 
         # Only generate RSI signals on 3m candles (the winning timeframe)
-        # Only fire on Tier-1 pairs (backtest-proven)
-        if interval == "3m" and len(history) >= 50 and symbol in AssassinController.TIER1_PAIRS:
+        # Only fire on TRADEABLE pairs (BTC+ETH = positive dollar EV)
+        if interval == "3m" and len(history) >= 50 and symbol in AssassinController.TRADEABLE_PAIRS:
             closes = [c.close for c in history[-50:]]  # need 50 for EMA50
-            rsi_val = compute_rsi(closes[-25:], period=AssassinController.RSI_PERIOD)
+            # Use 50 closes for RSI to match backtest accuracy (0.03% mismatch)
+            rsi_val = compute_rsi(closes[-AssassinController.RSI_HISTORY:], period=AssassinController.RSI_PERIOD)
 
             # Volume ratio vs 20-period average
             avg_vol = sum(c.volume for c in history[-20:]) / 20.0
@@ -589,12 +601,14 @@ async def main():
                 logger.info(f"⏸️ [DEDUP] {sig.symbol} signalled {now - last_signal_time[sig.symbol]:.0f}s ago. Skipping.")
                 continue
 
-            # ─── SESSION FILTER: Skip 03:00-06:00 UTC dead zone ───
-            from datetime import datetime, timezone
-            utc_hour = datetime.now(timezone.utc).hour
-            if 3 <= utc_hour < 6:
-                logger.info(f"🛡️ [SESSION] {sig.symbol} skipped — UTC {utc_hour}:00 dead zone.")
-                continue
+            # ─── SESSION FILTER: DISABLED ───
+            # Nuance validation showed 03-06 UTC has 81.1% SeqWR (BETTER than avg 79.8%)
+            # Keeping filter disabled = more signals + better WR
+            # from datetime import datetime, timezone
+            # utc_hour = datetime.now(timezone.utc).hour
+            # if 3 <= utc_hour < 6:
+            #     logger.info(f"🛡️ [SESSION] {sig.symbol} skipped")
+            #     continue
 
             logger.info(f"✅ [{mode_tag}|3m] {sig.symbol} {sig.action.upper()} — RSI gate passed!")
 
