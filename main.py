@@ -178,11 +178,12 @@ class AssassinController:
     NORMAL_BODY_MIN = 0.5   # Body/ATR >= 0.5
     SIGNAL_COOLDOWN = 3     # Min 3 candles between signals on same symbol
     USE_COUNTER_TREND = False  # Backtest: ct=none outperformed ct=counter
-    # RECOVERY: Tighter thresholds
-    RECOVERY_RSI_LO = 15
-    RECOVERY_RSI_HI = 78
-    RECOVERY_VOL_MIN = 3.0
-    RECOVERY_BODY_MIN = 0.8
+    # RECOVERY: Same thresholds as normal (tightening removed - was causing
+    # multi-hour silence after every loss with little accuracy benefit)
+    RECOVERY_RSI_LO = NORMAL_RSI_LO
+    RECOVERY_RSI_HI = NORMAL_RSI_HI
+    RECOVERY_VOL_MIN = NORMAL_VOL_MIN
+    RECOVERY_BODY_MIN = NORMAL_BODY_MIN
     # Pair payout tiers (from live platform)
     PAIR_PAYOUTS = {
         "BTCUSDT": 0.90, "ETHUSDT": 0.90,
