@@ -321,12 +321,7 @@ async def main():
         if tg_bot.initialize():
             controller.telegram_bot = tg_bot
 
-    # 5. Multi-TF Deduplication Guard: tracks last signal time per symbol
-    last_signal_time: dict = {}  # { "BTCUSDT": timestamp }
-    DEDUP_WINDOW = 30  # Reduced from 120s — 3-candle cooldown already handles spacing
-
-    # 5b. Per-symbol candle cooldown: tracks last signal candle index per symbol
-    last_signal_candle: dict = {}  # { "BTCUSDT": candle_count_at_last_signal }
+    # All cooldowns / dedup / concurrency caps REMOVED — zero blockers
 
     # 5a. Background Trade Settler — runs every 5s independently of candle callbacks
     #     Prevents zombie trades from blocking the concurrency guard forever
@@ -498,15 +493,7 @@ async def main():
                     logger.debug(f"[TREND FILTER] {symbol} PUT blocked — EMA20 < EMA50 (downtrend, not counter-trend)")
                     signal_action = None
 
-            # ─── COOLDOWN FILTER ───
-            # Min 3 candles between signals on same symbol
-            candle_idx = engine.candle_counts.get(symbol, 0)
-            cooldown = AssassinController.SIGNAL_COOLDOWN
-            if signal_action and cooldown > 0:
-                last_idx = last_signal_candle.get(symbol, -999)
-                if (candle_idx - last_idx) < cooldown:
-                    logger.debug(f"[COOLDOWN] {symbol} — only {candle_idx - last_idx} candles since last signal (need {cooldown})")
-                    signal_action = None
+            # COOLDOWN: REMOVED — every signal fires
 
             # Debug visibility
             trend_tag = 'UP' if ema20 > ema50 else 'DOWN'
@@ -517,7 +504,6 @@ async def main():
             )
 
             if signal_action:
-                last_signal_candle[symbol] = candle_idx
                 sig = AssassinSignal(
                     symbol=symbol,
                     action=signal_action,
@@ -539,36 +525,8 @@ async def main():
                     f"RSI={rsi_val:.1f} Vol={vol_ratio:.1f}x Body/ATR={body_ratio:.2f} Trend={trend_tag}"
                 )
 
-        liquid_pairs = None
-        if controller.is_in_mart_recovery:
-            liquid_pairs = await get_liquid_pairs(controller.symbols, top_n=RECOVERY_PAIR_COUNT)
-
         for sig in signals:
-            # ─── RECOVERY ISOLATION: Only the most liquid pairs right now ───
-            if controller.is_in_mart_recovery:
-                if sig.symbol not in liquid_pairs:
-                    logger.info(f"⏸️ [RECOVERY LIQUIDITY] {sig.symbol} not in top {RECOVERY_PAIR_COUNT} liquid pairs {liquid_pairs}. Skipping.")
-                    continue
-                # Only block if a BASE trade (gale_level==0) is active in recovery
-                base_trades = [t for t in controller.active_trades if t.gale_level == 0]
-                if len(base_trades) >= 1:
-                    logger.info(f"⏸️ [RECOVERY ISOLATION] Waiting for base trade to settle. Skipping {sig.symbol}.")
-                    continue
-            else:
-                # ─── CONCURRENCY GUARD — count only base-level trades (gales don't block new signals) ───
-                base_trades = [t for t in controller.active_trades if t.gale_level == 0]
-                if len(base_trades) >= 2:
-                    logger.info(f"⏸️ [CONCURRENCY CAP] 2 base trades active. Skipping {sig.symbol}.")
-                    continue
-
-            if sig.symbol in active_symbols:
-                logger.info(f"⏸️ [SYMBOL BUSY] {sig.symbol} already active. Skipping.")
-                continue
-
-            # ─── DEDUP: Skip if signalled within 2 min ───
-            if sig.symbol in last_signal_time and (now - last_signal_time[sig.symbol]) < DEDUP_WINDOW:
-                logger.info(f"⏸️ [DEDUP] {sig.symbol} signalled {now - last_signal_time[sig.symbol]:.0f}s ago. Skipping.")
-                continue
+            # ALL BLOCKERS REMOVED — every signal executes immediately
 
             # ─── SESSION FILTER: DISABLED ───
             # Nuance validation showed 03-06 UTC has 81.1% SeqWR (BETTER than avg 79.8%)
@@ -611,7 +569,6 @@ async def main():
                     is_recovery_trade=is_rec
                 ))
                 active_symbols.add(sig.symbol)
-                last_signal_time[sig.symbol] = now  # Mark for dedup
             else:
                 logger.warning(f"⚠️ Trade Execution Failed / Skipped: {tx_or_reason}")
 
