@@ -428,12 +428,12 @@ async def main():
             #     logger.info(f"🛡️ [SESSION] {sig.symbol} skipped")
             #     continue
 
-            logger.info(f"✅ [{mode_tag}|3m] {sig.symbol} {sig.action.upper()} — RSI gate passed!")
-
+            tf_tag = sig.metadata.get('tf', '1m') if hasattr(sig, 'metadata') and sig.metadata else '1m'
+            logger.info(f"✅ [HYBRID|{tf_tag}] {sig.symbol} {sig.action.upper()} — Setup triggered!")
 
             verdict_icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
             logger.critical(
-                f"{verdict_icon} [{interval}] {sig.symbol} {sig.action.upper()} | "
+                f"{verdict_icon} [{tf_tag}] {sig.symbol} {sig.action.upper()} | "
                 f"${sig.price:.2f} | {sig.verdict} ({sig.confidence*100:.0f}%) | "
                 f"Solid={sig.solid_count} Soft={sig.soft_count} | "
                 f"Regime={sig.regime} | {sig.trigger}"
@@ -516,7 +516,7 @@ async def main():
     # Preload historical 1m candles to seed all multi-timeframe aggregators
     try:
         logger.info(f"⏳ Pre-loading 1m history for {controller.symbols}...")
-        history_map = await feed.preload_history(limit=500)
+        history_map = await feed.preload_history(limit=1000)
         for sym, iv_data in history_map.items():
             candles = iv_data.get("1m", [])
             for c in candles:

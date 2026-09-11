@@ -108,7 +108,8 @@ class BinanceFeed:
                                         high=float(k[2]),
                                         low=float(k[3]),
                                         close=float(k[4]),
-                                        volume=float(k[5])
+                                        volume=float(k[5]),
+                                        trades=float(k[8]) if len(k) > 8 else 1.0
                                     )
                                     candles.append(c)
                                 logger.info(f"✅ Preloaded {len(candles)} historical {iv} candles for {sym_upper}")
@@ -182,7 +183,8 @@ class BinanceFeed:
                 high=float(k.get('h')),
                 low=float(k.get('l')),
                 close=float(k.get('c')),
-                volume=float(k.get('v', 0.0))
+                volume=float(k.get('v', 0.0)),
+                trades=float(k.get('n', 1.0))
             )
             logger.info(
                 f"📊 [{symbol}|{interval}] Candle Closed | O:{candle.open:.2f} H:{candle.high:.2f} "

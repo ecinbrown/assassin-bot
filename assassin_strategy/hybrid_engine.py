@@ -160,7 +160,7 @@ class HybridSignalEngine:
             return []
 
         history = self.aggregator.history.get((sym, tf), [])
-        if len(history) < 50:
+        if len(history) < 20:
             return []
 
         closes = np.array([c.close for c in history], dtype=float)
