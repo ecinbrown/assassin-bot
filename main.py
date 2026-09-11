@@ -87,7 +87,7 @@ def load_saved_state():
                 return json.load(f)
         except Exception:
             pass
-    return {"balance": 10.0, "wins": 0, "losses": 0, "marts_since_loss": 0}
+    return {"balance": 20.0, "wins": 0, "losses": 0, "marts_since_loss": 0}
 
 def save_state(balance: float, wins: int, losses: int, marts_since_loss: int = 0):
     try:
@@ -172,18 +172,18 @@ class AssassinController:
     # 70% payout pairs (BNB/SOL/DOGE/XRP/PEPE) have NEGATIVE EV — excluded
     RSI_PERIOD = 7          # RSI period (7 = faster, more signals than RSI-14)
     RSI_HISTORY = 50        # Use 50 closes for RSI (0.03% mismatch vs full history)
-    NORMAL_RSI_LO = 28      # Oversold → CALL  (RSI-7 ≤ 28) -> 100.9 trades/day, 90.81% 2-Gale WR
+    NORMAL_RSI_LO = 20      # Oversold → CALL  (RSI-7 ≤ 20) — restored original tighter filter
     NORMAL_RSI_HI = 72      # Overbought → PUT  (RSI-7 ≥ 72)
-    NORMAL_VOL_MIN = 1.0    # Standard volume (no 2.5x choke)
-    NORMAL_BODY_MIN = 0.0   # No body size blocker
-    SIGNAL_COOLDOWN = 0     # Cooldowns removed
+    NORMAL_VOL_MIN = 2.5    # Volume >= 2.5x 20-period avg — restored
+    NORMAL_BODY_MIN = 0.5   # Body/ATR >= 0.5 — restored
+    SIGNAL_COOLDOWN = 3     # Min 3 candles between signals on same symbol — restored
     USE_COUNTER_TREND = False  # Backtest: ct=none outperformed ct=counter
-    # RECOVERY SWEET SPOT: Activates after a rare sequence loss
-    # Triggers on high-conviction extremes (RSI <= 20 or >= 80) -> 86%-89% Recovery WR in ~5.8 mins
-    RECOVERY_RSI_LO = 20
-    RECOVERY_RSI_HI = 80
-    RECOVERY_VOL_MIN = 1.0
-    RECOVERY_BODY_MIN = 0.0
+    # RECOVERY: same thresholds as normal (tightening previously caused
+    # multi-hour silence after a loss for little accuracy benefit)
+    RECOVERY_RSI_LO = NORMAL_RSI_LO
+    RECOVERY_RSI_HI = NORMAL_RSI_HI
+    RECOVERY_VOL_MIN = NORMAL_VOL_MIN
+    RECOVERY_BODY_MIN = NORMAL_BODY_MIN
     # Pair payout tiers (from live platform)
     PAIR_PAYOUTS = {
         "BTCUSDT": 0.90, "ETHUSDT": 0.90,
@@ -207,26 +207,25 @@ class AssassinController:
         payout = self.PAIR_PAYOUTS.get(symbol, 0.70)
 
         if self.is_in_mart_recovery and self.lost_mart_amount > 0:
-            # Stake needed to recover full cumulative loss + target profit in ONE trade
-            target_profit = self.stake_native * payout
+            # Stake needed to recover full cumulative loss + 6.1% target profit in ONE trade
+            target_profit = balance * 0.061 * payout
             rec_stake = round((self.lost_mart_amount + target_profit) / payout, 4)
-            # Safety cap: max 35% of balance to protect account
-            if balance > 0:
-                rec_stake = min(round(balance * 0.35, 4), rec_stake)
+            # Safety cap: max 25% of balance to protect account
+            rec_stake = min(round(balance * 0.25, 4), rec_stake)
             return max(self.stake_native, rec_stake)
 
-        # Fixed unit staking floor
-        return self.stake_native
+        # 6.1% dynamic base stake scaling with a hard minimum floor — restored
+        return round(max(self.stake_native, balance * 0.061), 4)
 
 
 async def main():
     logger.info("=" * 65)
-    logger.info("  ASSASSIN BOT v3.2 — 2-Gale 91% Reversal Engine (101 Trades/Day)")
+    logger.info("  ASSASSIN BOT v3.3 — 1-Gale RSI-7 Reversal Engine (Filters Restored)")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: RSI-7 Reversal (90.81% SeqWR | ~101 trades/day)")
-    logger.info("  Timeframe: 3m candles | RSI-7<=28 CALL / RSI-7>=72 PUT")
-    logger.info("  Recovery: Sweet-Spot Armed (RSI<=20/>=80 | 89% Recovery WR)")
-    logger.info("  Guards: ZERO cooldowns | ZERO blockers | Fixed Unit + Mart Recovery")
+    logger.info("  Strategy: RSI-7 Reversal (80.6% Mart SeqWR | ~16/day)")
+    logger.info("  Timeframe: 3m candles | RSI-7<=20 CALL / RSI-7>=72 PUT")
+    logger.info("  Filters: Vol>=2.5x | Body/ATR>=0.5 | 3-candle cooldown")
+    logger.info("  Guards: 2-trade concurrency cap | 1-Gale only | 6.1% dynamic stake")
     logger.info("  Pairs: BTC(90%) + ETH(90%) ONLY (Positive $ EV)")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent)")
     logger.info("  Feeder: Binance Live WebSocket (3m)")
@@ -297,7 +296,7 @@ async def main():
     prdt_agent.initialize()
     # Restore saved simulated balance if available
     saved_state = load_saved_state()
-    prdt_agent.simulated_balance = saved_state.get("balance", 10.0)
+    prdt_agent.simulated_balance = saved_state.get("balance", 20.0)
     controller.prdt_agent = prdt_agent
 
     # Webhook Dispatcher (if configured)
@@ -360,7 +359,7 @@ async def main():
                                     wins=controller.wins, losses=controller.losses, step_info=f"WIN {step_name}"
                                 )
                         else:
-                            max_allowed_gale = 2
+                            max_allowed_gale = 1  # Gale 2 removed — 1-Gale only (smaller max exposure)
                             if t.gale_level < max_allowed_gale:
                                 next_gale = t.gale_level + 1
                                 next_stake = round(t.stake_native * 2.2, 4)
@@ -525,7 +524,10 @@ async def main():
                 )
 
         for sig in signals:
-            # ALL BLOCKERS REMOVED — every signal executes immediately
+            # ─── CONCURRENCY GUARD — restored: hard ceiling of 2 total trades at a time ───
+            if len(controller.active_trades) >= 2:
+                logger.info(f"⏸️ [CONCURRENCY CAP] 2 trades active. Skipping {sig.symbol}.")
+                continue
 
             # ─── SESSION FILTER: DISABLED ───
             # Nuance validation showed 03-06 UTC has 81.1% SeqWR (BETTER than avg 79.8%)

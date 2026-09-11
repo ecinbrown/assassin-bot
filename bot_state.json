@@ -1,5 +1,6 @@
 {
-  "balance": 10.0,
+  "balance": 20.0,
   "wins": 0,
-  "losses": 0
+  "losses": 0,
+  "marts_since_loss": 0
 }
