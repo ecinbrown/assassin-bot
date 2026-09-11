@@ -414,9 +414,8 @@ async def main():
                 logger.info(f"📊 [HYBRID SIGNAL] {s['symbol']} {s['action'].upper()} on {tf}m | {s['trigger']}")
 
         for sig in signals:
-            # ─── CONCURRENCY GUARD — restored: hard ceiling of 2 total trades at a time ───
-            if len(controller.active_trades) >= 2:
-                logger.info(f"⏸️ [CONCURRENCY CAP] 2 trades active. Skipping {sig.symbol}.")
+            # Per-pair execution: each pair manages its own independent trade sequence
+            if any(t.symbol == sig.symbol for t in controller.active_trades):
                 continue
 
             # ─── SESSION FILTER: DISABLED ───
