@@ -29,6 +29,7 @@ from .binance_feed import BinanceFeed
 from .prdt_webhook import PRDTWebhookDispatcher
 from .prdt_contract import PRDTAgent, EnteredRound
 from .telegram_bot import AssassinTelegramBot
+from .hybrid_engine import HybridSignalEngine, MultiTFCandleAggregator
 
 __all__ = [
     'Candle', 'detect_gap',
@@ -46,4 +47,6 @@ __all__ = [
     'BinanceFeed', 'PRDTWebhookDispatcher',
     'PRDTAgent', 'EnteredRound',
     'AssassinTelegramBot',
+    'HybridSignalEngine', 'MultiTFCandleAggregator',
 ]
+

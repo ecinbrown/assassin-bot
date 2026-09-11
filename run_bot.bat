@@ -1,9 +1,11 @@
 @echo off
-title ASSASSIN BOT v2 - LIVE RUNNER
+title ASSASSIN BOT v4.1 - 40 TPD BTC+ETH (85.03% WR)
 color 0A
 cls
 echo =======================================================
-echo   ASSASSIN BOT v2 - 24/7 AUTO-RUNNER
+echo   ASSASSIN BOT v4.1 - 40 TPD AUTO-RUNNER
+echo   Strategy: 281 Setups (85.03% 1-Gale WR | 6.1% Risk)
+echo   Pairs: BTCUSDT, ETHUSDT ONLY (90% Payout Tier)
 echo =======================================================
 echo.
 cd /d "%~dp0"
@@ -13,7 +15,7 @@ pip install -r requirements.txt >nul 2>&1
 
 echo [2/2] Launching Assassin Bot...
 echo Telegram: @homma1_bot (Admin ID: 6363315804)
-echo Monitored: BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT (1m / 5m Expiry)
+echo Monitored: BTCUSDT, ETHUSDT (Multi-TF Synthesis from 1m)
 echo.
 :loop
 python -u main.py

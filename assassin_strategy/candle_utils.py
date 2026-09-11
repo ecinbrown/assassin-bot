@@ -15,6 +15,8 @@ class Candle:
     low: float
     close: float
     volume: float = 0.0
+    trades: float = 1.0
+
 
     @property
     def body_size(self) -> float:

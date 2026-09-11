@@ -1,0 +1,3756 @@
+[
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.0,
+      "whale": 2.0
+    },
+    "desc": "ETH 4m | BB_2.4std_Wick0_Whale2.0",
+    "wr": 85.26,
+    "trades": 821
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 2.0
+    },
+    "desc": "ETH 4m | BB_2.5std_Wick0_Whale2.0",
+    "wr": 85.59,
+    "trades": 708
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.0,
+      "whale": 2.0
+    },
+    "desc": "ETH 4m | BB_2.6std_Wick0_Whale2.0",
+    "wr": 85.88,
+    "trades": 616
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 1.2
+    },
+    "desc": "BTC 11m | Exhaustion_5bars_Vol1.2",
+    "wr": 85.28,
+    "trades": 598
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.2,
+      "wick": 0.2,
+      "whale": 2.0
+    },
+    "desc": "ETH 4m | BB_2.2std_Wick20_Whale2.0",
+    "wr": 85.25,
+    "trades": 590
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.2,
+      "wick": 0.2,
+      "whale": 1.2
+    },
+    "desc": "BTC 15m | BB_2.2std_Wick20_Whale1.2",
+    "wr": 85.02,
+    "trades": 494
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.2,
+      "wick": 0.0,
+      "whale": 1.5
+    },
+    "desc": "BTC 15m | BB_2.2std_Wick0_Whale1.5",
+    "wr": 85.13,
+    "trades": 491
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 12,
+      "hi": 88,
+      "whale": 2.0
+    },
+    "desc": "BTC 9m | RSI3_12/88_Whale2.0",
+    "wr": 85.17,
+    "trades": 472
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 25,
+      "hi": 75,
+      "whale": 2.0
+    },
+    "desc": "BTC 10m | RSI6_25/75_Whale2.0",
+    "wr": 85.14,
+    "trades": 471
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 1.5
+    },
+    "desc": "BTC 11m | Exhaustion_5bars_Vol1.5",
+    "wr": 85.99,
+    "trades": 471
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 1.2
+    },
+    "desc": "ETH 15m | Exhaustion_5bars_Vol1.2",
+    "wr": 84.95,
+    "trades": 465
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.0,
+      "whale": 2.0
+    },
+    "desc": "ETH 4m | BB_2.8std_Wick0_Whale2.0",
+    "wr": 85.43,
+    "trades": 453
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.3,
+      "wick": 0.0,
+      "whale": 1.5
+    },
+    "desc": "BTC 15m | BB_2.3std_Wick0_Whale1.5",
+    "wr": 85.58,
+    "trades": 423
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 1.8
+    },
+    "desc": "ETH 11m | Exhaustion_5bars_Vol1.8",
+    "wr": 85.34,
+    "trades": 423
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 24,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 28,
+      "hi": 72,
+      "whale": 1.8
+    },
+    "desc": "BTC 24m | RSI4_28/72_Whale1.8",
+    "wr": 84.95,
+    "trades": 412
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 12,
+      "hi": 88,
+      "whale": 2.0
+    },
+    "desc": "BTC 10m | RSI3_12/88_Whale2.0",
+    "wr": 85.4,
+    "trades": 411
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.3,
+      "wick": 0.2,
+      "whale": 1.2
+    },
+    "desc": "BTC 15m | BB_2.3std_Wick20_Whale1.2",
+    "wr": 85.11,
+    "trades": 403
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 24,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 22,
+      "hi": 78,
+      "whale": 1.8
+    },
+    "desc": "BTC 24m | RSI3_22/78_Whale1.8",
+    "wr": 85.36,
+    "trades": 403
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.2,
+      "whale": 1.5
+    },
+    "desc": "BTC 5m | BB_2.5std_Wick20_Whale1.5",
+    "wr": 84.87,
+    "trades": 390
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 2.0
+    },
+    "desc": "BTC 9m | Exhaustion_5bars_Vol2.0",
+    "wr": 86.58,
+    "trades": 380
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 1.5
+    },
+    "desc": "ETH 7m | BB_3.0std_Wick0_Whale1.5",
+    "wr": 85.56,
+    "trades": 374
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.2,
+      "wick": 0.0,
+      "whale": 2.5
+    },
+    "desc": "BTC 4m | BB_2.2std_Wick0_Whale2.5",
+    "wr": 84.95,
+    "trades": 372
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 1.8
+    },
+    "desc": "BTC 11m | Exhaustion_5bars_Vol1.8",
+    "wr": 86.25,
+    "trades": 371
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.0,
+      "whale": 1.5
+    },
+    "desc": "BTC 15m | BB_2.4std_Wick0_Whale1.5",
+    "wr": 85.44,
+    "trades": 371
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "BB",
+    "params": {
+      "std": 2.3,
+      "wick": 0.35,
+      "whale": 1.5
+    },
+    "desc": "ETH 7m | BB_2.3std_Wick35_Whale1.5",
+    "wr": 84.91,
+    "trades": 371
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.2,
+      "whale": 2.0
+    },
+    "desc": "ETH 4m | BB_2.5std_Wick20_Whale2.0",
+    "wr": 85.48,
+    "trades": 365
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 25,
+      "hi": 75,
+      "whale": 2.0
+    },
+    "desc": "BTC 10m | RSI7_25/75_Whale2.0",
+    "wr": 85.16,
+    "trades": 364
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 25,
+      "hi": 75,
+      "whale": 2.5
+    },
+    "desc": "BTC 9m | RSI4_25/75_Whale2.5",
+    "wr": 84.87,
+    "trades": 357
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI",
+    "params": {
+      "period": 9,
+      "lo": 28,
+      "hi": 72,
+      "whale": 2.0
+    },
+    "desc": "BTC 10m | RSI9_28/72_Whale2.0",
+    "wr": 84.87,
+    "trades": 357
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 18,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 30,
+      "hi": 70,
+      "whale": 2.0
+    },
+    "desc": "ETH 18m | RSI5_30/70_Whale2.0",
+    "wr": 84.99,
+    "trades": 353
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.2,
+      "whale": 1.2
+    },
+    "desc": "BTC 4m | BB_2.8std_Wick20_Whale1.2",
+    "wr": 85.1,
+    "trades": 349
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "RSI",
+    "params": {
+      "period": 9,
+      "lo": 30,
+      "hi": 70,
+      "whale": 3.0
+    },
+    "desc": "ETH 4m | RSI9_30/70_Whale3.0",
+    "wr": 84.81,
+    "trades": 349
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 8,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.2,
+      "whale": 0.0
+    },
+    "desc": "BTC 8m | BB_2.8std_Wick20_Whale0.0",
+    "wr": 85.3,
+    "trades": 347
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 25,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 30,
+      "hi": 70,
+      "whale": 1.8
+    },
+    "desc": "BTC 25m | RSI5_30/70_Whale1.8",
+    "wr": 85.38,
+    "trades": 342
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 28,
+      "hi": 72,
+      "whale": 2.5
+    },
+    "desc": "BTC 9m | RSI5_28/72_Whale2.5",
+    "wr": 85.25,
+    "trades": 339
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "RSI",
+    "params": {
+      "period": 8,
+      "lo": 28,
+      "hi": 72,
+      "whale": 3.0
+    },
+    "desc": "ETH 4m | RSI8_28/72_Whale3.0",
+    "wr": 85.07,
+    "trades": 335
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "BB",
+    "params": {
+      "std": 2.2,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "desc": "BTC 10m | BB_2.2std_Wick35_Whale1.2",
+    "wr": 85.29,
+    "trades": 333
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.0,
+      "wick": 0.2,
+      "whale": 1.5
+    },
+    "desc": "BTC 15m | BB_2.0std_Wick20_Whale1.5",
+    "wr": 84.89,
+    "trades": 331
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 10,
+      "hi": 90,
+      "whale": 2.0
+    },
+    "desc": "ETH 7m | RSI4_10/90_Whale2.0",
+    "wr": 85.5,
+    "trades": 331
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 10,
+      "hi": 90,
+      "whale": 2.0
+    },
+    "desc": "BTC 10m | RSI3_10/90_Whale2.0",
+    "wr": 85.06,
+    "trades": 328
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.2,
+      "whale": 1.2
+    },
+    "desc": "BTC 15m | BB_2.4std_Wick20_Whale1.2",
+    "wr": 85.32,
+    "trades": 327
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 2.0,
+      "wick": 0.35,
+      "whale": 1.5
+    },
+    "desc": "BTC 9m | BB_2.0std_Wick35_Whale1.5",
+    "wr": 84.92,
+    "trades": 325
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 9,
+    "type": "WILLR",
+    "params": {
+      "wick": 0.0,
+      "whale": 2.0
+    },
+    "desc": "ETH 9m | WillR92_Wick0_Whale2.0",
+    "wr": 84.83,
+    "trades": 323
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 9,
+    "type": "STOCH",
+    "params": {
+      "st_th": 8,
+      "whale": 2.0
+    },
+    "desc": "ETH 9m | Stoch8_Whale2.0",
+    "wr": 84.83,
+    "trades": 323
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.3,
+      "wick": 0.0,
+      "whale": 2.5
+    },
+    "desc": "BTC 4m | BB_2.3std_Wick0_Whale2.5",
+    "wr": 85.22,
+    "trades": 318
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 15,
+    "type": "STOCH",
+    "params": {
+      "st_th": 15,
+      "whale": 2.0
+    },
+    "desc": "ETH 15m | Stoch15_Whale2.0",
+    "wr": 85.17,
+    "trades": 317
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.35,
+      "whale": 0.0
+    },
+    "desc": "BTC 15m | BB_2.4std_Wick35_Whale0.0",
+    "wr": 85.67,
+    "trades": 314
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.2,
+      "whale": 2.0
+    },
+    "desc": "ETH 4m | BB_2.6std_Wick20_Whale2.0",
+    "wr": 85.99,
+    "trades": 314
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 22,
+      "hi": 78,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI3_22/78_Whale2.5",
+    "wr": 84.94,
+    "trades": 312
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 1.5
+    },
+    "desc": "BTC 15m | BB_2.5std_Wick0_Whale1.5",
+    "wr": 84.89,
+    "trades": 311
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.2,
+      "whale": 1.0
+    },
+    "desc": "BTC 15m | BB_2.6std_Wick20_Whale1.0",
+    "wr": 85.21,
+    "trades": 311
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.0,
+      "whale": 1.8
+    },
+    "desc": "ETH 11m | BB_2.4std_Wick0_Whale1.8",
+    "wr": 85.85,
+    "trades": 311
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.2,
+      "wick": 0.35,
+      "whale": 2.0
+    },
+    "desc": "ETH 4m | BB_2.2std_Wick35_Whale2.0",
+    "wr": 85.11,
+    "trades": 309
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 2.0
+    },
+    "desc": "BTC 11m | Exhaustion_5bars_Vol2.0",
+    "wr": 85.71,
+    "trades": 308
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.2,
+      "whale": 1.5
+    },
+    "desc": "BTC 5m | BB_2.6std_Wick20_Whale1.5",
+    "wr": 85.25,
+    "trades": 305
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 24,
+    "type": "RSI",
+    "params": {
+      "period": 9,
+      "lo": 15,
+      "hi": 85,
+      "whale": 0.0
+    },
+    "desc": "BTC 24m | RSI9_15/85_Whale0.0",
+    "wr": 85.43,
+    "trades": 302
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 1.8
+    },
+    "desc": "ETH 15m | Exhaustion_5bars_Vol1.8",
+    "wr": 85.0,
+    "trades": 300
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.35,
+      "whale": 1.5
+    },
+    "desc": "ETH 7m | BB_2.4std_Wick35_Whale1.5",
+    "wr": 84.9,
+    "trades": 298
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 25,
+      "hi": 75,
+      "whale": 3.0
+    },
+    "desc": "ETH 4m | RSI7_25/75_Whale3.0",
+    "wr": 85.08,
+    "trades": 295
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "CCI",
+    "params": {
+      "cci_th": 180,
+      "whale": 2.0
+    },
+    "desc": "ETH 11m | CCI14_180_Whale2.0",
+    "wr": 85.37,
+    "trades": 294
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.2,
+      "whale": 1.8
+    },
+    "desc": "ETH 4m | BB_2.8std_Wick20_Whale1.8",
+    "wr": 84.93,
+    "trades": 292
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 30,
+      "hi": 70,
+      "whale": 3.0
+    },
+    "desc": "ETH 7m | RSI4_30/70_Whale3.0",
+    "wr": 85.27,
+    "trades": 292
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 25,
+      "hi": 75,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI3_25/75_Whale2.5",
+    "wr": 85.61,
+    "trades": 285
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 1.8
+    },
+    "desc": "ETH 11m | BB_2.5std_Wick0_Whale1.8",
+    "wr": 85.51,
+    "trades": 283
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "RSI",
+    "params": {
+      "period": 9,
+      "lo": 28,
+      "hi": 72,
+      "whale": 3.0
+    },
+    "desc": "ETH 4m | RSI9_28/72_Whale3.0",
+    "wr": 84.89,
+    "trades": 278
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 2,
+      "lo": 15,
+      "hi": 85,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI2_15/85_Whale2.5",
+    "wr": 85.61,
+    "trades": 278
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 2.5
+    },
+    "desc": "BTC 9m | Exhaustion_5bars_Vol2.5",
+    "wr": 85.82,
+    "trades": 275
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 20,
+      "hi": 80,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI3_20/80_Whale2.5",
+    "wr": 85.82,
+    "trades": 275
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 15,
+      "hi": 85,
+      "whale": 1.8
+    },
+    "desc": "BTC 9m | RSI6_15/85_Whale1.8",
+    "wr": 84.98,
+    "trades": 273
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.0,
+      "whale": 2.5
+    },
+    "desc": "BTC 4m | BB_2.4std_Wick0_Whale2.5",
+    "wr": 86.76,
+    "trades": 272
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 25,
+      "hi": 75,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI4_25/75_Whale2.5",
+    "wr": 85.82,
+    "trades": 268
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 28,
+      "hi": 72,
+      "whale": 3.0
+    },
+    "desc": "ETH 7m | RSI4_28/72_Whale3.0",
+    "wr": 85.82,
+    "trades": 268
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 24,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 28,
+      "hi": 72,
+      "whale": 2.0
+    },
+    "desc": "BTC 24m | RSI4_28/72_Whale2.0",
+    "wr": 85.02,
+    "trades": 267
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.2,
+      "whale": 0.0
+    },
+    "desc": "ETH 9m | BB_3.0std_Wick20_Whale0.0",
+    "wr": 85.66,
+    "trades": 265
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 1.8,
+      "wick": 0.35,
+      "whale": 1.8
+    },
+    "desc": "BTC 9m | BB_1.8std_Wick35_Whale1.8",
+    "wr": 87.12,
+    "trades": 264
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 25,
+      "hi": 75,
+      "whale": 2.5
+    },
+    "desc": "BTC 9m | RSI5_25/75_Whale2.5",
+    "wr": 84.85,
+    "trades": 264
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 28,
+      "hi": 72,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI5_28/72_Whale2.5",
+    "wr": 85.61,
+    "trades": 264
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.2,
+      "whale": 1.2
+    },
+    "desc": "BTC 15m | BB_2.5std_Wick20_Whale1.2",
+    "wr": 85.61,
+    "trades": 264
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 2.0
+    },
+    "desc": "ETH 15m | Exhaustion_5bars_Vol2.0",
+    "wr": 85.11,
+    "trades": 262
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 20,
+    "type": "WILLR",
+    "params": {
+      "wick": 0.2,
+      "whale": 1.5
+    },
+    "desc": "ETH 20m | WillR88_Wick20_Whale1.5",
+    "wr": 85.06,
+    "trades": 261
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 24,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 22,
+      "hi": 78,
+      "whale": 2.0
+    },
+    "desc": "BTC 24m | RSI3_22/78_Whale2.0",
+    "wr": 84.94,
+    "trades": 259
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.2,
+      "whale": 2.0
+    },
+    "desc": "ETH 5m | BB_2.5std_Wick20_Whale2.0",
+    "wr": 84.94,
+    "trades": 259
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 1.8,
+      "wick": 0.2,
+      "whale": 2.5
+    },
+    "desc": "BTC 5m | BB_1.8std_Wick20_Whale2.5",
+    "wr": 84.88,
+    "trades": 258
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 2.0
+    },
+    "desc": "ETH 5m | BB_3.0std_Wick0_Whale2.0",
+    "wr": 85.77,
+    "trades": 253
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 30,
+      "hi": 70,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI6_30/70_Whale2.5",
+    "wr": 85.32,
+    "trades": 252
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 30,
+      "hi": 70,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI5_30/70_Whale2.5",
+    "wr": 85.32,
+    "trades": 252
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.35,
+      "whale": 0.0
+    },
+    "desc": "ETH 15m | BB_2.6std_Wick35_Whale0.0",
+    "wr": 85.32,
+    "trades": 252
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 22,
+      "hi": 78,
+      "whale": 2.5
+    },
+    "desc": "BTC 10m | RSI4_22/78_Whale2.5",
+    "wr": 84.8,
+    "trades": 250
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 10,
+      "hi": 90,
+      "whale": 2.0
+    },
+    "desc": "ETH 4m | RSI6_10/90_Whale2.0",
+    "wr": 85.54,
+    "trades": 249
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "RSI",
+    "params": {
+      "period": 9,
+      "lo": 15,
+      "hi": 85,
+      "whale": 1.0
+    },
+    "desc": "BTC 20m | RSI9_15/85_Whale1.0",
+    "wr": 85.48,
+    "trades": 248
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 30,
+      "hi": 70,
+      "whale": 3.0
+    },
+    "desc": "ETH 7m | RSI5_30/70_Whale3.0",
+    "wr": 85.08,
+    "trades": 248
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "BB",
+    "params": {
+      "std": 2.0,
+      "wick": 0.5,
+      "whale": 1.2
+    },
+    "desc": "BTC 10m | BB_2.0std_Wick50_Whale1.2",
+    "wr": 84.9,
+    "trades": 245
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 28,
+      "hi": 72,
+      "whale": 2.5
+    },
+    "desc": "BTC 10m | RSI6_28/72_Whale2.5",
+    "wr": 84.9,
+    "trades": 245
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 25,
+    "type": "WILLR",
+    "params": {
+      "wick": 0.0,
+      "whale": 1.5
+    },
+    "desc": "BTC 25m | WillR95_Wick0_Whale1.5",
+    "wr": 85.83,
+    "trades": 240
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 25,
+    "type": "STOCH",
+    "params": {
+      "st_th": 5,
+      "whale": 1.5
+    },
+    "desc": "BTC 25m | Stoch5_Whale1.5",
+    "wr": 85.83,
+    "trades": 240
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.0,
+      "whale": 1.8
+    },
+    "desc": "ETH 11m | BB_2.6std_Wick0_Whale1.8",
+    "wr": 87.08,
+    "trades": 240
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.2,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "desc": "BTC 15m | BB_2.2std_Wick35_Whale1.2",
+    "wr": 85.77,
+    "trades": 239
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 18,
+      "hi": 82,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI3_18/82_Whale2.5",
+    "wr": 85.65,
+    "trades": 237
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 18,
+    "type": "CCI",
+    "params": {
+      "cci_th": 140,
+      "whale": 2.0
+    },
+    "desc": "BTC 18m | CCI14_140_Whale2.0",
+    "wr": 85.17,
+    "trades": 236
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "BB",
+    "params": {
+      "std": 1.8,
+      "wick": 0.2,
+      "whale": 2.0
+    },
+    "desc": "BTC 10m | BB_1.8std_Wick20_Whale2.0",
+    "wr": 85.96,
+    "trades": 235
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.2,
+      "wick": 0.2,
+      "whale": 1.5
+    },
+    "desc": "BTC 15m | BB_2.2std_Wick20_Whale1.5",
+    "wr": 86.81,
+    "trades": 235
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 25,
+      "hi": 75,
+      "whale": 2.5
+    },
+    "desc": "BTC 10m | RSI5_25/75_Whale2.5",
+    "wr": 86.27,
+    "trades": 233
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 22,
+      "hi": 78,
+      "whale": 2.0
+    },
+    "desc": "BTC 15m | RSI5_22/78_Whale2.0",
+    "wr": 84.85,
+    "trades": 231
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.35,
+      "whale": 0.0
+    },
+    "desc": "BTC 15m | BB_2.5std_Wick35_Whale0.0",
+    "wr": 85.96,
+    "trades": 228
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 25,
+      "hi": 75,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI4_25/75_Whale2.5",
+    "wr": 85.96,
+    "trades": 228
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.2,
+      "wick": 0.0,
+      "whale": 1.8
+    },
+    "desc": "BTC 15m | BB_2.2std_Wick0_Whale1.8",
+    "wr": 87.67,
+    "trades": 227
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 24,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 10,
+      "hi": 90,
+      "whale": 1.0
+    },
+    "desc": "BTC 24m | RSI6_10/90_Whale1.0",
+    "wr": 85.02,
+    "trades": 227
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 24,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 12,
+      "hi": 88,
+      "whale": 1.0
+    },
+    "desc": "BTC 24m | RSI7_12/88_Whale1.0",
+    "wr": 85.84,
+    "trades": 226
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 2.5
+    },
+    "desc": "BTC 4m | BB_2.5std_Wick0_Whale2.5",
+    "wr": 87.05,
+    "trades": 224
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 20,
+      "hi": 80,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI3_20/80_Whale2.5",
+    "wr": 85.27,
+    "trades": 224
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 22,
+      "hi": 78,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI4_22/78_Whale2.5",
+    "wr": 86.55,
+    "trades": 223
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.2,
+      "whale": 1.2
+    },
+    "desc": "ETH 7m | BB_3.0std_Wick20_Whale1.2",
+    "wr": 85.65,
+    "trades": 223
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 28,
+      "hi": 72,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI5_28/72_Whale2.5",
+    "wr": 86.04,
+    "trades": 222
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.2,
+      "whale": 2.0
+    },
+    "desc": "ETH 4m | BB_2.8std_Wick20_Whale2.0",
+    "wr": 85.52,
+    "trades": 221
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.2,
+      "whale": 1.2
+    },
+    "desc": "BTC 15m | BB_2.6std_Wick20_Whale1.2",
+    "wr": 86.3,
+    "trades": 219
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 24,
+    "type": "RSI",
+    "params": {
+      "period": 9,
+      "lo": 15,
+      "hi": 85,
+      "whale": 1.0
+    },
+    "desc": "BTC 24m | RSI9_15/85_Whale1.0",
+    "wr": 85.84,
+    "trades": 219
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 28,
+      "hi": 72,
+      "whale": 3.0
+    },
+    "desc": "ETH 7m | RSI5_28/72_Whale3.0",
+    "wr": 85.84,
+    "trades": 219
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.2,
+      "whale": 1.0
+    },
+    "desc": "ETH 9m | BB_3.0std_Wick20_Whale1.0",
+    "wr": 85.84,
+    "trades": 219
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 25,
+      "hi": 75,
+      "whale": 3.0
+    },
+    "desc": "ETH 7m | RSI4_25/75_Whale3.0",
+    "wr": 84.86,
+    "trades": 218
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 2.5
+    },
+    "desc": "BTC 11m | Exhaustion_5bars_Vol2.5",
+    "wr": 88.02,
+    "trades": 217
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 30,
+      "hi": 70,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI6_30/70_Whale2.5",
+    "wr": 85.98,
+    "trades": 214
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 24,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 1.8
+    },
+    "desc": "ETH 24m | Exhaustion_5bars_Vol1.8",
+    "wr": 84.98,
+    "trades": 213
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 28,
+      "hi": 72,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI6_28/72_Whale2.5",
+    "wr": 85.38,
+    "trades": 212
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "CCI",
+    "params": {
+      "cci_th": 160,
+      "whale": 2.0
+    },
+    "desc": "BTC 15m | CCI14_160_Whale2.0",
+    "wr": 86.32,
+    "trades": 212
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 18,
+      "hi": 82,
+      "whale": 2.0
+    },
+    "desc": "BTC 15m | RSI4_18/82_Whale2.0",
+    "wr": 84.91,
+    "trades": 212
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.2,
+      "whale": 2.0
+    },
+    "desc": "ETH 5m | BB_2.6std_Wick20_Whale2.0",
+    "wr": 84.91,
+    "trades": 212
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 24,
+    "type": "RSI",
+    "params": {
+      "period": 10,
+      "lo": 15,
+      "hi": 85,
+      "whale": 0.0
+    },
+    "desc": "BTC 24m | RSI10_15/85_Whale0.0",
+    "wr": 87.68,
+    "trades": 211
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.35,
+      "whale": 1.0
+    },
+    "desc": "BTC 15m | BB_2.4std_Wick35_Whale1.0",
+    "wr": 85.65,
+    "trades": 209
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 2.2,
+      "wick": 0.35,
+      "whale": 1.5
+    },
+    "desc": "BTC 9m | BB_2.2std_Wick35_Whale1.5",
+    "wr": 85.1,
+    "trades": 208
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 30,
+      "hi": 70,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI7_30/70_Whale2.5",
+    "wr": 85.1,
+    "trades": 208
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "BB",
+    "params": {
+      "std": 2.0,
+      "wick": 0.5,
+      "whale": 2.0
+    },
+    "desc": "BTC 3m | BB_2.0std_Wick50_Whale2.0",
+    "wr": 85.85,
+    "trades": 205
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "desc": "BTC 10m | BB_2.4std_Wick35_Whale1.2",
+    "wr": 84.88,
+    "trades": 205
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 10,
+      "hi": 90,
+      "whale": 2.5
+    },
+    "desc": "ETH 5m | RSI4_10/90_Whale2.5",
+    "wr": 85.78,
+    "trades": 204
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 25,
+      "hi": 75,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI5_25/75_Whale2.5",
+    "wr": 85.71,
+    "trades": 203
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 9,
+    "type": "WILLR",
+    "params": {
+      "wick": 0.0,
+      "whale": 2.0
+    },
+    "desc": "ETH 9m | WillR95_Wick0_Whale2.0",
+    "wr": 85.22,
+    "trades": 203
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 9,
+    "type": "STOCH",
+    "params": {
+      "st_th": 5,
+      "whale": 2.0
+    },
+    "desc": "ETH 9m | Stoch5_Whale2.0",
+    "wr": 85.22,
+    "trades": 203
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 8,
+      "lo": 20,
+      "hi": 80,
+      "whale": 2.0
+    },
+    "desc": "BTC 9m | RSI8_20/80_Whale2.0",
+    "wr": 85.64,
+    "trades": 202
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.3,
+      "wick": 0.0,
+      "whale": 1.8
+    },
+    "desc": "BTC 15m | BB_2.3std_Wick0_Whale1.8",
+    "wr": 89.11,
+    "trades": 202
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 6,
+    "type": "RSI",
+    "params": {
+      "period": 8,
+      "lo": 30,
+      "hi": 70,
+      "whale": 3.0
+    },
+    "desc": "BTC 6m | RSI8_30/70_Whale3.0",
+    "wr": 84.85,
+    "trades": 198
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 18,
+      "hi": 82,
+      "whale": 2.5
+    },
+    "desc": "BTC 9m | RSI4_18/82_Whale2.5",
+    "wr": 85.35,
+    "trades": 198
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 18,
+      "hi": 82,
+      "whale": 2.0
+    },
+    "desc": "BTC 9m | RSI7_18/82_Whale2.0",
+    "wr": 85.86,
+    "trades": 198
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 13,
+    "type": "RSI",
+    "params": {
+      "period": 9,
+      "lo": 12,
+      "hi": 88,
+      "whale": 0.0
+    },
+    "desc": "BTC 13m | RSI9_12/88_Whale0.0",
+    "wr": 84.85,
+    "trades": 198
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 10,
+      "hi": 90,
+      "whale": 2.0
+    },
+    "desc": "ETH 5m | RSI6_10/90_Whale2.0",
+    "wr": 86.36,
+    "trades": 198
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 10,
+      "hi": 90,
+      "whale": 0.0
+    },
+    "desc": "BTC 20m | RSI7_10/90_Whale0.0",
+    "wr": 85.79,
+    "trades": 197
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 24,
+    "type": "RSI",
+    "params": {
+      "period": 8,
+      "lo": 12,
+      "hi": 88,
+      "whale": 0.0
+    },
+    "desc": "BTC 24m | RSI8_12/88_Whale0.0",
+    "wr": 86.8,
+    "trades": 197
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 12,
+      "hi": 88,
+      "whale": 2.0
+    },
+    "desc": "ETH 5m | RSI7_12/88_Whale2.0",
+    "wr": 85.28,
+    "trades": 197
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.2,
+      "whale": 1.2
+    },
+    "desc": "ETH 9m | BB_3.0std_Wick20_Whale1.2",
+    "wr": 85.28,
+    "trades": 197
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.0,
+      "whale": 2.0
+    },
+    "desc": "ETH 11m | BB_2.4std_Wick0_Whale2.0",
+    "wr": 85.2,
+    "trades": 196
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "RSI",
+    "params": {
+      "period": 8,
+      "lo": 12,
+      "hi": 88,
+      "whale": 2.0
+    },
+    "desc": "BTC 3m | RSI8_12/88_Whale2.0",
+    "wr": 86.15,
+    "trades": 195
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "BB",
+    "params": {
+      "std": 2.0,
+      "wick": 0.35,
+      "whale": 2.5
+    },
+    "desc": "BTC 3m | BB_2.0std_Wick35_Whale2.5",
+    "wr": 84.97,
+    "trades": 193
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.0,
+      "whale": 2.5
+    },
+    "desc": "BTC 4m | BB_2.6std_Wick0_Whale2.5",
+    "wr": 86.53,
+    "trades": 193
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 30,
+      "hi": 70,
+      "whale": 3.0
+    },
+    "desc": "BTC 9m | RSI5_30/70_Whale3.0",
+    "wr": 84.97,
+    "trades": 193
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 15,
+      "hi": 85,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI3_15/85_Whale2.5",
+    "wr": 87.05,
+    "trades": 193
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 18,
+      "hi": 82,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI3_18/82_Whale2.5",
+    "wr": 86.01,
+    "trades": 193
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.2,
+      "whale": 1.2
+    },
+    "desc": "BTC 4m | BB_3.0std_Wick20_Whale1.2",
+    "wr": 85.42,
+    "trades": 192
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.2,
+      "whale": 1.5
+    },
+    "desc": "BTC 5m | BB_2.8std_Wick20_Whale1.5",
+    "wr": 86.46,
+    "trades": 192
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 20,
+      "hi": 80,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI4_20/80_Whale2.5",
+    "wr": 85.94,
+    "trades": 192
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.3,
+      "wick": 0.2,
+      "whale": 1.5
+    },
+    "desc": "BTC 15m | BB_2.3std_Wick20_Whale1.5",
+    "wr": 88.02,
+    "trades": 192
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 20,
+      "hi": 80,
+      "whale": 2.5
+    },
+    "desc": "ETH 7m | RSI6_20/80_Whale2.5",
+    "wr": 84.9,
+    "trades": 192
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 7,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 22,
+      "hi": 78,
+      "whale": 3.0
+    },
+    "desc": "BTC 7m | RSI4_22/78_Whale3.0",
+    "wr": 84.82,
+    "trades": 191
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 10,
+      "hi": 90,
+      "whale": 2.0
+    },
+    "desc": "BTC 9m | RSI4_10/90_Whale2.0",
+    "wr": 84.82,
+    "trades": 191
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.3,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "desc": "BTC 15m | BB_2.3std_Wick35_Whale1.2",
+    "wr": 87.37,
+    "trades": 190
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 24,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 2.0
+    },
+    "desc": "ETH 24m | Exhaustion_5bars_Vol2.0",
+    "wr": 85.11,
+    "trades": 188
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.35,
+      "whale": 1.5
+    },
+    "desc": "BTC 5m | BB_2.5std_Wick35_Whale1.5",
+    "wr": 85.56,
+    "trades": 187
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "RSI",
+    "params": {
+      "period": 10,
+      "lo": 18,
+      "hi": 82,
+      "whale": 3.0
+    },
+    "desc": "ETH 2m | RSI10_18/82_Whale3.0",
+    "wr": 86.1,
+    "trades": 187
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 12,
+      "hi": 88,
+      "whale": 2.5
+    },
+    "desc": "BTC 9m | RSI3_12/88_Whale2.5",
+    "wr": 84.95,
+    "trades": 186
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 30,
+    "type": "WILLR",
+    "params": {
+      "wick": 0.0,
+      "whale": 1.5
+    },
+    "desc": "ETH 30m | WillR92_Wick0_Whale1.5",
+    "wr": 88.17,
+    "trades": 186
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 30,
+    "type": "STOCH",
+    "params": {
+      "st_th": 8,
+      "whale": 1.5
+    },
+    "desc": "ETH 30m | Stoch8_Whale1.5",
+    "wr": 88.17,
+    "trades": 186
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 10,
+      "hi": 90,
+      "whale": 2.0
+    },
+    "desc": "BTC 3m | RSI7_10/90_Whale2.0",
+    "wr": 84.86,
+    "trades": 185
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 18,
+      "hi": 82,
+      "whale": 1.8
+    },
+    "desc": "BTC 15m | RSI6_18/82_Whale1.8",
+    "wr": 85.33,
+    "trades": 184
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.0,
+      "whale": 1.8
+    },
+    "desc": "ETH 11m | BB_2.8std_Wick0_Whale1.8",
+    "wr": 88.04,
+    "trades": 184
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.35,
+      "whale": 2.0
+    },
+    "desc": "ETH 4m | BB_2.5std_Wick35_Whale2.0",
+    "wr": 85.16,
+    "trades": 182
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 8,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.2,
+      "whale": 0.0
+    },
+    "desc": "BTC 8m | BB_3.0std_Wick20_Whale0.0",
+    "wr": 88.33,
+    "trades": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 1.8,
+      "wick": 0.35,
+      "whale": 2.0
+    },
+    "desc": "BTC 9m | BB_1.8std_Wick35_Whale2.0",
+    "wr": 88.33,
+    "trades": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 12,
+      "hi": 88,
+      "whale": 1.2
+    },
+    "desc": "BTC 20m | RSI7_12/88_Whale1.2",
+    "wr": 85.0,
+    "trades": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 2.0
+    },
+    "desc": "BTC 4m | BB_3.0std_Wick0_Whale2.0",
+    "wr": 85.47,
+    "trades": 179
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.0,
+      "whale": 1.8
+    },
+    "desc": "BTC 15m | BB_2.4std_Wick0_Whale1.8",
+    "wr": 88.27,
+    "trades": 179
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "RSI",
+    "params": {
+      "period": 14,
+      "lo": 18,
+      "hi": 82,
+      "whale": 1.0
+    },
+    "desc": "BTC 15m | RSI14_18/82_Whale1.0",
+    "wr": 85.39,
+    "trades": 178
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "RSI",
+    "params": {
+      "period": 14,
+      "lo": 22,
+      "hi": 78,
+      "whale": 3.0
+    },
+    "desc": "ETH 2m | RSI14_22/78_Whale3.0",
+    "wr": 85.96,
+    "trades": 178
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 2.0
+    },
+    "desc": "ETH 11m | BB_2.5std_Wick0_Whale2.0",
+    "wr": 85.39,
+    "trades": 178
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 22,
+      "hi": 78,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI4_22/78_Whale2.5",
+    "wr": 87.08,
+    "trades": 178
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 2.0,
+      "wick": 0.35,
+      "whale": 1.8
+    },
+    "desc": "BTC 9m | BB_2.0std_Wick35_Whale1.8",
+    "wr": 89.83,
+    "trades": 177
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 24,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 10,
+      "hi": 90,
+      "whale": 0.0
+    },
+    "desc": "BTC 24m | RSI7_10/90_Whale0.0",
+    "wr": 85.31,
+    "trades": 177
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 10,
+      "hi": 90,
+      "whale": 1.8
+    },
+    "desc": "ETH 11m | RSI5_10/90_Whale1.8",
+    "wr": 86.93,
+    "trades": 176
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 6,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 25,
+      "hi": 75,
+      "whale": 3.0
+    },
+    "desc": "BTC 6m | RSI6_25/75_Whale3.0",
+    "wr": 85.14,
+    "trades": 175
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 10,
+      "hi": 90,
+      "whale": 1.2
+    },
+    "desc": "BTC 20m | RSI6_10/90_Whale1.2",
+    "wr": 85.71,
+    "trades": 175
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 24,
+    "type": "WILLR",
+    "params": {
+      "wick": 0.2,
+      "whale": 1.2
+    },
+    "desc": "ETH 24m | WillR92_Wick20_Whale1.2",
+    "wr": 87.93,
+    "trades": 174
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 25,
+      "hi": 75,
+      "whale": 2.5
+    },
+    "desc": "BTC 10m | RSI6_25/75_Whale2.5",
+    "wr": 84.97,
+    "trades": 173
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 25,
+      "hi": 75,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI5_25/75_Whale2.5",
+    "wr": 86.13,
+    "trades": 173
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 18,
+      "hi": 82,
+      "whale": 2.5
+    },
+    "desc": "BTC 10m | RSI4_18/82_Whale2.5",
+    "wr": 86.05,
+    "trades": 172
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 20,
+    "type": "WILLR",
+    "params": {
+      "wick": 0.2,
+      "whale": 1.5
+    },
+    "desc": "ETH 20m | WillR90_Wick20_Whale1.5",
+    "wr": 86.63,
+    "trades": 172
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 2.0,
+      "wick": 0.2,
+      "whale": 2.5
+    },
+    "desc": "BTC 5m | BB_2.0std_Wick20_Whale2.5",
+    "wr": 85.96,
+    "trades": 171
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 15,
+      "hi": 85,
+      "whale": 2.0
+    },
+    "desc": "BTC 9m | RSI6_15/85_Whale2.0",
+    "wr": 86.55,
+    "trades": 171
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 12,
+      "hi": 88,
+      "whale": 3.0
+    },
+    "desc": "BTC 4m | RSI4_12/88_Whale3.0",
+    "wr": 85.8,
+    "trades": 169
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 25,
+      "hi": 75,
+      "whale": 3.0
+    },
+    "desc": "BTC 9m | RSI4_25/75_Whale3.0",
+    "wr": 85.8,
+    "trades": 169
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 18,
+    "type": "CCI",
+    "params": {
+      "cci_th": 160,
+      "whale": 2.0
+    },
+    "desc": "BTC 18m | CCI14_160_Whale2.0",
+    "wr": 86.39,
+    "trades": 169
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 2.3,
+      "wick": 0.35,
+      "whale": 1.5
+    },
+    "desc": "BTC 9m | BB_2.3std_Wick35_Whale1.5",
+    "wr": 85.71,
+    "trades": 168
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "BB",
+    "params": {
+      "std": 2.0,
+      "wick": 0.2,
+      "whale": 2.0
+    },
+    "desc": "BTC 10m | BB_2.0std_Wick20_Whale2.0",
+    "wr": 86.23,
+    "trades": 167
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 28,
+      "hi": 72,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI7_28/72_Whale2.5",
+    "wr": 85.63,
+    "trades": 167
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 12,
+      "hi": 88,
+      "whale": 2.5
+    },
+    "desc": "ETH 7m | RSI4_12/88_Whale2.5",
+    "wr": 85.63,
+    "trades": 167
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 13,
+    "type": "RSI",
+    "params": {
+      "period": 8,
+      "lo": 10,
+      "hi": 90,
+      "whale": 0.0
+    },
+    "desc": "BTC 13m | RSI8_10/90_Whale0.0",
+    "wr": 85.54,
+    "trades": 166
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 7,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 15,
+      "hi": 85,
+      "whale": 3.0
+    },
+    "desc": "BTC 7m | RSI3_15/85_Whale3.0",
+    "wr": 84.85,
+    "trades": 165
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 2.0
+    },
+    "desc": "ETH 7m | BB_3.0std_Wick0_Whale2.0",
+    "wr": 86.67,
+    "trades": 165
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 15,
+      "hi": 85,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI3_15/85_Whale2.5",
+    "wr": 86.67,
+    "trades": 165
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 12,
+      "hi": 88,
+      "whale": 2.0
+    },
+    "desc": "BTC 9m | RSI5_12/88_Whale2.0",
+    "wr": 85.37,
+    "trades": 164
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.2,
+      "whale": 1.5
+    },
+    "desc": "BTC 15m | BB_2.4std_Wick20_Whale1.5",
+    "wr": 87.8,
+    "trades": 164
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.35,
+      "whale": 0.0
+    },
+    "desc": "BTC 15m | BB_2.6std_Wick35_Whale0.0",
+    "wr": 86.59,
+    "trades": 164
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 10,
+      "hi": 90,
+      "whale": 2.0
+    },
+    "desc": "BTC 15m | RSI3_10/90_Whale2.0",
+    "wr": 85.37,
+    "trades": 164
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 24,
+    "type": "RSI",
+    "params": {
+      "period": 10,
+      "lo": 15,
+      "hi": 85,
+      "whale": 1.0
+    },
+    "desc": "BTC 24m | RSI10_15/85_Whale1.0",
+    "wr": 87.2,
+    "trades": 164
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 28,
+      "hi": 72,
+      "whale": 3.0
+    },
+    "desc": "BTC 9m | RSI5_28/72_Whale3.0",
+    "wr": 87.04,
+    "trades": 162
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 10,
+      "hi": 90,
+      "whale": 2.0
+    },
+    "desc": "ETH 4m | RSI7_10/90_Whale2.0",
+    "wr": 85.8,
+    "trades": 162
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 12,
+      "hi": 88,
+      "whale": 2.5
+    },
+    "desc": "BTC 10m | RSI3_12/88_Whale2.5",
+    "wr": 86.96,
+    "trades": 161
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 15,
+      "hi": 85,
+      "whale": 2.0
+    },
+    "desc": "BTC 15m | RSI4_15/85_Whale2.0",
+    "wr": 85.71,
+    "trades": 161
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.2,
+      "wick": 0.2,
+      "whale": 2.5
+    },
+    "desc": "BTC 4m | BB_2.2std_Wick20_Whale2.5",
+    "wr": 85.53,
+    "trades": 159
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 14,
+    "type": "CCI",
+    "params": {
+      "cci_th": 180,
+      "whale": 2.0
+    },
+    "desc": "BTC 14m | CCI14_180_Whale2.0",
+    "wr": 86.16,
+    "trades": 159
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 18,
+      "hi": 82,
+      "whale": 2.0
+    },
+    "desc": "BTC 15m | RSI5_18/82_Whale2.0",
+    "wr": 86.16,
+    "trades": 159
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 15,
+      "hi": 85,
+      "whale": 2.5
+    },
+    "desc": "ETH 7m | RSI5_15/85_Whale2.5",
+    "wr": 86.79,
+    "trades": 159
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 12,
+      "hi": 88,
+      "whale": 3.0
+    },
+    "desc": "ETH 2m | RSI7_12/88_Whale3.0",
+    "wr": 84.81,
+    "trades": 158
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 18,
+      "hi": 82,
+      "whale": 2.5
+    },
+    "desc": "ETH 7m | RSI6_18/82_Whale2.5",
+    "wr": 86.08,
+    "trades": 158
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "BB",
+    "params": {
+      "std": 1.8,
+      "wick": 0.0,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | BB_1.8std_Wick0_Whale2.5",
+    "wr": 86.08,
+    "trades": 158
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 20,
+      "hi": 80,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI4_20/80_Whale2.5",
+    "wr": 86.71,
+    "trades": 158
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 30,
+      "hi": 70,
+      "whale": 3.0
+    },
+    "desc": "BTC 10m | RSI5_30/70_Whale3.0",
+    "wr": 85.35,
+    "trades": 157
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.2,
+      "whale": 1.5
+    },
+    "desc": "ETH 7m | BB_3.0std_Wick20_Whale1.5",
+    "wr": 86.62,
+    "trades": 157
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "WILLR",
+    "params": {
+      "wick": 0.2,
+      "whale": 2.0
+    },
+    "desc": "BTC 11m | WillR90_Wick20_Whale2.0",
+    "wr": 85.26,
+    "trades": 156
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.35,
+      "whale": 1.0
+    },
+    "desc": "BTC 15m | BB_2.5std_Wick35_Whale1.0",
+    "wr": 86.54,
+    "trades": 156
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 28,
+      "hi": 72,
+      "whale": 3.0
+    },
+    "desc": "BTC 11m | RSI4_28/72_Whale3.0",
+    "wr": 85.16,
+    "trades": 155
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 12,
+    "type": "RSI",
+    "params": {
+      "period": 2,
+      "lo": 25,
+      "hi": 75,
+      "whale": 3.0
+    },
+    "desc": "ETH 12m | RSI2_25/75_Whale3.0",
+    "wr": 85.16,
+    "trades": 155
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 14,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.5,
+      "whale": 0.0
+    },
+    "desc": "BTC 14m | BB_2.4std_Wick50_Whale0.0",
+    "wr": 87.01,
+    "trades": 154
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 24,
+    "type": "RSI",
+    "params": {
+      "period": 8,
+      "lo": 12,
+      "hi": 88,
+      "whale": 1.0
+    },
+    "desc": "BTC 24m | RSI8_12/88_Whale1.0",
+    "wr": 85.06,
+    "trades": 154
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 10,
+      "hi": 90,
+      "whale": 3.0
+    },
+    "desc": "ETH 2m | RSI6_10/90_Whale3.0",
+    "wr": 85.71,
+    "trades": 154
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 2.5
+    },
+    "desc": "BTC 5m | BB_2.5std_Wick0_Whale2.5",
+    "wr": 84.97,
+    "trades": 153
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 6,
+    "type": "RSI",
+    "params": {
+      "period": 8,
+      "lo": 28,
+      "hi": 72,
+      "whale": 3.0
+    },
+    "desc": "BTC 6m | RSI8_28/72_Whale3.0",
+    "wr": 84.97,
+    "trades": 153
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 30,
+      "hi": 70,
+      "whale": 3.0
+    },
+    "desc": "BTC 9m | RSI6_30/70_Whale3.0",
+    "wr": 87.58,
+    "trades": 153
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 20,
+      "hi": 80,
+      "whale": 2.0
+    },
+    "desc": "BTC 15m | RSI6_20/80_Whale2.0",
+    "wr": 84.97,
+    "trades": 153
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "desc": "ETH 4m | BB_3.0std_Wick35_Whale1.2",
+    "wr": 84.97,
+    "trades": 153
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.0,
+      "whale": 2.0
+    },
+    "desc": "ETH 11m | BB_2.6std_Wick0_Whale2.0",
+    "wr": 85.62,
+    "trades": 153
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 18,
+      "hi": 82,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI4_18/82_Whale2.5",
+    "wr": 85.53,
+    "trades": 152
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.35,
+      "whale": 2.0
+    },
+    "desc": "ETH 4m | BB_2.6std_Wick35_Whale2.0",
+    "wr": 86.18,
+    "trades": 152
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "desc": "ETH 7m | BB_2.8std_Wick35_Whale1.2",
+    "wr": 84.87,
+    "trades": 152
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 9,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 30,
+      "hi": 70,
+      "whale": 3.0
+    },
+    "desc": "ETH 9m | RSI5_30/70_Whale3.0",
+    "wr": 84.87,
+    "trades": 152
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.3,
+      "wick": 0.35,
+      "whale": 2.0
+    },
+    "desc": "BTC 4m | BB_2.3std_Wick35_Whale2.0",
+    "wr": 85.33,
+    "trades": 150
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "BB",
+    "params": {
+      "std": 2.2,
+      "wick": 0.5,
+      "whale": 1.2
+    },
+    "desc": "BTC 10m | BB_2.2std_Wick50_Whale1.2",
+    "wr": 87.92,
+    "trades": 149
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.0,
+      "whale": 2.5
+    },
+    "desc": "ETH 5m | BB_2.8std_Wick0_Whale2.5",
+    "wr": 85.23,
+    "trades": 149
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 7,
+    "type": "RSI",
+    "params": {
+      "period": 8,
+      "lo": 22,
+      "hi": 78,
+      "whale": 2.5
+    },
+    "desc": "ETH 7m | RSI8_22/78_Whale2.5",
+    "wr": 85.23,
+    "trades": 149
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 2.0,
+      "wick": 0.0,
+      "whale": 2.5
+    },
+    "desc": "BTC 9m | BB_2.0std_Wick0_Whale2.5",
+    "wr": 85.14,
+    "trades": 148
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 25,
+      "hi": 75,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI6_25/75_Whale2.5",
+    "wr": 85.81,
+    "trades": 148
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 9,
+      "lo": 30,
+      "hi": 70,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI9_30/70_Whale2.5",
+    "wr": 85.14,
+    "trades": 148
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.4,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "desc": "BTC 15m | BB_2.4std_Wick35_Whale1.2",
+    "wr": 87.84,
+    "trades": 148
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 12,
+      "hi": 88,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI3_12/88_Whale2.5",
+    "wr": 86.39,
+    "trades": 147
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 12,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "desc": "BTC 12m | BB_2.5std_Wick35_Whale1.2",
+    "wr": 85.03,
+    "trades": 147
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 22,
+      "hi": 78,
+      "whale": 2.5
+    },
+    "desc": "BTC 11m | RSI5_22/78_Whale2.5",
+    "wr": 86.3,
+    "trades": 146
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 1.8
+    },
+    "desc": "BTC 15m | BB_2.5std_Wick0_Whale1.8",
+    "wr": 87.67,
+    "trades": 146
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.2,
+      "whale": 2.0
+    },
+    "desc": "BTC 3m | BB_2.8std_Wick20_Whale2.0",
+    "wr": 85.52,
+    "trades": 145
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "RSI",
+    "params": {
+      "period": 6,
+      "lo": 10,
+      "hi": 90,
+      "whale": 2.5
+    },
+    "desc": "BTC 3m | RSI6_10/90_Whale2.5",
+    "wr": 87.5,
+    "trades": 144
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 30,
+      "hi": 70,
+      "whale": 3.0
+    },
+    "desc": "BTC 11m | RSI5_30/70_Whale3.0",
+    "wr": 86.81,
+    "trades": 144
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "RSI",
+    "params": {
+      "period": 14,
+      "lo": 28,
+      "hi": 72,
+      "whale": 3.0
+    },
+    "desc": "ETH 4m | RSI14_28/72_Whale3.0",
+    "wr": 85.42,
+    "trades": 144
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 22,
+      "hi": 78,
+      "whale": 3.0
+    },
+    "desc": "BTC 11m | RSI3_22/78_Whale3.0",
+    "wr": 86.01,
+    "trades": 143
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 25,
+    "type": "BB",
+    "params": {
+      "std": 2.0,
+      "wick": 0.0,
+      "whale": 1.8
+    },
+    "desc": "BTC 25m | BB_2.0std_Wick0_Whale1.8",
+    "wr": 85.31,
+    "trades": 143
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 2.0,
+      "wick": 0.5,
+      "whale": 1.5
+    },
+    "desc": "BTC 9m | BB_2.0std_Wick50_Whale1.5",
+    "wr": 85.21,
+    "trades": 142
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "CCI",
+    "params": {
+      "cci_th": 180,
+      "whale": 2.0
+    },
+    "desc": "BTC 15m | CCI14_180_Whale2.0",
+    "wr": 88.73,
+    "trades": 142
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 8,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.2,
+      "whale": 1.0
+    },
+    "desc": "BTC 8m | BB_3.0std_Wick20_Whale1.0",
+    "wr": 87.23,
+    "trades": 141
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 2.0
+    },
+    "desc": "BTC 10m | BB_2.5std_Wick0_Whale2.0",
+    "wr": 85.11,
+    "trades": 141
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 4,
+      "lo": 18,
+      "hi": 82,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI4_18/82_Whale2.5",
+    "wr": 85.82,
+    "trades": 141
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.3,
+      "wick": 0.2,
+      "whale": 2.5
+    },
+    "desc": "BTC 4m | BB_2.3std_Wick20_Whale2.5",
+    "wr": 86.43,
+    "trades": 140
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.0,
+      "whale": 2.5
+    },
+    "desc": "BTC 4m | BB_2.8std_Wick0_Whale2.5",
+    "wr": 85.71,
+    "trades": 140
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.2,
+      "whale": 0.0
+    },
+    "desc": "BTC 15m | BB_3.0std_Wick20_Whale0.0",
+    "wr": 85.0,
+    "trades": 140
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 3,
+      "lo": 25,
+      "hi": 75,
+      "whale": 3.0
+    },
+    "desc": "ETH 11m | RSI3_25/75_Whale3.0",
+    "wr": 85.71,
+    "trades": 140
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "RSI",
+    "params": {
+      "period": 8,
+      "lo": 28,
+      "hi": 72,
+      "whale": 2.5
+    },
+    "desc": "ETH 11m | RSI8_28/72_Whale2.5",
+    "wr": 86.43,
+    "trades": 140
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 1.8,
+      "wick": 0.35,
+      "whale": 2.5
+    },
+    "desc": "BTC 5m | BB_1.8std_Wick35_Whale2.5",
+    "wr": 85.61,
+    "trades": 139
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "BB",
+    "params": {
+      "std": 2.0,
+      "wick": 0.35,
+      "whale": 1.8
+    },
+    "desc": "BTC 10m | BB_2.0std_Wick35_Whale1.8",
+    "wr": 85.61,
+    "trades": 139
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "RSI",
+    "params": {
+      "period": 8,
+      "lo": 15,
+      "hi": 85,
+      "whale": 2.5
+    },
+    "desc": "ETH 4m | RSI8_15/85_Whale2.5",
+    "wr": 85.61,
+    "trades": 139
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 20,
+    "type": "WILLR",
+    "params": {
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "desc": "ETH 20m | WillR90_Wick35_Whale1.2",
+    "wr": 85.61,
+    "trades": 139
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI",
+    "params": {
+      "period": 5,
+      "lo": 28,
+      "hi": 72,
+      "whale": 3.0
+    },
+    "desc": "BTC 10m | RSI5_28/72_Whale3.0",
+    "wr": 85.51,
+    "trades": 138
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 12,
+      "hi": 88,
+      "whale": 2.5
+    },
+    "desc": "BTC 3m | RSI7_12/88_Whale2.5",
+    "wr": 88.32,
+    "trades": 137
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 7,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 1.8
+    },
+    "desc": "BTC 7m | BB_3.0std_Wick0_Whale1.8",
+    "wr": 85.29,
+    "trades": 136
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.2,
+      "whale": 1.2
+    },
+    "desc": "BTC 15m | BB_2.8std_Wick20_Whale1.2",
+    "wr": 85.29,
+    "trades": 136
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 11,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 1.8
+    },
+    "desc": "ETH 11m | BB_3.0std_Wick0_Whale1.8",
+    "wr": 86.03,
+    "trades": 136
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.35,
+      "whale": 1.5
+    },
+    "desc": "BTC 5m | BB_2.6std_Wick35_Whale1.5",
+    "wr": 85.93,
+    "trades": 135
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 6,
+    "type": "RSI",
+    "params": {
+      "period": 7,
+      "lo": 25,
+      "hi": 75,
+      "whale": 3.0
+    },
+    "desc": "BTC 6m | RSI7_25/75_Whale3.0",
+    "wr": 85.19,
+    "trades": 135
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.2,
+      "whale": 1.5
+    },
+    "desc": "BTC 15m | BB_2.5std_Wick20_Whale1.5",
+    "wr": 88.15,
+    "trades": 135
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 7,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.35,
+      "whale": 0.0
+    },
+    "desc": "BTC 7m | BB_2.8std_Wick35_Whale0.0",
+    "wr": 85.82,
+    "trades": 134
+  }
+]
