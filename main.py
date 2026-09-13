@@ -183,7 +183,7 @@ class AssassinController:
         self.last_sweep_ts: float = saved.get("last_sweep_ts", time.time())
         self.sweep_profit_ratio: float = float(os.environ.get("SWEEP_PROFIT_RATIO", "0.30"))
         self.sweep_interval_hours: float = float(os.environ.get("SWEEP_INTERVAL_HOURS", "12.0"))
-        self.safe_vault_address: str = os.environ.get("SAFE_VAULT_ADDRESS", "0xf6c31c82823616bc0b986cf317ba9ecf4339c09f")
+        self.safe_vault_address: str = os.environ.get("SAFE_VAULT_ADDRESS", "")
         self.min_sweep_usd: float = float(os.environ.get("MIN_SWEEP_USD", "2.00"))
 
         self.is_in_mart_recovery: bool = False
@@ -215,7 +215,7 @@ class AssassinController:
     def execute_sweep(self, force: bool = False) -> Tuple[bool, str, dict]:
         """
         Execute Twice-Daily 70/30 Profit Skim:
-        - Sweeps 30% of net profit above baseline to safe vault / bank.
+        - Withdraws 30% of net profit from trading account back to your deposit wallet.
         - Retains 70% of net profit in trading account to compound trade sizing.
         - Updates baseline to new active balance.
         """
@@ -244,13 +244,19 @@ class AssassinController:
         self.last_sweep_ts = time.time()
         self.save_current_state()
 
+        dest_addr = self.safe_vault_address
+        if not dest_addr and self.prdt_agent and getattr(self.prdt_agent, 'account', None):
+            dest_addr = self.prdt_agent.account.address
+        if not dest_addr:
+            dest_addr = "0xF43aA3aa8d324beeA1120DA71076ad16963A2073"
+
         details = {
             "net_profit": net_profit,
             "sweep_amount": sweep_amount,
             "retained_amount": retained_amount,
             "new_balance": new_balance,
             "total_swept": self.total_swept_profit,
-            "vault_address": self.safe_vault_address
+            "vault_address": dest_addr
         }
         return True, "Sweep completed", details
 

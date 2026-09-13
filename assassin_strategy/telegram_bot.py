@@ -489,18 +489,18 @@ class AssassinTelegramBot:
         tx_hash: Optional[str] = None
     ):
         """Broadcast an automated 70/30 profit sweep event."""
-        masked_vault = f"{vault_address[:6]}...{vault_address[-4:]}" if len(vault_address) >= 10 else vault_address
+        masked_wallet = f"{vault_address[:6]}...{vault_address[-4:]}" if len(vault_address) >= 10 else (vault_address or "0xF43a...2073")
         tx_line = f"\n• <b>TxHash:</b> <code>{tx_hash}</code>" if tx_hash and tx_hash != "SIMULATED" else ""
         msg = (
-            "💸 <b>TWICE-DAILY 70/30 PROFIT SWEEP COMPLETED</b> 💸\n\n"
+            "💸 <b>TWICE-DAILY 70/30 PROFIT WITHDRAWAL COMPLETED</b> 💸\n\n"
             f"• <b>12-Hour Net Profit:</b> <code>+${net_profit:.2f}</code>\n"
-            f"• <b>Swept to Vault (30%):</b> <code>${swept_amount:.2f}</code> 🔒\n"
+            f"• <b>Withdrawn to Wallet (30%):</b> <code>${swept_amount:.2f}</code> 🔒\n"
             f"• <b>Compounding Pool (70%):</b> <code>+${retained_amount:.2f}</code> 🚀\n"
             f"• <b>New Active Balance:</b> <code>${new_balance:.2f}</code>\n"
-            f"• <b>Total Swept to Date:</b> <code>${total_swept:.2f}</code>\n"
-            f"• <b>Vault Address:</b> <code>{masked_vault}</code>"
+            f"• <b>Total Withdrawn to Date:</b> <code>${total_swept:.2f}</code>\n"
+            f"• <b>Wallet Address:</b> <code>{masked_wallet}</code>"
             f"{tx_line}\n\n"
-            "<i>Compounding baseline updated. Next automatic sweep in 12 hours.</i>"
+            "<i>Compounding baseline updated. Next automatic withdrawal in 12 hours.</i>"
         )
         await self.send_message(msg)
 
@@ -528,8 +528,14 @@ class AssassinTelegramBot:
         rem_secs = max(0, interval_secs - elapsed)
         rem_hours = int(rem_secs // 3600)
         rem_mins = int((rem_secs % 3600) // 60)
-        vault_addr = getattr(c, 'safe_vault_address', '')
-        masked_vault = f"{vault_addr[:6]}...{vault_addr[-4:]}" if len(vault_addr) >= 10 else (vault_addr or "Not configured")
+        
+        # Default destination wallet is the deposit wallet
+        w_addr = getattr(c, 'safe_vault_address', '')
+        if not w_addr and agent and getattr(agent, 'account', None):
+            w_addr = agent.account.address
+        if not w_addr:
+            w_addr = "0xF43aA3aa8d324beeA1120DA71076ad16963A2073"
+        masked_wallet = f"{w_addr[:6]}...{w_addr[-4:]}"
 
         user_text = (update.message.text or "").strip().lower() if update.message else ""
         if "now" in user_text or (context.args and "now" in context.args):
@@ -548,16 +554,16 @@ class AssassinTelegramBot:
             return
 
         status_msg = (
-            "💸 <b>70/30 PROFIT HARVESTER STATUS</b> 💸\n\n"
+            "💸 <b>70/30 PROFIT WITHDRAWAL STATUS</b> 💸\n\n"
             f"• <b>Active Trading Balance:</b> <code>${cur_bal:.2f}</code>\n"
             f"• <b>Compounding Baseline:</b> <code>${baseline:.2f}</code>\n"
             f"• <b>Accrued Session Profit:</b> <code>{'+' if net_profit >= 0 else ''}${net_profit:.2f}</code>\n"
-            f"• <b>Pending Sweep (30%):</b> <code>${swept_30:.2f}</code>\n"
+            f"• <b>Pending Withdrawal (30%):</b> <code>${swept_30:.2f}</code>\n"
             f"• <b>Compounding Retained (70%):</b> <code>${retained_70:.2f}</code>\n"
-            f"• <b>Total Swept to Date:</b> <code>${total_swept:.2f}</code>\n"
-            f"• <b>Next Scheduled Sweep:</b> in ~{rem_hours}h {rem_mins}m (Twice Daily)\n"
-            f"• <b>Vault Destination:</b> <code>{masked_vault}</code>\n\n"
-            "<i>💡 Type <code>/sweep now</code> to trigger an immediate manual sweep.</i>"
+            f"• <b>Total Withdrawn to Date:</b> <code>${total_swept:.2f}</code>\n"
+            f"• <b>Next Scheduled Withdrawal:</b> in ~{rem_hours}h {rem_mins}m (Twice Daily)\n"
+            f"• <b>Destination Wallet:</b> <code>{masked_wallet}</code>\n\n"
+            "<i>💡 Type <code>/sweep now</code> to trigger an immediate manual withdrawal.</i>"
         )
         await update.message.reply_text(status_msg, parse_mode='HTML')
 
