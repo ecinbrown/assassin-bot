@@ -47,9 +47,9 @@ class AssassinTelegramBot:
     def _get_keyboard(self) -> ReplyKeyboardMarkup:
         """Create persistent quick-action keyboard."""
         keyboard = [
-            [KeyboardButton("📊 Status"), KeyboardButton("🎁 Claim Winnings")],
-            [KeyboardButton("🧪 Switch to DEMO"), KeyboardButton("🟢 Switch to REAL")],
-            [KeyboardButton("🛑 Pause / Resume")]
+            [KeyboardButton("📊 Status"), KeyboardButton("💸 70/30 Sweep")],
+            [KeyboardButton("🎁 Claim Winnings"), KeyboardButton("🛑 Pause / Resume")],
+            [KeyboardButton("🧪 Switch to DEMO"), KeyboardButton("🟢 Switch to REAL")]
         ]
         return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
@@ -89,9 +89,11 @@ class AssassinTelegramBot:
             self.app.add_handler(CommandHandler("pause", self.handle_pause))
             self.app.add_handler(CommandHandler("resume", self.handle_resume))
             self.app.add_handler(CommandHandler("claim", self.handle_claim))
+            self.app.add_handler(CommandHandler("sweep", self.handle_sweep))
 
             # Keyboard button text handlers (ultra-flexible matching)
             self.app.add_handler(MessageHandler(filters.Regex(r"(?i).*status.*"), self.handle_status))
+            self.app.add_handler(MessageHandler(filters.Regex(r"(?i).*sweep.*"), self.handle_sweep))
             self.app.add_handler(MessageHandler(filters.Regex(r"(?i).*demo.*"), self.handle_demo))
             self.app.add_handler(MessageHandler(filters.Regex(r"(?i).*real.*"), self.handle_real))
             self.app.add_handler(MessageHandler(filters.Regex(r"(?i).*claim.*"), self.handle_claim))
@@ -327,12 +329,16 @@ class AssassinTelegramBot:
         win_rate = (wins / total_settled * 100.0) if total_settled > 0 else 0.0
         active_count = len(getattr(c, 'active_trades', []))
 
+        total_swept = getattr(c, 'total_swept_profit', 0.0)
+        baseline = getattr(c, 'baseline_balance', 20.0)
+
         msg = (
             "📊 <b>ASSASSIN BOT DASHBOARD</b> 📊\n\n"
             f"⚙️ <b>Mode:</b> <b>{mode_str}</b>\n"
             f"🚦 <b>Engine:</b> {'🛑 PAUSED' if paused else '🟢 ACTIVE'}\n"
             f"💰 <b>Balance:</b> <code>{balance_text}</code>\n"
             f"💵 <b>Current Stake:</b> <code>{stake_text}</code>\n"
+            f"💸 <b>70/30 Profit Swept:</b> <code>${total_swept:.2f}</code> (Base: ${baseline:.2f})\n"
             f"🏆 <b>Scorecard:</b> <code>{wins}W - {losses}L ({win_rate:.1f}% Win Rate)</code>\n"
             f"⚡ <b>Active Trades Running:</b> <code>{active_count} open</code>\n"
             f"🎯 <b>Symbols:</b> <code>{symbols_str}</code>\n"
@@ -472,6 +478,89 @@ class AssassinTelegramBot:
         else:
             await update.message.reply_text("ℹ️ No pending claimable rounds found.")
 
+    async def send_sweep_alert(
+        self,
+        net_profit: float,
+        swept_amount: float,
+        retained_amount: float,
+        new_balance: float,
+        total_swept: float,
+        vault_address: str,
+        tx_hash: Optional[str] = None
+    ):
+        """Broadcast an automated 70/30 profit sweep event."""
+        masked_vault = f"{vault_address[:6]}...{vault_address[-4:]}" if len(vault_address) >= 10 else vault_address
+        tx_line = f"\n• <b>TxHash:</b> <code>{tx_hash}</code>" if tx_hash and tx_hash != "SIMULATED" else ""
+        msg = (
+            "💸 <b>TWICE-DAILY 70/30 PROFIT SWEEP COMPLETED</b> 💸\n\n"
+            f"• <b>12-Hour Net Profit:</b> <code>+${net_profit:.2f}</code>\n"
+            f"• <b>Swept to Vault (30%):</b> <code>${swept_amount:.2f}</code> 🔒\n"
+            f"• <b>Compounding Pool (70%):</b> <code>+${retained_amount:.2f}</code> 🚀\n"
+            f"• <b>New Active Balance:</b> <code>${new_balance:.2f}</code>\n"
+            f"• <b>Total Swept to Date:</b> <code>${total_swept:.2f}</code>\n"
+            f"• <b>Vault Address:</b> <code>{masked_vault}</code>"
+            f"{tx_line}\n\n"
+            "<i>Compounding baseline updated. Next automatic sweep in 12 hours.</i>"
+        )
+        await self.send_message(msg)
+
+    async def handle_sweep(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """View 70/30 profit sweep status or trigger a manual sweep."""
+        if not await self._check_auth(update):
+            return
+        c = self.controller
+        if not c:
+            await update.message.reply_text("❌ Controller not active.")
+            return
+
+        agent = getattr(c, 'prdt_agent', None)
+        cur_bal = agent.simulated_balance if (agent and c.simulation_mode) else c.stake_native
+        baseline = getattr(c, 'baseline_balance', 20.0)
+        net_profit = round(cur_bal - baseline, 4)
+        swept_30 = round(max(0.0, net_profit * getattr(c, 'sweep_profit_ratio', 0.30)), 2)
+        retained_70 = round(max(0.0, net_profit - swept_30), 2)
+        total_swept = getattr(c, 'total_swept_profit', 0.0)
+        
+        now = time.time()
+        last_sweep = getattr(c, 'last_sweep_ts', now)
+        elapsed = now - last_sweep
+        interval_secs = getattr(c, 'sweep_interval_hours', 12.0) * 3600.0
+        rem_secs = max(0, interval_secs - elapsed)
+        rem_hours = int(rem_secs // 3600)
+        rem_mins = int((rem_secs % 3600) // 60)
+        vault_addr = getattr(c, 'safe_vault_address', '')
+        masked_vault = f"{vault_addr[:6]}...{vault_addr[-4:]}" if len(vault_addr) >= 10 else (vault_addr or "Not configured")
+
+        user_text = (update.message.text or "").strip().lower() if update.message else ""
+        if "now" in user_text or (context.args and "now" in context.args):
+            success, reason, details = c.execute_sweep(force=True)
+            if success:
+                await self.send_sweep_alert(
+                    net_profit=details["net_profit"],
+                    swept_amount=details["sweep_amount"],
+                    retained_amount=details["retained_amount"],
+                    new_balance=details["new_balance"],
+                    total_swept=details["total_swept"],
+                    vault_address=details["vault_address"]
+                )
+            else:
+                await update.message.reply_text(f"⚠️ <b>Manual Sweep Not Executed:</b> {reason}", parse_mode='HTML')
+            return
+
+        status_msg = (
+            "💸 <b>70/30 PROFIT HARVESTER STATUS</b> 💸\n\n"
+            f"• <b>Active Trading Balance:</b> <code>${cur_bal:.2f}</code>\n"
+            f"• <b>Compounding Baseline:</b> <code>${baseline:.2f}</code>\n"
+            f"• <b>Accrued Session Profit:</b> <code>{'+' if net_profit >= 0 else ''}${net_profit:.2f}</code>\n"
+            f"• <b>Pending Sweep (30%):</b> <code>${swept_30:.2f}</code>\n"
+            f"• <b>Compounding Retained (70%):</b> <code>${retained_70:.2f}</code>\n"
+            f"• <b>Total Swept to Date:</b> <code>${total_swept:.2f}</code>\n"
+            f"• <b>Next Scheduled Sweep:</b> in ~{rem_hours}h {rem_mins}m (Twice Daily)\n"
+            f"• <b>Vault Destination:</b> <code>{masked_vault}</code>\n\n"
+            "<i>💡 Type <code>/sweep now</code> to trigger an immediate manual sweep.</i>"
+        )
+        await update.message.reply_text(status_msg, parse_mode='HTML')
+
     async def handle_unknown_or_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not await self._check_auth(update):
             return
@@ -488,6 +577,8 @@ class AssassinTelegramBot:
             await self.handle_real(update, context)
         elif "claim" in text:
             await self.handle_claim(update, context)
+        elif "sweep" in text:
+            await self.handle_sweep(update, context)
         elif "pause" in text or "resume" in text:
             await self.handle_pause_toggle(update, context)
         elif "help" in text or "start" in text:

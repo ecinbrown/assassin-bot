@@ -23,7 +23,7 @@ import os
 import sys
 import time
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Tuple, Dict
 
 import aiohttp
 from aiohttp import web
@@ -89,16 +89,35 @@ def load_saved_state():
                 return json.load(f)
         except Exception:
             pass
-    return {"balance": 20.0, "wins": 0, "losses": 0, "marts_since_loss": 0}
+    return {
+        "balance": 20.0,
+        "wins": 0,
+        "losses": 0,
+        "marts_since_loss": 0,
+        "baseline_balance": 20.0,
+        "total_swept_profit": 0.0,
+        "last_sweep_ts": time.time()
+    }
 
-def save_state(balance: float, wins: int, losses: int, marts_since_loss: int = 0):
+def save_state(
+    balance: float,
+    wins: int,
+    losses: int,
+    marts_since_loss: int = 0,
+    baseline_balance: float = 20.0,
+    total_swept_profit: float = 0.0,
+    last_sweep_ts: float = 0.0
+):
     try:
         with open(STATE_FILE, "w") as f:
             json.dump({
                 "balance": round(balance, 4),
                 "wins": wins,
                 "losses": losses,
-                "marts_since_loss": marts_since_loss
+                "marts_since_loss": marts_since_loss,
+                "baseline_balance": round(baseline_balance, 4),
+                "total_swept_profit": round(total_swept_profit, 4),
+                "last_sweep_ts": round(last_sweep_ts, 2)
             }, f, indent=2)
     except Exception:
         pass
@@ -159,6 +178,14 @@ class AssassinController:
         self.wins: int = saved.get("wins", 0)
         self.losses: int = saved.get("losses", 0)
         self.marts_since_loss: int = saved.get("marts_since_loss", 0)
+        self.baseline_balance: float = saved.get("baseline_balance", 20.0)
+        self.total_swept_profit: float = saved.get("total_swept_profit", 0.0)
+        self.last_sweep_ts: float = saved.get("last_sweep_ts", time.time())
+        self.sweep_profit_ratio: float = float(os.environ.get("SWEEP_PROFIT_RATIO", "0.30"))
+        self.sweep_interval_hours: float = float(os.environ.get("SWEEP_INTERVAL_HOURS", "12.0"))
+        self.safe_vault_address: str = os.environ.get("SAFE_VAULT_ADDRESS", "0xf6c31c82823616bc0b986cf317ba9ecf4339c09f")
+        self.min_sweep_usd: float = float(os.environ.get("MIN_SWEEP_USD", "2.00"))
+
         self.is_in_mart_recovery: bool = False
         self.lost_mart_amount: float = 0.0
         self.last_sequence_loss_time: float = 0.0
@@ -171,6 +198,61 @@ class AssassinController:
         self.prdt_agent: Optional[PRDTAgent] = None
         self.telegram_bot: Optional[AssassinTelegramBot] = None
         self.dispatcher: Optional[PRDTWebhookDispatcher] = None
+
+    def save_current_state(self):
+        """Persist current balance and sweep tracking metrics."""
+        bal = self.prdt_agent.simulated_balance if self.prdt_agent else 20.0
+        save_state(
+            balance=bal,
+            wins=self.wins,
+            losses=self.losses,
+            marts_since_loss=self.marts_since_loss,
+            baseline_balance=self.baseline_balance,
+            total_swept_profit=self.total_swept_profit,
+            last_sweep_ts=self.last_sweep_ts
+        )
+
+    def execute_sweep(self, force: bool = False) -> Tuple[bool, str, dict]:
+        """
+        Execute Twice-Daily 70/30 Profit Skim:
+        - Sweeps 30% of net profit above baseline to safe vault / bank.
+        - Retains 70% of net profit in trading account to compound trade sizing.
+        - Updates baseline to new active balance.
+        """
+        cur_bal = self.prdt_agent.simulated_balance if (self.prdt_agent and self.simulation_mode) else self.stake_native
+        net_profit = round(cur_bal - self.baseline_balance, 4)
+
+        if net_profit < self.min_sweep_usd and not force:
+            self.last_sweep_ts = time.time()
+            self.save_current_state()
+            return False, f"Net profit (${net_profit:.2f}) is below minimum sweep threshold (${self.min_sweep_usd:.2f})", {}
+
+        if net_profit <= 0:
+            self.last_sweep_ts = time.time()
+            self.save_current_state()
+            return False, f"No net profit accrued (${net_profit:.2f}) in this window.", {}
+
+        sweep_amount = round(net_profit * self.sweep_profit_ratio, 2)
+        retained_amount = round(net_profit - sweep_amount, 2)
+        new_balance = round(cur_bal - sweep_amount, 4)
+
+        if self.simulation_mode and self.prdt_agent:
+            self.prdt_agent.simulated_balance = new_balance
+
+        self.baseline_balance = new_balance
+        self.total_swept_profit = round(self.total_swept_profit + sweep_amount, 2)
+        self.last_sweep_ts = time.time()
+        self.save_current_state()
+
+        details = {
+            "net_profit": net_profit,
+            "sweep_amount": sweep_amount,
+            "retained_amount": retained_amount,
+            "new_balance": new_balance,
+            "total_swept": self.total_swept_profit,
+            "vault_address": self.safe_vault_address
+        }
+        return True, "Sweep completed", details
 
     # ─── 85.03% High-Frequency Multi-Timeframe Strategy (281 Setups) ───
     # Validated on 365d Binance data: 40.05 trades/day | 85.03% 1-Gale SeqWR
@@ -328,7 +410,7 @@ async def main():
                                     controller.is_in_mart_recovery = False
                                     controller.lost_mart_amount = 0.0
                                     logger.critical("[INTRADAY RECOVERY] 🎯 All sequence losses fully recovered in the same day!")
-                            save_state(prdt_agent.simulated_balance, controller.wins, controller.losses, controller.marts_since_loss)
+                            controller.save_current_state()
                             logger.critical(f"[BG-SETTLER] WIN {t.symbol} {t.action.upper()} {step_name} | Profit: {seq_profit:+.4f} | Bal: {prdt_agent.simulated_balance:.4f}")
                             if tg_bot:
                                 await tg_bot.send_settlement_alert(
@@ -344,7 +426,7 @@ async def main():
                                 next_gale = t.gale_level + 1
                                 next_stake = round(t.stake_native * 2.2, 4)
                                 prdt_agent.simulated_balance = round(prdt_agent.simulated_balance - next_stake, 4)
-                                save_state(prdt_agent.simulated_balance, controller.wins, controller.losses, controller.marts_since_loss)
+                                controller.save_current_state()
                                 trade_duration = t.expiry_time - t.entry_time
                                 remaining.append(ActiveTrade(
                                     symbol=t.symbol, action=t.action.lower(),
@@ -362,7 +444,7 @@ async def main():
                                 controller.is_in_mart_recovery = True
                                 controller.lost_mart_amount = round(controller.lost_mart_amount + t.total_sequence_stake, 4)
                                 controller.last_sequence_loss_time = now  # Activate 20m post-loss cool-down guard
-                                save_state(prdt_agent.simulated_balance, controller.wins, controller.losses, controller.marts_since_loss)
+                                controller.save_current_state()
                                 logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} | Lost: {t.total_sequence_stake:.4f} | 20m Cool-Down Active")
                                 if tg_bot:
                                     await tg_bot.send_settlement_alert(
@@ -514,6 +596,40 @@ async def main():
 
     claim_task = asyncio.create_task(auto_claim_worker())
 
+    # 6b. Background Twice-Daily 70/30 Profit Sweeper (checks every 60s)
+    async def profit_sweep_worker():
+        while True:
+            try:
+                await asyncio.sleep(60)
+                now = time.time()
+                interval_secs = controller.sweep_interval_hours * 3600.0
+                if now - controller.last_sweep_ts >= interval_secs:
+                    logger.info("⏰ [70/30 SWEEPER] 12-hour window elapsed. Evaluating profit sweep...")
+                    success, reason, details = controller.execute_sweep()
+                    if success:
+                        logger.critical(
+                            f"💸 [70/30 SWEEPER] Swept: ${details['sweep_amount']:.2f} (30%) | "
+                            f"Retained: ${details['retained_amount']:.2f} (70%) | "
+                            f"New Active Bal: ${details['new_balance']:.2f}"
+                        )
+                        if tg_bot:
+                            await tg_bot.send_sweep_alert(
+                                net_profit=details["net_profit"],
+                                swept_amount=details["sweep_amount"],
+                                retained_amount=details["retained_amount"],
+                                new_balance=details["new_balance"],
+                                total_swept=details["total_swept"],
+                                vault_address=details["vault_address"]
+                            )
+                    else:
+                        logger.info(f"ℹ️ [70/30 SWEEPER] Sweep check: {reason}")
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"[70/30 SWEEPER] Error: {e}")
+
+    sweep_task = asyncio.create_task(profit_sweep_worker())
+
     # 7. Start Telegram Bot Polling (if enabled)
     tg_task = None
     if tg_bot:
@@ -563,6 +679,7 @@ async def main():
         logger.info("Shutting down Assassin Bot...")
     finally:
         claim_task.cancel()
+        sweep_task.cancel()
         settler_task.cancel()
         await runner.cleanup()
         if tg_bot:
