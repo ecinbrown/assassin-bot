@@ -492,15 +492,15 @@ class AssassinTelegramBot:
         masked_wallet = f"{vault_address[:6]}...{vault_address[-4:]}" if len(vault_address) >= 10 else (vault_address or "0xF43a...2073")
         tx_line = f"\n• <b>TxHash:</b> <code>{tx_hash}</code>" if tx_hash and tx_hash != "SIMULATED" else ""
         msg = (
-            "💸 <b>TWICE-DAILY 70/30 PROFIT WITHDRAWAL COMPLETED</b> 💸\n\n"
-            f"• <b>12-Hour Net Profit:</b> <code>+${net_profit:.2f}</code>\n"
+            "💸 <b>DAILY 70/30 PROFIT WITHDRAWAL COMPLETED</b> 💸\n\n"
+            f"• <b>24-Hour Net Profit:</b> <code>+${net_profit:.2f}</code>\n"
             f"• <b>Withdrawn to Wallet (30%):</b> <code>${swept_amount:.2f}</code> 🔒\n"
             f"• <b>Compounding Pool (70%):</b> <code>+${retained_amount:.2f}</code> 🚀\n"
             f"• <b>New Active Balance:</b> <code>${new_balance:.2f}</code>\n"
             f"• <b>Total Withdrawn to Date:</b> <code>${total_swept:.2f}</code>\n"
             f"• <b>Wallet Address:</b> <code>{masked_wallet}</code>"
             f"{tx_line}\n\n"
-            "<i>Compounding baseline updated. Next automatic withdrawal in 12 hours.</i>"
+            "<i>Compounding baseline updated. Next automatic withdrawal in 24 hours.</i>"
         )
         await self.send_message(msg)
 
@@ -524,7 +524,7 @@ class AssassinTelegramBot:
         now = time.time()
         last_sweep = getattr(c, 'last_sweep_ts', now)
         elapsed = now - last_sweep
-        interval_secs = getattr(c, 'sweep_interval_hours', 12.0) * 3600.0
+        interval_secs = getattr(c, 'sweep_interval_hours', 24.0) * 3600.0
         rem_secs = max(0, interval_secs - elapsed)
         rem_hours = int(rem_secs // 3600)
         rem_mins = int((rem_secs % 3600) // 60)
@@ -561,7 +561,7 @@ class AssassinTelegramBot:
             f"• <b>Pending Withdrawal (30%):</b> <code>${swept_30:.2f}</code>\n"
             f"• <b>Compounding Retained (70%):</b> <code>${retained_70:.2f}</code>\n"
             f"• <b>Total Withdrawn to Date:</b> <code>${total_swept:.2f}</code>\n"
-            f"• <b>Next Scheduled Withdrawal:</b> in ~{rem_hours}h {rem_mins}m (Twice Daily)\n"
+            f"• <b>Next Scheduled Withdrawal:</b> in ~{rem_hours}h {rem_mins}m (Once Daily)\n"
             f"• <b>Destination Wallet:</b> <code>{masked_wallet}</code>\n\n"
             "<i>💡 Type <code>/sweep now</code> to trigger an immediate manual withdrawal.</i>"
         )
