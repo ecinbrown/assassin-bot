@@ -3752,5 +3752,484 @@
     "desc": "BTC 7m | BB_2.8std_Wick35_Whale0.0",
     "wr": 85.82,
     "trades": 134
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.35,
+      "whale": 0.0
+    },
+    "trades": 33,
+    "seq_wr": 96.96969696969697,
+    "desc": "BNB 15m | BB_3.0std_Wick35_Whale0.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.35,
+      "whale": 0.8
+    },
+    "trades": 32,
+    "seq_wr": 96.875,
+    "desc": "BNB 15m | BB_3.0std_Wick35_Whale0.8"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.35,
+      "whale": 1.0
+    },
+    "trades": 26,
+    "seq_wr": 96.15384615384616,
+    "desc": "BNB 15m | BB_3.0std_Wick35_Whale1.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.3,
+      "whale": 1.0
+    },
+    "trades": 40,
+    "seq_wr": 95.0,
+    "desc": "BNB 15m | BB_3.0std_Wick30_Whale1.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.3,
+      "whale": 1.2
+    },
+    "trades": 33,
+    "seq_wr": 93.93939393939394,
+    "desc": "BNB 15m | BB_3.0std_Wick30_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 20,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.3,
+      "whale": 0.0
+    },
+    "trades": 49,
+    "seq_wr": 91.83673469387755,
+    "desc": "BNB 20m | BB_3.0std_Wick30_Whale0.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 20,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.3,
+      "whale": 0.8
+    },
+    "trades": 47,
+    "seq_wr": 91.48936170212765,
+    "desc": "BNB 20m | BB_3.0std_Wick30_Whale0.8"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.25,
+      "whale": 1.2
+    },
+    "trades": 70,
+    "seq_wr": 91.42857142857143,
+    "desc": "BNB 9m | BB_3.0std_Wick25_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 20,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.3,
+      "whale": 1.2
+    },
+    "trades": 35,
+    "seq_wr": 91.42857142857143,
+    "desc": "BNB 20m | BB_3.0std_Wick30_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.25,
+      "whale": 1.0
+    },
+    "trades": 98,
+    "seq_wr": 90.81632653061224,
+    "desc": "BNB 9m | BB_3.0std_Wick25_Whale1.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 20,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.3,
+      "whale": 1.0
+    },
+    "trades": 42,
+    "seq_wr": 90.47619047619047,
+    "desc": "BNB 20m | BB_3.0std_Wick30_Whale1.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 30,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.3,
+      "whale": 1.2
+    },
+    "trades": 42,
+    "seq_wr": 90.47619047619047,
+    "desc": "BNB 30m | BB_2.8std_Wick30_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.25,
+      "whale": 0.8
+    },
+    "trades": 108,
+    "seq_wr": 89.81481481481481,
+    "desc": "BNB 9m | BB_3.0std_Wick25_Whale0.8"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 20,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.35,
+      "whale": 0.0
+    },
+    "trades": 29,
+    "seq_wr": 89.6551724137931,
+    "desc": "BNB 20m | BB_3.0std_Wick35_Whale0.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.2,
+      "whale": 1.0
+    },
+    "trades": 135,
+    "seq_wr": 89.62962962962963,
+    "desc": "BNB 9m | BB_3.0std_Wick20_Whale1.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 9,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.25,
+      "whale": 0.0
+    },
+    "trades": 115,
+    "seq_wr": 89.56521739130434,
+    "desc": "BNB 9m | BB_3.0std_Wick25_Whale0.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 30,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.25,
+      "whale": 1.2
+    },
+    "trades": 56,
+    "seq_wr": 89.28571428571428,
+    "desc": "BNB 30m | BB_2.8std_Wick25_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 30,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.2,
+      "whale": 1.2
+    },
+    "trades": 73,
+    "seq_wr": 89.04109589041096,
+    "desc": "BNB 30m | BB_2.8std_Wick20_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 30,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "trades": 27,
+    "seq_wr": 88.88888888888889,
+    "desc": "BNB 30m | BB_2.8std_Wick35_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 30,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.25,
+      "whale": 1.2
+    },
+    "trades": 35,
+    "seq_wr": 88.57142857142857,
+    "desc": "BNB 30m | BB_3.0std_Wick25_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 8,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.35,
+      "whale": 1.0
+    },
+    "trades": 43,
+    "seq_wr": 88.37209302325581,
+    "desc": "BNB 8m | BB_3.0std_Wick35_Whale1.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 8,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "trades": 34,
+    "seq_wr": 88.23529411764706,
+    "desc": "BNB 8m | BB_3.0std_Wick35_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 7,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.3,
+      "whale": 1.2
+    },
+    "trades": 65,
+    "seq_wr": 87.6923076923077,
+    "desc": "BNB 7m | BB_3.0std_Wick30_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 2.0
+    },
+    "trades": 223,
+    "seq_wr": 86.54708520179372,
+    "desc": "BNB 15m | EXHAUST_5bars_Vol2.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 8,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.35,
+      "whale": 0.0
+    },
+    "trades": 51,
+    "seq_wr": 86.27450980392156,
+    "desc": "BNB 8m | BB_3.0std_Wick35_Whale0.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 7,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.3,
+      "whale": 1.0
+    },
+    "trades": 79,
+    "seq_wr": 86.07594936708861,
+    "desc": "BNB 7m | BB_3.0std_Wick30_Whale1.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 24,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.35,
+      "whale": 1.0
+    },
+    "trades": 56,
+    "seq_wr": 85.71428571428571,
+    "desc": "BNB 24m | BB_2.8std_Wick35_Whale1.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 24,
+    "type": "BB",
+    "params": {
+      "std": 2.8,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "trades": 42,
+    "seq_wr": 85.71428571428571,
+    "desc": "BNB 24m | BB_2.8std_Wick35_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 18,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "trades": 69,
+    "seq_wr": 85.5072463768116,
+    "desc": "BNB 18m | BB_2.6std_Wick35_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 24,
+    "type": "BB",
+    "params": {
+      "std": 2.2,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "trades": 179,
+    "seq_wr": 85.47486033519553,
+    "desc": "BNB 24m | BB_2.2std_Wick35_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 8,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.35,
+      "whale": 0.8
+    },
+    "trades": 48,
+    "seq_wr": 85.41666666666666,
+    "desc": "BNB 8m | BB_3.0std_Wick35_Whale0.8"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 13,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.3,
+      "whale": 1.2
+    },
+    "trades": 41,
+    "seq_wr": 85.3658536585366,
+    "desc": "BNB 13m | BB_3.0std_Wick30_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 24,
+    "type": "BB",
+    "params": {
+      "std": 2.6,
+      "wick": 0.35,
+      "whale": 1.2
+    },
+    "trades": 67,
+    "seq_wr": 85.07462686567165,
+    "desc": "BNB 24m | BB_2.6std_Wick35_Whale1.2"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "vol": 1.5
+    },
+    "trades": 326,
+    "seq_wr": 84.96932515337423,
+    "desc": "BNB 15m | EXHAUST_5bars_Vol1.5"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 7,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.25,
+      "whale": 1.0
+    },
+    "trades": 126,
+    "seq_wr": 84.92063492063491,
+    "desc": "BNB 7m | BB_3.0std_Wick25_Whale1.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 13,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.35,
+      "whale": 1.0
+    },
+    "trades": 33,
+    "seq_wr": 84.84848484848484,
+    "desc": "BNB 13m | BB_3.0std_Wick35_Whale1.0"
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 24,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.25,
+      "whale": 1.2
+    },
+    "trades": 33,
+    "seq_wr": 84.84848484848484,
+    "desc": "BNB 24m | BB_3.0std_Wick25_Whale1.2"
   }
 ]

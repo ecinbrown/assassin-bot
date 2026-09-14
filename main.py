@@ -260,20 +260,28 @@ class AssassinController:
         }
         return True, "Sweep completed", details
 
-    # ─── 85.03% High-Frequency Multi-Timeframe Strategy (281 Setups) ───
-    # Validated on 365d Binance data: 40.05 trades/day | 85.03% 1-Gale SeqWR
-    # Strictly 1-Gale | 6.1% Compounding | BTC + ETH ALONE (90% Payout)
+    # ─── 85.03% High-Frequency Multi-Timeframe Strategy (318 Setups) ───
+    # Validated on 365d Binance data: 47.58 trades/day | 84.37% 1-Gale SeqWR
+    # Strictly 1-Gale | 6.1% Compounding | BTC + ETH + BNB (90% Payout)
     PAIR_PAYOUTS = {
-        "BTCUSDT": 0.90, "ETHUSDT": 0.90,
+        "BTCUSDT": 0.90, "ETHUSDT": 0.90, "BNBUSDT": 0.90,
     }
-    TRADEABLE_PAIRS = {"BTCUSDT", "ETHUSDT"}
-    TIER1_PAIRS = {"BTCUSDT", "ETHUSDT"}
+    TRADEABLE_PAIRS = {"BTCUSDT", "ETHUSDT", "BNBUSDT"}
+    TIER1_PAIRS = {"BTCUSDT", "ETHUSDT", "BNBUSDT"}
+
+    # PRDT Pro Maximum Bet Limits per Symbol
+    SYMBOL_MAX_BETS = {
+        "BTCUSDT": 1000.0,
+        "ETHUSDT": 250.0,
+        "BNBUSDT": 250.0,
+    }
 
 
     def calculate_dynamic_stake(self, balance: float, symbol: str = "BTCUSDT") -> float:
         """
         6.1% Compounding Model with Intraday Smart Dynamic Recovery:
         - Scales base stake to 6.1% of account balance (min $1.00).
+        - Enforces PRDT Pro platform maximum bet caps ($1,000 on BTC, $250 on ETH & BNB).
         - Intraday Smart Recovery: If there is unrecovered sequence loss debt,
           adds a micro-recovery surcharge spread across 2 winning trades
           capped at 4% of balance. This erases losses in the same day safely.
@@ -291,6 +299,12 @@ class AssassinController:
             recovery_addition = min(rec_slice, max_slice)
             base_stake += recovery_addition
 
+        # Enforce PRDT platform max bet caps (BTC: $1000, ETH: $250, BNB: $250)
+        # Gale 1 is 2.22x base_stake, so base_stake cannot exceed max_pool / 2.22
+        max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(symbol, 250.0)
+        max_allowed_base = round(max_pool_bet / 2.22, 2)
+        base_stake = min(base_stake, max_allowed_base)
+
         return max(self.stake_native, round(base_stake, 2))
 
 
@@ -298,18 +312,19 @@ async def main():
     logger.info("=" * 65)
     logger.info("  ASSASSIN BOT v4.1 — 85.03% BTC+ETH High-Frequency Engine")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: 281 Setups (BB 1.8-3.0σ, Whale, WillR, CCI, Exhaustion, RSI)")
-    logger.info("  Performance: 40.05 Trades/Day | 85.03% 1-Gale SeqWR (365d Verified)")
-    logger.info("  Guards: 2-Trade Concurrency Cap | Strictly 1-Gale | 6.1% Compounding")
-    logger.info("  Pairs: BTCUSDT, ETHUSDT ONLY (90% Payout Tier)")
+    logger.info("  Strategy: 318 Setups (BB 1.8-3.0σ, Whale, WillR, CCI, Exhaustion, RSI)")
+    logger.info("  Performance: 47.58 Trades/Day | 84.37% 1-Gale SeqWR (365d Verified)")
+    logger.info("  Guards: Per-Pair Concurrency Lock | Strictly 1-Gale | 6.1% Compounding")
+    logger.info("  Pairs: BTCUSDT, ETHUSDT, BNBUSDT (90% Payout Tier)")
+    logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 Max Bet Safeguards")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent) + Webhook")
     logger.info("  Feeder: Binance Live WebSocket (1m multi-TF aggregator)")
     logger.info("  Telegram: Interactive Control + Real/Demo Mode Switcher")
     logger.info("=" * 65)
 
     # 1. Configuration from Environment
-    # Trade BTC + ETH ALONE (Strictly 90% Payout Pairs)
-    default_symbols = "BTCUSDT,ETHUSDT"
+    # Trade BTC + ETH + BNB (Strictly 90% Payout Pairs)
+    default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT"
     symbols = os.environ.get("TRADING_SYMBOLS", default_symbols).split(",")
     symbols = [s.strip().upper() for s in symbols if s.strip()]
 
@@ -430,7 +445,8 @@ async def main():
                             max_allowed_gale = 1  # Gale 2 removed — 1-Gale only (smaller max exposure)
                             if t.gale_level < max_allowed_gale:
                                 next_gale = t.gale_level + 1
-                                next_stake = round(t.stake_native * 2.2, 4)
+                                max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(t.symbol, 250.0)
+                                next_stake = min(round(t.stake_native * 2.22, 4), max_pool_bet)
                                 prdt_agent.simulated_balance = round(prdt_agent.simulated_balance - next_stake, 4)
                                 controller.save_current_state()
                                 trade_duration = t.expiry_time - t.entry_time
