@@ -307,17 +307,18 @@ class HybridSignalEngine:
             elif stype == "WILLR":
                 wick_req = p["wick"]
                 whale_req = p["whale"]
+                wr_th = p.get("wr_th", 92)
                 hh = np.max(highs[-14:])
                 ll = np.min(lows[-14:])
                 diff = hh - ll
                 wr14 = -50.0 if diff < 1e-8 else -100.0 * (hh - closes[-1]) / diff
 
-                if wr14 <= -92 and lw >= wick_req and whale >= whale_req:
+                if wr14 <= -wr_th and lw >= wick_req and whale >= whale_req:
                     action = "call"
-                    trigger_detail = f"WillR={wr14:.1f}<=-92 | LW={lw:.2f}>={wick_req} | Whale={whale:.1f}>={whale_req}"
-                elif wr14 >= -8 and uw >= wick_req and whale >= whale_req:
+                    trigger_detail = f"WillR={wr14:.1f}<=-{wr_th} | LW={lw:.2f}>={wick_req} | Whale={whale:.1f}>={whale_req}"
+                elif wr14 >= -(100 - wr_th) and uw >= wick_req and whale >= whale_req:
                     action = "put"
-                    trigger_detail = f"WillR={wr14:.1f}>=-8 | UW={uw:.2f}>={wick_req} | Whale={whale:.1f}>={whale_req}"
+                    trigger_detail = f"WillR={wr14:.1f}>=-{100 - wr_th} | UW={uw:.2f}>={wick_req} | Whale={whale:.1f}>={whale_req}"
 
             # ─── CCI ───
             elif stype == "CCI":

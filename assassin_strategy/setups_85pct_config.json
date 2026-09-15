@@ -560,7 +560,8 @@
     "type": "WILLR",
     "params": {
       "wick": 0.0,
-      "whale": 2.0
+      "whale": 2.0,
+      "wr_th": 92
     },
     "desc": "ETH 9m | WillR92_Wick0_Whale2.0",
     "wr": 84.83,
@@ -1047,7 +1048,8 @@
     "type": "WILLR",
     "params": {
       "wick": 0.2,
-      "whale": 1.5
+      "whale": 1.5,
+      "wr_th": 88
     },
     "desc": "ETH 20m | WillR88_Wick20_Whale1.5",
     "wr": 85.06,
@@ -1236,7 +1238,8 @@
     "type": "WILLR",
     "params": {
       "wick": 0.0,
-      "whale": 1.5
+      "whale": 1.5,
+      "wr_th": 95
     },
     "desc": "BTC 25m | WillR95_Wick0_Whale1.5",
     "wr": 85.83,
@@ -1782,7 +1785,8 @@
     "type": "WILLR",
     "params": {
       "wick": 0.0,
-      "whale": 2.0
+      "whale": 2.0,
+      "wr_th": 95
     },
     "desc": "ETH 9m | WillR95_Wick0_Whale2.0",
     "wr": 85.22,
@@ -2214,7 +2218,8 @@
     "type": "WILLR",
     "params": {
       "wick": 0.0,
-      "whale": 1.5
+      "whale": 1.5,
+      "wr_th": 92
     },
     "desc": "ETH 30m | WillR92_Wick0_Whale1.5",
     "wr": 88.17,
@@ -2482,7 +2487,8 @@
     "type": "WILLR",
     "params": {
       "wick": 0.2,
-      "whale": 1.2
+      "whale": 1.2,
+      "wr_th": 92
     },
     "desc": "ETH 24m | WillR92_Wick20_Whale1.2",
     "wr": 87.93,
@@ -2536,7 +2542,8 @@
     "type": "WILLR",
     "params": {
       "wick": 0.2,
-      "whale": 1.5
+      "whale": 1.5,
+      "wr_th": 90
     },
     "desc": "ETH 20m | WillR90_Wick20_Whale1.5",
     "wr": 86.63,
@@ -2983,7 +2990,8 @@
     "type": "WILLR",
     "params": {
       "wick": 0.2,
-      "whale": 2.0
+      "whale": 2.0,
+      "wr_th": 90
     },
     "desc": "BTC 11m | WillR90_Wick20_Whale2.0",
     "wr": 85.26,
@@ -3627,7 +3635,8 @@
     "type": "WILLR",
     "params": {
       "wick": 0.35,
-      "whale": 1.2
+      "whale": 1.2,
+      "wr_th": 90
     },
     "desc": "ETH 20m | WillR90_Wick35_Whale1.2",
     "wr": 85.61,
