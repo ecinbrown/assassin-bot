@@ -188,8 +188,6 @@ class AssassinController:
 
         self.is_in_mart_recovery: bool = False
         self.lost_mart_amount: float = 0.0
-        self.last_sequence_loss_time: float = 0.0
-        self.post_loss_cooldown_seconds: float = 20 * 60.0  # 20-minute post-loss cool-down guard (81.65% recovery WR)
         self.active_trades: List[ActiveTrade] = []
         self.latest_prices: dict = {}
         
@@ -470,9 +468,8 @@ async def main():
                                 controller.marts_since_loss = 0
                                 controller.is_in_mart_recovery = True
                                 controller.lost_mart_amount = round(controller.lost_mart_amount + t.total_sequence_stake, 4)
-                                controller.last_sequence_loss_time = now  # Activate 20m post-loss cool-down guard
                                 controller.save_current_state()
-                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} | Lost: {t.total_sequence_stake:.4f} | 20m Cool-Down Active")
+                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} | Lost: {t.total_sequence_stake:.4f}")
                                 if tg_bot:
                                     await tg_bot.send_settlement_alert(
                                         symbol=t.symbol, action=t.action,
@@ -544,25 +541,6 @@ async def main():
             # Per-pair execution: each pair manages its own independent trade sequence
             if any(t.symbol == sig.symbol for t in controller.active_trades):
                 continue
-
-            # ─── POST-LOSS 20-MINUTE COOL-DOWN GUARD ───
-            # Empirical 365d data proved Trade +1 immediately after loss has 66.5% WR (cascade danger).
-            # 20-minute cool-down raises post-loss WR to 81.65% and slashes ruin risk to <1%.
-            if controller.last_sequence_loss_time > 0:
-                elapsed_cd = now - controller.last_sequence_loss_time
-                if elapsed_cd < controller.post_loss_cooldown_seconds:
-                    rem_cd = int((controller.post_loss_cooldown_seconds - elapsed_cd) / 60) + 1
-                    logger.info(f"🛡️ [POST-LOSS COOLDOWN] Settling after sequence loss ({rem_cd}m remaining). Skipping {sig.symbol} {sig.action.upper()}.")
-                    continue
-
-            # ─── SESSION FILTER: DISABLED ───
-            # Nuance validation showed 03-06 UTC has 81.1% SeqWR (BETTER than avg 79.8%)
-            # Keeping filter disabled = more signals + better WR
-            # from datetime import datetime, timezone
-            # utc_hour = datetime.now(timezone.utc).hour
-            # if 3 <= utc_hour < 6:
-            #     logger.info(f"🛡️ [SESSION] {sig.symbol} skipped")
-            #     continue
 
             tf_tag = sig.metadata.get('tf', '1m') if hasattr(sig, 'metadata') and sig.metadata else '1m'
             logger.info(f"✅ [HYBRID|{tf_tag}] {sig.symbol} {sig.action.upper()} — Setup triggered!")
