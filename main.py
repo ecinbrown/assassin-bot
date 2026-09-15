@@ -356,9 +356,14 @@ async def main():
         simulation_mode=simulation_mode
     )
 
-    # 3. Instantiate Hybrid Signal Engine (65 Setups across 12 timeframes)
+    # 3. Instantiate Hybrid Signal Engine (436 Setups across 19 timeframes)
     hybrid_engine = HybridSignalEngine()
     controller.hybrid_engine = hybrid_engine
+    logger.info("⏳ Preloading 1,000 historical candles from Binance to instantly warm up all 19 timeframes...")
+    try:
+        await hybrid_engine.preload_from_binance(symbols, limit=1000)
+    except Exception as e:
+        logger.warning(f"⚠️ Preloading from Binance encountered an issue: {e}")
     engines = {"1m": AssassinSignalEngine(default_expiry_seconds=60)}
     controller.engine = engines["1m"]  # Compatibility reference
 

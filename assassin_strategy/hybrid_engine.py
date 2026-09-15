@@ -59,7 +59,7 @@ class MultiTFCandleAggregator:
             self.history[key_1m].pop(0)
         closed_tf_candles.append((1, candle_1m))
 
-        # Check other timeframes
+        # Check other timeframes with clock-aligned bar boundaries
         for tf in self.timeframes:
             if tf == 1:
                 continue
@@ -80,6 +80,7 @@ class MultiTFCandleAggregator:
                     "count": 1,
                     "start_time": candle_1m.timestamp
                 }
+                bar = self.current_bars[key]
             else:
                 bar["high"] = max(bar["high"], candle_1m.high)
                 bar["low"] = min(bar["low"], candle_1m.low)
@@ -88,29 +89,31 @@ class MultiTFCandleAggregator:
                 bar["trades"] += (candle_1m.trades if hasattr(candle_1m, "trades") else 1.0)
                 bar["count"] += 1
 
-                # Check if bar completed
-                if bar["count"] >= tf:
-                    final_candle = Candle(
-                        open=bar["open"],
-                        high=bar["high"],
-                        low=bar["low"],
-                        close=bar["close"],
-                        volume=bar["volume"],
-                        timestamp=bar["start_time"],
-                        trades=bar["trades"]
-                    )
-                    self.history[key].append(final_candle)
-                    if len(self.history[key]) > 200:
-                        self.history[key].pop(0)
-                    closed_tf_candles.append((tf, final_candle))
-                    del self.current_bars[key]
+            # Clock alignment: in Binance, a 1m candle starting at ts closes at minute (ts//60 + 1)
+            # The multi-minute bar closes when that minute is a multiple of tf
+            is_bar_closed = (int(candle_1m.timestamp // 60) + 1) % tf == 0
+            if is_bar_closed or bar["count"] >= tf:
+                final_candle = Candle(
+                    open=bar["open"],
+                    high=bar["high"],
+                    low=bar["low"],
+                    close=bar["close"],
+                    volume=bar["volume"],
+                    timestamp=bar["start_time"],
+                    trades=bar["trades"]
+                )
+                self.history[key].append(final_candle)
+                if len(self.history[key]) > 200:
+                    self.history[key].pop(0)
+                closed_tf_candles.append((tf, final_candle))
+                self.current_bars[key] = None
 
         return closed_tf_candles
 
 
 class HybridSignalEngine:
     """
-    Executes real-time signal checks across all 65 high-confidence setups.
+    Executes real-time signal checks across all 436 high-confidence setups.
     """
     def __init__(self, config_path: Optional[str] = None):
         if config_path is None:
@@ -124,6 +127,56 @@ class HybridSignalEngine:
         timeframes = list({s.tf for s in self.setups})
         self.aggregator = MultiTFCandleAggregator(timeframes)
         logger.info(f"Initialized HybridSignalEngine with {len(self.setups)} setups across {len(timeframes)} timeframes.")
+
+    async def preload_from_binance(self, symbols: List[str], limit: int = 1000):
+        """
+        Preload historical 1m candles from Binance REST API on startup.
+        Feeds candles through the aggregator to instantly warm up all 19 timeframes
+        (1m to 30m) with 50+ closed candles so indicators (MA20, STD20, Whale metrics)
+        are ready from second 1.
+        """
+        import asyncio, urllib.request, json
+
+        def fetch_sync(sym_str):
+            REST_HOSTS = [
+                "https://api.binance.com/api/v3/klines",
+                "https://data-api.binance.vision/api/v3/klines",
+                "https://api1.binance.com/api/v3/klines",
+                "https://api2.binance.com/api/v3/klines",
+                "https://api3.binance.com/api/v3/klines",
+            ]
+            for host in REST_HOSTS:
+                url = f"{host}?symbol={sym_str}&interval=1m&limit={limit}"
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+                try:
+                    with urllib.request.urlopen(req, timeout=8) as resp:
+                        if resp.status == 200:
+                            return json.loads(resp.read().decode())
+                except Exception as e:
+                    logger.debug(f"Preload from {host} failed for {sym_str}: {e}")
+            return []
+
+        for sym in symbols:
+            sym_upper = sym.upper()
+            data = await asyncio.to_thread(fetch_sync, sym_upper)
+            if not data:
+                logger.warning(f"⚠️ Failed to preload candles for {sym_upper}")
+                continue
+
+            for k in data:
+                c = Candle(
+                    timestamp=float(k[0]) / 1000.0,
+                    open=float(k[1]),
+                    high=float(k[2]),
+                    low=float(k[3]),
+                    close=float(k[4]),
+                    volume=float(k[5]),
+                    trades=float(k[8]) if len(k) > 8 else 1.0
+                )
+                self.aggregator.update_1m_candle(sym_upper, c)
+
+            counts = [f"{tf}m:{len(self.aggregator.history.get((sym_upper, tf), []))}" for tf in [1, 5, 10, 15, 20, 30] if tf in self.aggregator.timeframes]
+            logger.critical(f"🚀 [PRELOAD COMPLETE] {sym_upper}: {len(data)} 1m candles processed -> Warmed up: {', '.join(counts)}")
 
     def load_config(self, path: str):
         with open(path, "r") as f:
