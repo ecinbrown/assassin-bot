@@ -340,12 +340,28 @@ class HybridSignalEngine:
                 bars_req = p["bars"]
                 vol_req = p["vol"]
 
-                if cr >= bars_req and v_ratio >= vol_req and lw >= 0.35:
+                if cr >= bars_req and v_ratio >= vol_req and lw >= 0.25:
                     action = "call"
-                    trigger_detail = f"ConsecRed={cr}>={bars_req} | Vol={v_ratio:.1f}x>={vol_req} | LW={lw:.2f}>=0.35"
-                elif cg >= bars_req and v_ratio >= vol_req and uw >= 0.35:
+                    trigger_detail = f"ConsecRed={cr}>={bars_req} | Vol={v_ratio:.1f}x>={vol_req} | LW={lw:.2f}>=0.25"
+                elif cg >= bars_req and v_ratio >= vol_req and uw >= 0.25:
                     action = "put"
-                    trigger_detail = f"ConsecGreen={cg}>={bars_req} | Vol={v_ratio:.1f}x>={vol_req} | UW={uw:.2f}>=0.35"
+                    trigger_detail = f"ConsecGreen={cg}>={bars_req} | Vol={v_ratio:.1f}x>={vol_req} | UW={uw:.2f}>=0.25"
+
+            # ─── STOCHASTIC ───
+            elif stype == "STOCH":
+                st_th = p["st_th"]
+                whale_req = p["whale"]
+                hh = np.max(highs[-14:])
+                ll = np.min(lows[-14:])
+                diff = hh - ll
+                stoch_val = 50.0 if diff < 1e-8 else (closes[-1] - ll) / diff * 100.0
+
+                if stoch_val <= st_th and whale >= whale_req:
+                    action = "call"
+                    trigger_detail = f"Stoch14={stoch_val:.1f}<={st_th} | Whale={whale:.1f}>={whale_req}"
+                elif stoch_val >= (100 - st_th) and whale >= whale_req:
+                    action = "put"
+                    trigger_detail = f"Stoch14={stoch_val:.1f}>={100 - st_th} | Whale={whale:.1f}>={whale_req}"
 
             if action:
                 signals.append({
