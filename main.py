@@ -529,8 +529,12 @@ async def main():
                 logger.info(f"📊 [HYBRID SIGNAL] {s['symbol']} {s['action'].upper()} on {tf}m | {s['trigger']}")
 
         for sig in signals:
-            # Per-pair execution: each pair manages its own independent trade sequence
-            if any(t.symbol == sig.symbol for t in controller.active_trades):
+            # Per-pair execution: allow up to 2 concurrent independent setups per coin (40+ TPD target)
+            pair_trades = [t for t in controller.active_trades if t.symbol == sig.symbol]
+            if len(pair_trades) >= 2:
+                continue
+            # Dedup: prevent taking duplicate trades on the exact same second/candle close
+            if any(abs(t.entry_time - time.time()) < 5 for t in pair_trades):
                 continue
 
             tf_tag = sig.metadata.get('tf', '1m') if hasattr(sig, 'metadata') and sig.metadata else '1m'
