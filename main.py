@@ -303,7 +303,7 @@ async def main():
     logger.info("  ─────────────────────────────────────────────────────")
     logger.info("  Strategy: 318 Setups (BB 1.8-3.0σ, Whale, WillR, CCI, Exhaustion, RSI)")
     logger.info("  Performance: 47.58 Trades/Day | 84.37% 1-Gale SeqWR (365d Verified)")
-    logger.info("  Guards: Per-Pair Concurrency Lock | Strictly 1-Gale | 6.1% Compounding")
+    logger.info("  Guards: Unlocked Concurrency (All Trades Taken) | 6.1% Compounding")
     logger.info("  Pairs: BTCUSDT, ETHUSDT, BNBUSDT (90% Payout Tier)")
     logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 Max Bet Safeguards")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent) + Webhook")
@@ -345,10 +345,17 @@ async def main():
         simulation_mode=simulation_mode
     )
 
-    # 3. Instantiate Hybrid Signal Engine (436 Setups across 19 timeframes)
-    hybrid_engine = HybridSignalEngine()
+    # 3. Instantiate Signal Engine (supports GALE1 and ZERO_GALE flat modes)
+    strategy_mode = os.environ.get("STRATEGY_MODE", "GALE1").upper()
+    if strategy_mode in ("ZERO_GALE", "FLAT", "0GALE"):
+        zero_gale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "zero_gale_setups_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=zero_gale_cfg)
+        logger.critical(f"🎯 [STRATEGY MODE: ZERO-GALE] Armed with {len(hybrid_engine.setups)} verified flat setups (32.7 TPD | 62.9% OOS WR | Zero Martingale)!")
+    else:
+        hybrid_engine = HybridSignalEngine()
+        logger.info(f"📊 [STRATEGY MODE: GALE1] Armed with {len(hybrid_engine.setups)} setups (85% 1-Gale Sequence WR)")
     controller.hybrid_engine = hybrid_engine
-    logger.info("⏳ Preloading 1,000 historical candles from Binance to instantly warm up all 19 timeframes...")
+    logger.info("⏳ Preloading 1,000 historical candles from Binance to warm up timeframes...")
     try:
         await hybrid_engine.preload_from_binance(symbols, limit=1000)
     except Exception as e:
@@ -436,7 +443,8 @@ async def main():
                                     wins=controller.wins, losses=controller.losses, step_info=f"WIN {step_name}"
                                 )
                         else:
-                            max_allowed_gale = 1  # Gale 2 removed — 1-Gale only (smaller max exposure)
+                            # 0 for ZERO_GALE / FLAT mode, 1 for GALE1 mode
+                            max_allowed_gale = 0 if os.environ.get("STRATEGY_MODE", "GALE1").upper() in ("ZERO_GALE", "FLAT", "0GALE") else 1
                             if t.gale_level < max_allowed_gale:
                                 next_gale = t.gale_level + 1
                                 max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(t.symbol, 250.0)
@@ -529,12 +537,10 @@ async def main():
                 logger.info(f"📊 [HYBRID SIGNAL] {s['symbol']} {s['action'].upper()} on {tf}m | {s['trigger']}")
 
         for sig in signals:
-            # Per-pair execution: allow up to 2 concurrent independent setups per coin (40+ TPD target)
+            # Unlocked execution: all available setups taken (concurrency cap removed)
             pair_trades = [t for t in controller.active_trades if t.symbol == sig.symbol]
-            if len(pair_trades) >= 2:
-                continue
             # Dedup: prevent taking duplicate trades on the exact same second/candle close
-            if any(abs(t.entry_time - time.time()) < 5 for t in pair_trades):
+            if any(abs(t.entry_time - time.time()) < 5 and t.action == sig.action.lower() for t in pair_trades):
                 continue
 
             tf_tag = sig.metadata.get('tf', '1m') if hasattr(sig, 'metadata') and sig.metadata else '1m'
