@@ -255,6 +255,27 @@ class HybridSignalEngine:
             else:
                 break
 
+        # 6. Body and Wick Ratios
+        body_ratio = abs(closes[-1] - opens[-1]) / max(curr_rng, 1e-8)
+
+        # 7. Bollinger Z-score
+        bb_z = (closes[-1] - ma20) / max(std20, 1e-8)
+
+        # 8. Volume SMA20 ratio (already have v_ratio from vol_sma)
+        vol_sma20 = np.mean(volumes[-20:]) if n >= 20 else np.mean(volumes)
+        vol_ratio_20 = volumes[-1] / max(vol_sma20, 1e-8)
+
+        # 9. MFI (14-period Money Flow Index)
+        mfi_val = 50.0
+        if n >= 15:
+            tp = (highs[-14:] + lows[-14:] + closes[-14:]) / 3.0
+            tp_prev = np.roll(tp, 1)
+            mf = tp * volumes[-14:]
+            pos_flow = np.sum(mf[1:][tp[1:] > tp_prev[1:]])
+            neg_flow = np.sum(mf[1:][tp[1:] < tp_prev[1:]])
+            if neg_flow > 0:
+                mfi_val = 100.0 - (100.0 / (1.0 + pos_flow / neg_flow))
+
         signals = []
 
         for s in setups:
@@ -364,13 +385,119 @@ class HybridSignalEngine:
                     action = "put"
                     trigger_detail = f"Stoch14={stoch_val:.1f}>={100 - st_th} | Whale={whale:.1f}>={whale_req}"
 
+            # ─── BB + RSI REVERSAL (No-Gale) ───
+            elif stype == "BB_RSI_REV":
+                rsi_period = p.get("rsi_period", 14)
+                rsi_th = p.get("rsi_th", 5)
+                bb_th = p.get("bb_th", 2.5)
+                min_vol = p.get("min_vol", 0.0)
+
+                deltas = np.diff(closes[-(rsi_period + 30):])
+                gains = np.where(deltas > 0, deltas, 0.0)
+                losses_arr = np.where(deltas < 0, -deltas, 0.0)
+                ag = np.mean(gains[:rsi_period])
+                al = np.mean(losses_arr[:rsi_period])
+                for j in range(rsi_period, len(deltas)):
+                    ag = (ag * (rsi_period - 1) + gains[j]) / rsi_period
+                    al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
+                rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+
+                if rsi_val <= rsi_th and bb_z <= -bb_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                    action = "call"
+                    trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}<={rsi_th} | BBz={bb_z:.2f}<=-{bb_th} | Vol={vol_ratio_20:.1f}"
+                elif rsi_val >= (100 - rsi_th) and bb_z >= bb_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                    action = "put"
+                    trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th} | BBz={bb_z:.2f}>={bb_th} | Vol={vol_ratio_20:.1f}"
+
+            # ─── RSI ONLY (No-Gale) ───
+            elif stype == "RSI_ONLY":
+                rsi_period = p.get("rsi_period", 2)
+                rsi_th = p.get("rsi_th", 3)
+                min_vol = p.get("min_vol", 0.0)
+
+                deltas = np.diff(closes[-(rsi_period + 30):])
+                gains = np.where(deltas > 0, deltas, 0.0)
+                losses_arr = np.where(deltas < 0, -deltas, 0.0)
+                ag = np.mean(gains[:rsi_period])
+                al = np.mean(losses_arr[:rsi_period])
+                for j in range(rsi_period, len(deltas)):
+                    ag = (ag * (rsi_period - 1) + gains[j]) / rsi_period
+                    al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
+                rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+
+                if rsi_val <= rsi_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                    action = "call"
+                    trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}<={rsi_th} | Vol={vol_ratio_20:.1f}"
+                elif rsi_val >= (100 - rsi_th) and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                    action = "put"
+                    trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th} | Vol={vol_ratio_20:.1f}"
+
+            # ─── BB + STREAK (No-Gale) ───
+            elif stype == "BB_STREAK":
+                bb_th = p.get("bb_th", 2.5)
+                min_run = p.get("min_run", 3)
+                min_vol = p.get("min_vol", 0.0)
+
+                if bb_z <= -bb_th and cr >= min_run and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                    action = "call"
+                    trigger_detail = f"BBz={bb_z:.2f}<=-{bb_th} | RedStreak={cr}>={min_run} | Vol={vol_ratio_20:.1f}"
+                elif bb_z >= bb_th and cg >= min_run and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                    action = "put"
+                    trigger_detail = f"BBz={bb_z:.2f}>={bb_th} | GreenStreak={cg}>={min_run} | Vol={vol_ratio_20:.1f}"
+
+            # ─── WICK REJECTION (No-Gale) ───
+            elif stype == "WICK_REJ":
+                min_wick = p.get("min_wick", 0.5)
+                max_body = p.get("max_body", 0.3)
+                bb_th = p.get("bb_th", 0.0)
+                min_vol = p.get("min_vol", 0.0)
+
+                bb_ok_call = (bb_th <= 0) or (bb_z <= -bb_th)
+                bb_ok_put = (bb_th <= 0) or (bb_z >= bb_th)
+
+                if lw >= min_wick and body_ratio <= max_body and bb_ok_call and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                    action = "call"
+                    trigger_detail = f"LW={lw:.2f}>={min_wick} | Body={body_ratio:.2f}<={max_body} | BBz={bb_z:.2f}"
+                elif uw >= min_wick and body_ratio <= max_body and bb_ok_put and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                    action = "put"
+                    trigger_detail = f"UW={uw:.2f}>={min_wick} | Body={body_ratio:.2f}<={max_body} | BBz={bb_z:.2f}"
+
+            # ─── MFI + RSI (No-Gale) ───
+            elif stype == "MFI_RSI":
+                mfi_th = p.get("mfi_th", 20)
+                rsi_period = p.get("rsi_period", 5)
+                rsi_th = p.get("rsi_th", 10)
+                min_vol = p.get("min_vol", 0.0)
+
+                deltas = np.diff(closes[-(rsi_period + 30):])
+                gains = np.where(deltas > 0, deltas, 0.0)
+                losses_arr = np.where(deltas < 0, -deltas, 0.0)
+                ag = np.mean(gains[:rsi_period])
+                al = np.mean(losses_arr[:rsi_period])
+                for j in range(rsi_period, len(deltas)):
+                    ag = (ag * (rsi_period - 1) + gains[j]) / rsi_period
+                    al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
+                rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+
+                if mfi_val <= mfi_th and rsi_val <= rsi_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                    action = "call"
+                    trigger_detail = f"MFI={mfi_val:.1f}<={mfi_th} | RSI{rsi_period}={rsi_val:.1f}<={rsi_th}"
+                elif mfi_val >= (100 - mfi_th) and rsi_val >= (100 - rsi_th) and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                    action = "put"
+                    trigger_detail = f"MFI={mfi_val:.1f}>={100-mfi_th} | RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th}"
+
             if action:
+                # Support variable expiry_bars from config (default: 1 bar)
+                expiry_bars = s.params.get("expiry_bars", 1) if hasattr(s, 'params') else 1
+                # Also check top-level expiry_bars on the setup dict during load
+                if hasattr(s, 'expiry_bars'):
+                    expiry_bars = s.expiry_bars
                 signals.append({
                     "symbol": sym,
                     "action": action,
                     "price": closes[-1],
                     "tf": tf,
-                    "expiry_seconds": tf * 60,
+                    "expiry_seconds": tf * 60 * max(expiry_bars, 1),
                     "confidence": s.wr / 100.0,
                     "pattern_type": f"{s.type}_{tf}M",
                     "trigger": f"{s.desc} | {trigger_detail}",

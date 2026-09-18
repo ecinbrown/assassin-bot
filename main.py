@@ -348,9 +348,9 @@ async def main():
     # 3. Instantiate Signal Engine (supports GALE1 and ZERO_GALE flat modes)
     strategy_mode = os.environ.get("STRATEGY_MODE", "GALE1").upper()
     if strategy_mode in ("ZERO_GALE", "FLAT", "0GALE"):
-        zero_gale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "zero_gale_setups_config.json")
+        zero_gale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "zero_gale_80pct_config.json")
         hybrid_engine = HybridSignalEngine(config_path=zero_gale_cfg)
-        logger.critical(f"🎯 [STRATEGY MODE: ZERO-GALE] Armed with {len(hybrid_engine.setups)} verified flat setups (32.7 TPD | 62.9% OOS WR | Zero Martingale)!")
+        logger.critical(f"🎯 [STRATEGY MODE: ZERO-GALE] Armed with {len(hybrid_engine.setups)} verified flat setups (18.75 TPD | 83.95% Direct WR | Zero Martingale)!")
     else:
         hybrid_engine = HybridSignalEngine()
         logger.info(f"📊 [STRATEGY MODE: GALE1] Armed with {len(hybrid_engine.setups)} setups (85% 1-Gale Sequence WR)")
