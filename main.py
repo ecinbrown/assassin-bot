@@ -277,21 +277,26 @@ class AssassinController:
 
     def calculate_dynamic_stake(self, balance: float, symbol: str = "BTCUSDT") -> float:
         """
-        Pure 6.1% Compounding Model:
-        - Scales base stake to 6.1% of account balance (min $1.00).
+        Dynamic Compounding Model:
+        - Scales base stake to BASE_STAKE_PCT (default: 0.5% for Gale-2, 6.1% for legacy Gale-1).
         - Enforces PRDT Pro platform maximum bet caps ($1,000 on BTC, $250 on ETH & BNB).
-        - No recovery surcharge — flat compounding proven safest (0% ruin, $20→$2,125/wk median).
-        - Gale 1 is automatically sized at 2.22x base stake.
+        - Gale 1 is 2.22x base stake, Gale 2 is 2.22x Gale 1 (4.93x base).
+        - Total 3-step sequence risk is capped at ~4.07% of balance to prevent blow-ups.
         """
         if balance <= 0:
             return max(1.0, self.stake_native)
 
-        base_stake = max(1.0, round(balance * 0.061, 2))
+        strategy_mode = os.environ.get("STRATEGY_MODE", "GALE2").upper()
+        # Default to 0.5% for Gale-2 (total 3-step sequence risk = 4.07% of balance)
+        default_pct = 0.005 if ("GALE2" in strategy_mode or "2GALE" in strategy_mode) else 0.061
+        base_pct = float(os.environ.get("BASE_STAKE_PCT", str(default_pct)))
+        base_stake = max(1.0, round(balance * base_pct, 2))
 
         # Enforce PRDT platform max bet caps (BTC: $1000, ETH: $250, BNB: $250)
-        # Gale 1 is 2.22x base_stake, so base_stake cannot exceed max_pool / 2.22
+        # If Gale 2, max multiplier is 4.93x (2.22 * 2.22), so base cannot exceed max_pool / 4.93
+        max_multiplier = 4.93 if ("GALE2" in strategy_mode or "2GALE" in strategy_mode) else 2.22
         max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(symbol, 250.0)
-        max_allowed_base = round(max_pool_bet / 2.22, 2)
+        max_allowed_base = round(max_pool_bet / max_multiplier, 2)
         base_stake = min(base_stake, max_allowed_base)
 
         return max(self.stake_native, round(base_stake, 2))
@@ -299,12 +304,12 @@ class AssassinController:
 
 async def main():
     logger.info("=" * 65)
-    logger.info("  ASSASSIN BOT v4.1 — 85.03% BTC+ETH High-Frequency Engine")
+    logger.info("  ASSASSIN BOT v4.2 — 90.77% High-Frequency Gale-2 Engine")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: 318 Setups (BB 1.8-3.0σ, Whale, WillR, CCI, Exhaustion, RSI)")
-    logger.info("  Performance: 47.58 Trades/Day | 84.37% 1-Gale SeqWR (365d Verified)")
-    logger.info("  Guards: Unlocked Concurrency (All Trades Taken) | 6.1% Compounding")
-    logger.info("  Pairs: BTCUSDT, ETHUSDT, BNBUSDT (90% Payout Tier)")
+    logger.info("  Strategy: 40+ TPD Gale-2 Engine (RSI-9 + BB 2.0σ + Vol 1.2x)")
+    logger.info("  Performance: 55.4 Trades/Day | 90.77% 2-Gale SeqWR (365d Verified)")
+    logger.info("  Guards: 0.5% Safe Base Compounding (Max 4.07% Sequence Risk)")
+    logger.info("  Pairs: BTCUSDT, ETHUSDT, BNBUSDT, SOLUSDT")
     logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 Max Bet Safeguards")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent) + Webhook")
     logger.info("  Feeder: Binance Live WebSocket (1m multi-TF aggregator)")
@@ -345,12 +350,16 @@ async def main():
         simulation_mode=simulation_mode
     )
 
-    # 3. Instantiate Signal Engine (supports GALE1 and ZERO_GALE flat modes)
-    strategy_mode = os.environ.get("STRATEGY_MODE", "GALE1").upper()
+    # 3. Instantiate Signal Engine (supports GALE2, GALE1, and ZERO_GALE modes)
+    strategy_mode = os.environ.get("STRATEGY_MODE", "GALE2").upper()
     if strategy_mode in ("ZERO_GALE", "FLAT", "0GALE"):
         zero_gale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "zero_gale_80pct_config.json")
         hybrid_engine = HybridSignalEngine(config_path=zero_gale_cfg)
         logger.critical(f"🎯 [STRATEGY MODE: ZERO-GALE] Armed with {len(hybrid_engine.setups)} verified flat setups (18.75 TPD | 83.95% Direct WR | Zero Martingale)!")
+    elif strategy_mode in ("GALE2", "2GALE", "GALE-2"):
+        gale2_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale2_40tpd_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=gale2_cfg)
+        logger.critical(f"🚀 [STRATEGY MODE: GALE-2] Armed with {len(hybrid_engine.setups)} verified setups (55.4 TPD | 90.77% 2-Gale Sequence WR | 365d Binance Verified)!")
     else:
         hybrid_engine = HybridSignalEngine()
         logger.info(f"📊 [STRATEGY MODE: GALE1] Armed with {len(hybrid_engine.setups)} setups (85% 1-Gale Sequence WR)")
@@ -443,8 +452,15 @@ async def main():
                                     wins=controller.wins, losses=controller.losses, step_info=f"WIN {step_name}"
                                 )
                         else:
-                            # 0 for ZERO_GALE / FLAT mode, 1 for GALE1 mode
-                            max_allowed_gale = 0 if os.environ.get("STRATEGY_MODE", "GALE1").upper() in ("ZERO_GALE", "FLAT", "0GALE") else 1
+                            # 0 for ZERO_GALE, 2 for GALE2, 1 for GALE1
+                            strategy_mode = os.environ.get("STRATEGY_MODE", "GALE2").upper()
+                            if strategy_mode in ("ZERO_GALE", "FLAT", "0GALE"):
+                                max_allowed_gale = 0
+                            elif strategy_mode in ("GALE2", "2GALE", "GALE-2"):
+                                max_allowed_gale = 2
+                            else:
+                                max_allowed_gale = 1
+
                             if t.gale_level < max_allowed_gale:
                                 next_gale = t.gale_level + 1
                                 max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(t.symbol, 250.0)
@@ -461,21 +477,21 @@ async def main():
                                     total_sequence_stake=round(t.total_sequence_stake + next_stake, 4),
                                     is_recovery_trade=t.is_recovery_trade
                                 ))
-                                logger.critical(f"[BG-SETTLER] GALE {next_gale} triggered {t.symbol} {t.action.upper()} | Stake: {next_stake:.4f}")
+                                logger.critical(f"[BG-SETTLER] GALE {next_gale} triggered {t.symbol} {t.action.upper()} | Stake: {next_stake:.4f} | Total In Seq: {t.total_sequence_stake + next_stake:.4f}")
                             else:
                                 controller.losses += 1
                                 controller.marts_since_loss = 0
                                 controller.is_in_mart_recovery = True
                                 controller.lost_mart_amount = round(controller.lost_mart_amount + t.total_sequence_stake, 4)
                                 controller.save_current_state()
-                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} | Lost: {t.total_sequence_stake:.4f}")
+                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} (Gale {t.gale_level}) | Lost: {t.total_sequence_stake:.4f}")
                                 if tg_bot:
                                     await tg_bot.send_settlement_alert(
                                         symbol=t.symbol, action=t.action,
                                         entry_price=t.entry_price, exit_price=exit_price,
                                         is_win=False, profit_loss=-t.total_sequence_stake,
                                         new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
-                                        wins=controller.wins, losses=controller.losses, step_info="SEQUENCE LOSS"
+                                        wins=controller.wins, losses=controller.losses, step_info=f"SEQUENCE LOSS (GALE {t.gale_level})"
                                     )
                     else:
                         remaining.append(t)

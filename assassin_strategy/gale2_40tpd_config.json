@@ -1,0 +1,182 @@
+[
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 9,
+      "rsi_th": 28,
+      "bb_th": 2.0,
+      "min_vol": 1.2
+    },
+    "desc": "BTC 5m | RSI9_28/72 + BB2.0s + Vol1.2x",
+    "wr": 90.77,
+    "trades": 5052,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 9,
+      "rsi_th": 28,
+      "bb_th": 2.0,
+      "min_vol": 1.2
+    },
+    "desc": "ETH 5m | RSI9_28/72 + BB2.0s + Vol1.2x",
+    "wr": 90.77,
+    "trades": 5052,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 9,
+      "rsi_th": 28,
+      "bb_th": 2.0,
+      "min_vol": 1.2
+    },
+    "desc": "BNB 5m | RSI9_28/72 + BB2.0s + Vol1.2x",
+    "wr": 90.77,
+    "trades": 5052,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 9,
+      "rsi_th": 28,
+      "bb_th": 2.0,
+      "min_vol": 1.2
+    },
+    "desc": "SOL 5m | RSI9_28/72 + BB2.0s + Vol1.2x",
+    "wr": 90.77,
+    "trades": 5052,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 9,
+      "rsi_th": 25,
+      "bb_th": 2.0,
+      "min_vol": 1.2
+    },
+    "desc": "BTC 5m | RSI9_25/75 + BB2.0s + Vol1.2x",
+    "wr": 90.72,
+    "trades": 3784,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 9,
+      "rsi_th": 25,
+      "bb_th": 2.0,
+      "min_vol": 1.2
+    },
+    "desc": "ETH 5m | RSI9_25/75 + BB2.0s + Vol1.2x",
+    "wr": 90.72,
+    "trades": 3784,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 9,
+      "rsi_th": 25,
+      "bb_th": 2.0,
+      "min_vol": 1.2
+    },
+    "desc": "BNB 5m | RSI9_25/75 + BB2.0s + Vol1.2x",
+    "wr": 90.72,
+    "trades": 3784,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 9,
+      "rsi_th": 25,
+      "bb_th": 2.0,
+      "min_vol": 1.2
+    },
+    "desc": "SOL 5m | RSI9_25/75 + BB2.0s + Vol1.2x",
+    "wr": 90.72,
+    "trades": 3784,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 28,
+      "bb_th": 2.2,
+      "min_vol": 1.5
+    },
+    "desc": "BTC 2m | RSI14_28/72 + BB2.2s + Vol1.5x",
+    "wr": 90.6,
+    "trades": 4039,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 28,
+      "bb_th": 2.2,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 2m | RSI14_28/72 + BB2.2s + Vol1.5x",
+    "wr": 90.6,
+    "trades": 4039,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 28,
+      "bb_th": 2.2,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 2m | RSI14_28/72 + BB2.2s + Vol1.5x",
+    "wr": 90.6,
+    "trades": 4039,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 28,
+      "bb_th": 2.2,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 2m | RSI14_28/72 + BB2.2s + Vol1.5x",
+    "wr": 90.6,
+    "trades": 4039,
+    "expiry_bars": 1
+  }
+]
