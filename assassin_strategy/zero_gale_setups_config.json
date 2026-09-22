@@ -1,0 +1,1321 @@
+[
+  {
+    "pair": "ETHUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 7,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 3m Exp:1b | Run_7_BB_3.0",
+    "wr": 71.88,
+    "oos_wr": 90.91,
+    "trades": 32,
+    "trades_day": 0.088,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 7,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 3m Exp:2b | Run_7_BB_3.0",
+    "wr": 71.88,
+    "oos_wr": 90.91,
+    "trades": 32,
+    "trades_day": 0.088,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 15m Exp:1b | Run_5_BB_3.0",
+    "wr": 65.0,
+    "oos_wr": 80.0,
+    "trades": 40,
+    "trades_day": 0.11,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 6,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 5m Exp:1b | Run_6_BB_3.0",
+    "wr": 73.53,
+    "oos_wr": 66.67,
+    "trades": 34,
+    "trades_day": 0.093,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "ETH 5m Exp:1b | BB_3.5_RSI2_10",
+    "wr": 64.52,
+    "oos_wr": 73.68,
+    "trades": 124,
+    "trades_day": 0.34,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 2.0
+    },
+    "desc": "ETH 5m Exp:1b | BB_3.5_RSI2_2",
+    "wr": 63.79,
+    "oos_wr": 74.29,
+    "trades": 116,
+    "trades_day": 0.318,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 6,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 3m Exp:2b | Run_6_BB_3.0",
+    "wr": 64.0,
+    "oos_wr": 73.91,
+    "trades": 75,
+    "trades_day": 0.205,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 6,
+      "std": 2.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 15m Exp:1b | Run_6_BB_2.0",
+    "wr": 67.26,
+    "oos_wr": 70.27,
+    "trades": 113,
+    "trades_day": 0.31,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "ETH 5m Exp:1b | BB_3.5_RSI2_5",
+    "wr": 64.17,
+    "oos_wr": 72.97,
+    "trades": 120,
+    "trades_day": 0.329,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 6,
+      "std": 2.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 15m Exp:3b | Run_6_BB_2.0",
+    "wr": 62.83,
+    "oos_wr": 72.97,
+    "trades": 113,
+    "trades_day": 0.31,
+    "expiry_bars": 3
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 6,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 3m Exp:3b | Run_6_BB_3.0",
+    "wr": 61.33,
+    "oos_wr": 73.91,
+    "trades": 75,
+    "trades_day": 0.205,
+    "expiry_bars": 3
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 7,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 3m Exp:5b | Run_7_BB_3.0",
+    "wr": 62.5,
+    "oos_wr": 72.73,
+    "trades": 32,
+    "trades_day": 0.088,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "ETH 5m Exp:3b | BB_3.5_RSI2_10",
+    "wr": 63.71,
+    "oos_wr": 71.05,
+    "trades": 124,
+    "trades_day": 0.34,
+    "expiry_bars": 3
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 2.0
+    },
+    "desc": "ETH 5m Exp:2b | BB_3.5_RSI2_2",
+    "wr": 60.34,
+    "oos_wr": 74.29,
+    "trades": 116,
+    "trades_day": 0.318,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 2.0
+    },
+    "desc": "ETH 5m Exp:3b | BB_3.5_RSI2_2",
+    "wr": 62.93,
+    "oos_wr": 71.43,
+    "trades": 116,
+    "trades_day": 0.318,
+    "expiry_bars": 3
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "std": 2.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 15m Exp:1b | Run_5_BB_2.0",
+    "wr": 67.84,
+    "oos_wr": 65.98,
+    "trades": 283,
+    "trades_day": 0.775,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "ETH 5m Exp:3b | BB_3.5_RSI2_5",
+    "wr": 63.33,
+    "oos_wr": 70.27,
+    "trades": 120,
+    "trades_day": 0.329,
+    "expiry_bars": 3
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 6,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 3m Exp:1b | Run_6_BB_3.0",
+    "wr": 64.0,
+    "oos_wr": 69.57,
+    "trades": 75,
+    "trades_day": 0.205,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "std": 2.5,
+      "vol": 1.0
+    },
+    "desc": "ETH 15m Exp:1b | Run_5_BB_2.5",
+    "wr": 67.27,
+    "oos_wr": 65.85,
+    "trades": 110,
+    "trades_day": 0.301,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 6,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 3m Exp:5b | Run_6_BB_3.0",
+    "wr": 62.67,
+    "oos_wr": 69.57,
+    "trades": 75,
+    "trades_day": 0.205,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 5m Exp:1b | Run_5_BB_3.0",
+    "wr": 65.17,
+    "oos_wr": 66.67,
+    "trades": 89,
+    "trades_day": 0.244,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "ETH 5m Exp:2b | BB_3.5_RSI2_10",
+    "wr": 60.48,
+    "oos_wr": 71.05,
+    "trades": 124,
+    "trades_day": 0.34,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "ETH 5m Exp:2b | BB_3.5_RSI2_5",
+    "wr": 60.0,
+    "oos_wr": 70.27,
+    "trades": 120,
+    "trades_day": 0.329,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 6,
+      "std": 2.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 15m Exp:2b | Run_6_BB_2.0",
+    "wr": 59.29,
+    "oos_wr": 70.27,
+    "trades": 113,
+    "trades_day": 0.31,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 6,
+      "std": 2.5,
+      "vol": 1.0
+    },
+    "desc": "ETH 15m Exp:1b | Run_6_BB_2.5",
+    "wr": 63.64,
+    "oos_wr": 65.0,
+    "trades": 44,
+    "trades_day": 0.121,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "ETH 5m Exp:5b | Run_5_BB_3.0",
+    "wr": 61.8,
+    "oos_wr": 66.67,
+    "trades": 89,
+    "trades_day": 0.244,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 2.0
+    },
+    "desc": "ETH 5m Exp:1b | BB_3.0_RSI2_2",
+    "wr": 62.11,
+    "oos_wr": 65.09,
+    "trades": 541,
+    "trades_day": 1.482,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "ETH 5m Exp:1b | BB_3.0_RSI2_5",
+    "wr": 62.3,
+    "oos_wr": 64.74,
+    "trades": 557,
+    "trades_day": 1.526,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "ETH 5m Exp:1b | BB_3.0_RSI2_10",
+    "wr": 62.69,
+    "oos_wr": 64.04,
+    "trades": 579,
+    "trades_day": 1.586,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 6,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "BTC 3m Exp:1b | Run_6_BB_3.0",
+    "wr": 61.4,
+    "oos_wr": 70.59,
+    "trades": 57,
+    "trades_day": 0.156,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 2.0
+    },
+    "desc": "BTC 5m Exp:1b | BB_3.5_RSI2_2",
+    "wr": 64.13,
+    "oos_wr": 67.86,
+    "trades": 92,
+    "trades_day": 0.252,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 7,
+      "std": 2.5,
+      "vol": 1.0
+    },
+    "desc": "BTC 5m Exp:2b | Run_7_BB_2.5",
+    "wr": 62.71,
+    "oos_wr": 68.75,
+    "trades": 59,
+    "trades_day": 0.162,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "BTC 5m Exp:1b | BB_3.5_RSI2_10",
+    "wr": 63.73,
+    "oos_wr": 63.33,
+    "trades": 102,
+    "trades_day": 0.279,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 2.0
+    },
+    "desc": "BTC 5m Exp:3b | BB_3.5_RSI2_2",
+    "wr": 61.96,
+    "oos_wr": 64.29,
+    "trades": 92,
+    "trades_day": 0.252,
+    "expiry_bars": 3
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "BTC 5m Exp:1b | BB_3.5_RSI2_5",
+    "wr": 62.24,
+    "oos_wr": 63.33,
+    "trades": 98,
+    "trades_day": 0.268,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 7,
+      "std": 2.5,
+      "vol": 1.0
+    },
+    "desc": "BTC 3m Exp:5b | Run_7_BB_2.5",
+    "wr": 59.29,
+    "oos_wr": 65.62,
+    "trades": 113,
+    "trades_day": 0.31,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 2.0
+    },
+    "desc": "BTC 3m Exp:5b | BB_3.5_RSI2_2",
+    "wr": 59.86,
+    "oos_wr": 64.15,
+    "trades": 142,
+    "trades_day": 0.389,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "BTC 3m Exp:5b | BB_3.5_RSI2_5",
+    "wr": 59.46,
+    "oos_wr": 63.64,
+    "trades": 148,
+    "trades_day": 0.405,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "BTC 3m Exp:5b | BB_3.5_RSI2_10",
+    "wr": 59.62,
+    "oos_wr": 63.16,
+    "trades": 156,
+    "trades_day": 0.427,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "BTC 5m Exp:3b | BB_3.5_RSI2_5",
+    "wr": 61.22,
+    "oos_wr": 60.0,
+    "trades": 98,
+    "trades_day": 0.268,
+    "expiry_bars": 3
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "BTC 5m Exp:3b | BB_3.5_RSI2_10",
+    "wr": 60.78,
+    "oos_wr": 60.0,
+    "trades": 102,
+    "trades_day": 0.279,
+    "expiry_bars": 3
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 2.0
+    },
+    "desc": "BTC 5m Exp:2b | BB_3.5_RSI2_2",
+    "wr": 59.78,
+    "oos_wr": 60.71,
+    "trades": 92,
+    "trades_day": 0.252,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 7,
+      "std": 2.0,
+      "vol": 1.0
+    },
+    "desc": "BTC 3m Exp:5b | Run_7_BB_2.0",
+    "wr": 58.82,
+    "oos_wr": 60.48,
+    "trades": 408,
+    "trades_day": 1.118,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "BTC 15m Exp:1b | BB_3.5_RSI2_10",
+    "wr": 60.87,
+    "oos_wr": 58.33,
+    "trades": 46,
+    "trades_day": 0.126,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "BTC 5m Exp:2b | BB_3.5_RSI2_10",
+    "wr": 58.82,
+    "oos_wr": 60.0,
+    "trades": 102,
+    "trades_day": 0.279,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "BTC 5m Exp:2b | BB_3.5_RSI2_5",
+    "wr": 58.16,
+    "oos_wr": 60.0,
+    "trades": 98,
+    "trades_day": 0.268,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 1,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 6,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "SOL 1m Exp:1b | Run_6_BB_3.0",
+    "wr": 64.04,
+    "oos_wr": 75.0,
+    "trades": 89,
+    "trades_day": 0.244,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 7,
+      "std": 2.5,
+      "vol": 1.0
+    },
+    "desc": "SOL 5m Exp:1b | Run_7_BB_2.5",
+    "wr": 66.67,
+    "oos_wr": 64.29,
+    "trades": 45,
+    "trades_day": 0.123,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "SOL 5m Exp:1b | Run_5_BB_3.0",
+    "wr": 64.18,
+    "oos_wr": 66.67,
+    "trades": 67,
+    "trades_day": 0.184,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 2.0
+    },
+    "desc": "SOL 5m Exp:1b | BB_3.5_RSI2_2",
+    "wr": 60.81,
+    "oos_wr": 67.86,
+    "trades": 74,
+    "trades_day": 0.203,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "SOL 5m Exp:1b | BB_3.5_RSI2_10",
+    "wr": 59.49,
+    "oos_wr": 65.52,
+    "trades": 79,
+    "trades_day": 0.216,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 1.0
+    },
+    "desc": "SOL 15m Exp:1b | Pin_Donch50_V3.0",
+    "wr": 59.7,
+    "oos_wr": 65.0,
+    "trades": 67,
+    "trades_day": 0.184,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "SOL 5m Exp:1b | BB_3.5_RSI2_5",
+    "wr": 58.44,
+    "oos_wr": 65.52,
+    "trades": 77,
+    "trades_day": 0.211,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 1.0
+    },
+    "desc": "SOL 15m Exp:3b | Pin_Donch20_V3.0",
+    "wr": 61.25,
+    "oos_wr": 62.5,
+    "trades": 80,
+    "trades_day": 0.219,
+    "expiry_bars": 3
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 1.0
+    },
+    "desc": "SOL 15m Exp:3b | Pin_Donch50_V3.0",
+    "wr": 62.69,
+    "oos_wr": 60.0,
+    "trades": 67,
+    "trades_day": 0.184,
+    "expiry_bars": 3
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 7,
+      "std": 2.5,
+      "vol": 1.0
+    },
+    "desc": "SOL 3m Exp:5b | Run_7_BB_2.5",
+    "wr": 62.22,
+    "oos_wr": 60.0,
+    "trades": 90,
+    "trades_day": 0.247,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 6,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "SOL 3m Exp:5b | Run_6_BB_3.0",
+    "wr": 60.98,
+    "oos_wr": 60.0,
+    "trades": 41,
+    "trades_day": 0.112,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "std": 2.5,
+      "vol": 1.0
+    },
+    "desc": "SOL 15m Exp:1b | Run_5_BB_2.5",
+    "wr": 60.87,
+    "oos_wr": 59.46,
+    "trades": 115,
+    "trades_day": 0.315,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "SOL 3m Exp:1b | Run_5_BB_3.0",
+    "wr": 61.05,
+    "oos_wr": 59.26,
+    "trades": 95,
+    "trades_day": 0.26,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 1,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "std": 3.0,
+      "vol": 1.0
+    },
+    "desc": "SOL 1m Exp:5b | Run_5_BB_3.0",
+    "wr": 60.77,
+    "oos_wr": 58.93,
+    "trades": 209,
+    "trades_day": 0.573,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 7,
+      "std": 2.5,
+      "vol": 1.0
+    },
+    "desc": "SOL 5m Exp:2b | Run_7_BB_2.5",
+    "wr": 60.0,
+    "oos_wr": 57.14,
+    "trades": 45,
+    "trades_day": 0.123,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 2.0
+    },
+    "desc": "SOL 5m Exp:1b | BB_3.0_RSI2_2",
+    "wr": 59.65,
+    "oos_wr": 57.48,
+    "trades": 399,
+    "trades_day": 1.093,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "SOL 5m Exp:1b | BB_3.0_RSI2_5",
+    "wr": 59.66,
+    "oos_wr": 57.36,
+    "trades": 409,
+    "trades_day": 1.121,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "std": 2.5,
+      "vol": 1.0
+    },
+    "desc": "SOL 3m Exp:1b | Run_5_BB_2.5",
+    "wr": 59.08,
+    "oos_wr": 57.24,
+    "trades": 479,
+    "trades_day": 1.312,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 1.0
+    },
+    "desc": "SOL 5m Exp:5b | Pin_Donch50_V3.0",
+    "wr": 58.33,
+    "oos_wr": 57.58,
+    "trades": 228,
+    "trades_day": 0.625,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 2.0
+    },
+    "desc": "BNB 15m Exp:5b | BB_3.5_RSI2_2",
+    "wr": 65.71,
+    "oos_wr": 66.67,
+    "trades": 35,
+    "trades_day": 0.096,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "BNB 15m Exp:5b | BB_3.5_RSI2_5",
+    "wr": 64.86,
+    "oos_wr": 66.67,
+    "trades": 37,
+    "trades_day": 0.101,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 7,
+      "std": 2.0,
+      "vol": 1.0
+    },
+    "desc": "BNB 15m Exp:1b | Run_7_BB_2.0",
+    "wr": 64.56,
+    "oos_wr": 65.38,
+    "trades": 79,
+    "trades_day": 0.216,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 5,
+      "std": 2.5,
+      "vol": 1.0
+    },
+    "desc": "BNB 15m Exp:1b | Run_5_BB_2.5",
+    "wr": 62.5,
+    "oos_wr": 61.76,
+    "trades": 112,
+    "trades_day": 0.307,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 1.0
+    },
+    "desc": "BNB 15m Exp:2b | Pin_Donch50_V3.0",
+    "wr": 61.04,
+    "oos_wr": 63.16,
+    "trades": 77,
+    "trades_day": 0.211,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 3.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "BNB 15m Exp:5b | BB_3.5_RSI2_10",
+    "wr": 64.1,
+    "oos_wr": 57.14,
+    "trades": 39,
+    "trades_day": 0.107,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 7,
+      "std": 2.0,
+      "vol": 1.0
+    },
+    "desc": "BNB 15m Exp:2b | Run_7_BB_2.0",
+    "wr": 63.29,
+    "oos_wr": 57.69,
+    "trades": 79,
+    "trades_day": 0.216,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 5,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 7,
+      "std": 2.5,
+      "vol": 1.0
+    },
+    "desc": "BNB 5m Exp:2b | Run_7_BB_2.5",
+    "wr": 58.23,
+    "oos_wr": 60.71,
+    "trades": 79,
+    "trades_day": 0.216,
+    "expiry_bars": 2
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "BNB 15m Exp:1b | BB_2.5_RSI2_10",
+    "wr": 59.39,
+    "oos_wr": 58.2,
+    "trades": 628,
+    "trades_day": 1.721,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "BNB 15m Exp:1b | BB_3.0_RSI2_10",
+    "wr": 58.72,
+    "oos_wr": 58.0,
+    "trades": 172,
+    "trades_day": 0.471,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 2.5,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "BNB 15m Exp:1b | BB_2.5_RSI2_5",
+    "wr": 59.47,
+    "oos_wr": 57.14,
+    "trades": 607,
+    "trades_day": 1.663,
+    "expiry_bars": 1
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 10.0
+    },
+    "desc": "BNB 5m Exp:3b | BB_3.0_RSI2_10",
+    "wr": 59.12,
+    "oos_wr": 57.14,
+    "trades": 411,
+    "trades_day": 1.126,
+    "expiry_bars": 3
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "EXHAUSTION",
+    "params": {
+      "bars": 7,
+      "std": 2.0,
+      "vol": 1.0
+    },
+    "desc": "BNB 15m Exp:5b | Run_7_BB_2.0",
+    "wr": 58.23,
+    "oos_wr": 57.69,
+    "trades": 79,
+    "trades_day": 0.216,
+    "expiry_bars": 5
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 5,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "BNB 5m Exp:3b | BB_3.0_RSI2_5",
+    "wr": 58.78,
+    "oos_wr": 57.03,
+    "trades": 393,
+    "trades_day": 1.077,
+    "expiry_bars": 3
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "BB",
+    "params": {
+      "std": 3.0,
+      "wick": 0.0,
+      "whale": 1.0,
+      "rsi_filter": 5.0
+    },
+    "desc": "BNB 15m Exp:1b | BB_3.0_RSI2_5",
+    "wr": 58.33,
+    "oos_wr": 57.14,
+    "trades": 168,
+    "trades_day": 0.46,
+    "expiry_bars": 1
+  }
+]

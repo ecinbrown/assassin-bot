@@ -156,6 +156,17 @@ class ActiveTrade:
     is_recovery_trade: bool = False
 
 
+@dataclass
+class RecoveryDebt:
+    """Tracks a loss that needs recovery on a specific symbol."""
+    symbol: str
+    lost_amount: float          # Total sequence stake lost
+    created_at: float           # time.time() when loss occurred
+    cooldown_bars: int = 5      # Bars to wait before recovery eligible
+    bars_elapsed: int = 0       # 1m candles seen since loss
+    is_ready: bool = False      # True once cooldown_bars passed
+
+
 class AssassinController:
     """Master controller managing runtime state, mode toggling, and services."""
     def __init__(
@@ -189,6 +200,8 @@ class AssassinController:
         self.is_in_mart_recovery: bool = False
         self.lost_mart_amount: float = 0.0
         self.active_trades: List[ActiveTrade] = []
+        # Recovery overlay: queue of debts waiting for cooldown then fresh signal
+        self.recovery_queue: List[RecoveryDebt] = []
         self.latest_prices: dict = {}
         
         self.engine: Optional[AssassinSignalEngine] = None
@@ -483,15 +496,24 @@ async def main():
                                 controller.marts_since_loss = 0
                                 controller.is_in_mart_recovery = True
                                 controller.lost_mart_amount = round(controller.lost_mart_amount + t.total_sequence_stake, 4)
+                                # Queue a recovery debt for this symbol
+                                controller.recovery_queue.append(RecoveryDebt(
+                                    symbol=t.symbol,
+                                    lost_amount=round(t.total_sequence_stake, 4),
+                                    created_at=time.time(),
+                                    cooldown_bars=5,
+                                    bars_elapsed=0,
+                                    is_ready=False
+                                ))
                                 controller.save_current_state()
-                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} (Gale {t.gale_level}) | Lost: {t.total_sequence_stake:.4f}")
+                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} (Gale {t.gale_level}) | Lost: {t.total_sequence_stake:.4f} | Recovery queued (5-bar cooldown)")
                                 if tg_bot:
                                     await tg_bot.send_settlement_alert(
                                         symbol=t.symbol, action=t.action,
                                         entry_price=t.entry_price, exit_price=exit_price,
                                         is_win=False, profit_loss=-t.total_sequence_stake,
                                         new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
-                                        wins=controller.wins, losses=controller.losses, step_info=f"SEQUENCE LOSS (GALE {t.gale_level})"
+                                        wins=controller.wins, losses=controller.losses, step_info=f"SEQUENCE LOSS (GALE {t.gale_level}) | Recovery in 5 bars"
                                     )
                     else:
                         remaining.append(t)
@@ -510,6 +532,14 @@ async def main():
 
         controller.latest_prices[symbol] = candle.close
         now = time.time()
+
+        # Tick recovery cooldowns for this symbol
+        for debt in controller.recovery_queue:
+            if debt.symbol == symbol and not debt.is_ready:
+                debt.bars_elapsed += 1
+                if debt.bars_elapsed >= debt.cooldown_bars:
+                    debt.is_ready = True
+                    logger.info(f"🔄 [RECOVERY] {symbol} cooldown complete — next fresh signal triggers recovery trade")
 
         # Route candle to the correct engine's history buffer
         engine = engines.get(interval)
@@ -570,7 +600,7 @@ async def main():
                 f"Regime={sig.regime} | {sig.trigger}"
             )
 
-            # 1. Execute via Dynamic Compounding Staking
+            # 1. Execute NORMAL trade via Dynamic Compounding Staking
             current_balance = prdt_agent.simulated_balance if controller.simulation_mode else prdt_agent.get_balance()
             trade_stake = controller.calculate_dynamic_stake(current_balance, symbol=sig.symbol)
             success, tx_or_reason = await prdt_agent.execute_trade(sig, stake_native=trade_stake)
@@ -588,11 +618,51 @@ async def main():
                     epoch=prdt_agent.get_current_epoch(),
                     gale_level=0,
                     total_sequence_stake=trade_stake,
-                    is_recovery_trade=is_rec
+                    is_recovery_trade=False
                 ))
                 active_symbols.add(sig.symbol)
             else:
                 logger.warning(f"⚠️ Trade Execution Failed / Skipped: {tx_or_reason}")
+
+            # 2. Check if a RECOVERY trade should fire on this signal
+            ready_debts = [d for d in controller.recovery_queue if d.symbol == sig.symbol and d.is_ready]
+            if ready_debts:
+                debt = ready_debts[0]  # Oldest ready debt first
+                # Recovery stake: enough to recoup loss in one Gale-2 win (loss / payout_rate)
+                pair_payout = AssassinController.PAIR_PAYOUTS.get(sig.symbol, 0.70)
+                recovery_base = round(debt.lost_amount / pair_payout / 7.15, 2)  # 7.15x = total Gale-2 payout multiplier
+                recovery_base = max(recovery_base, controller.stake_native)  # Floor at min stake
+                max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(sig.symbol, 250.0)
+                recovery_base = min(recovery_base, round(max_pool_bet / 4.93, 2))  # Cap for Gale-2 headroom
+                
+                current_balance = prdt_agent.simulated_balance if controller.simulation_mode else prdt_agent.get_balance()
+                # Safety: don't risk more than 2% of balance on recovery
+                recovery_base = min(recovery_base, round(current_balance * 0.02, 2))
+                
+                rec_success, rec_tx = await prdt_agent.execute_trade(sig, stake_native=recovery_base)
+                if rec_success:
+                    controller.active_trades.append(ActiveTrade(
+                        symbol=sig.symbol,
+                        action=sig.action.lower(),
+                        entry_price=sig.price,
+                        stake_native=recovery_base,
+                        entry_time=time.time(),
+                        expiry_time=time.time() + sig.expiry_seconds,
+                        epoch=prdt_agent.get_current_epoch(),
+                        gale_level=0,
+                        total_sequence_stake=recovery_base,
+                        is_recovery_trade=True
+                    ))
+                    controller.recovery_queue.remove(debt)
+                    logger.critical(
+                        f"🔄 [RECOVERY TRADE] {sig.symbol} {sig.action.upper()} | "
+                        f"Stake: ${recovery_base:.2f} | Recouping: ${debt.lost_amount:.2f} loss | "
+                        f"Remaining debts: {len(controller.recovery_queue)}"
+                    )
+                    if tg_bot:
+                        await tg_bot.send_trade_alert(sig, f"RECOVERY ${recovery_base:.2f} (recoup ${debt.lost_amount:.2f})", True)
+                else:
+                    logger.warning(f"⚠️ Recovery trade failed: {rec_tx}")
 
             # Send Trade Execution Alert to Telegram
             if tg_bot:
