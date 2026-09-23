@@ -319,21 +319,21 @@ class AssassinController:
 
 async def main():
     logger.info("=" * 65)
-    logger.info("  ASSASSIN BOT v4.2 — 90.77% High-Frequency Gale-2 Engine")
+    logger.info("  ASSASSIN BOT v5.0 — 90.10% 1-Gale Champion Engine")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: 40+ TPD Gale-2 Engine (RSI-9 + BB 2.0σ + Vol 1.2x)")
-    logger.info("  Performance: 55.4 Trades/Day | 90.77% 2-Gale SeqWR (365d Verified)")
-    logger.info("  Guards: 0.5% Safe Base Compounding (Max 4.07% Sequence Risk)")
+    logger.info("  Strategy: 30-40 TPD 1-Gale (HTF 15m Trend-Pullbacks)")
+    logger.info("  Performance: 33.67 Trades/Day | 90.10% 1-Gale SeqWR (365d Verified)")
+    logger.info("  Staking: Pure Compounding (Base Staking with Zero Recovery Inflation)")
     logger.info("  Pairs: BTCUSDT, ETHUSDT, BNBUSDT, SOLUSDT")
-    logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 Max Bet Safeguards")
+    logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 | SOL $250 Max Bet Safeguards")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent) + Webhook")
     logger.info("  Feeder: Binance Live WebSocket (1m multi-TF aggregator)")
     logger.info("  Telegram: Interactive Control + Real/Demo Mode Switcher")
     logger.info("=" * 65)
 
     # 1. Configuration from Environment
-    # Trade BTC + ETH + BNB (Strictly 90% Payout Pairs)
-    default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT"
+    # Trade BTC + ETH + BNB + SOL (Full 4-Pair Champion Portfolio)
+    default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT,SOLUSDT"
     symbols = os.environ.get("TRADING_SYMBOLS", default_symbols).split(",")
     symbols = [s.strip().upper() for s in symbols if s.strip()]
 
