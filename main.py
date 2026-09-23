@@ -202,6 +202,8 @@ class AssassinController:
         self.active_trades: List[ActiveTrade] = []
         # Recovery overlay: queue of debts waiting for cooldown then fresh signal
         self.recovery_queue: List[RecoveryDebt] = []
+        # Post-loss lockout: symbol -> timestamp until which all trades are paused (15m falling-knife protection)
+        self.pair_loss_lockouts: Dict[str, float] = {}
         self.latest_prices: dict = {}
         
         self.engine: Optional[AssassinSignalEngine] = None
@@ -505,8 +507,10 @@ async def main():
                                     bars_elapsed=0,
                                     is_ready=False
                                 ))
+                                # 15-minute (3 x 5m candles) lockout on this pair to prevent falling-knife re-entry
+                                controller.pair_loss_lockouts[t.symbol] = time.time() + 900.0
                                 controller.save_current_state()
-                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} (Gale {t.gale_level}) | Lost: {t.total_sequence_stake:.4f} | Recovery queued (5-bar cooldown)")
+                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} (Gale {t.gale_level}) | Lost: {t.total_sequence_stake:.4f} | 15m lockout active | Recovery queued (5-bar cooldown)")
                                 if tg_bot:
                                     await tg_bot.send_settlement_alert(
                                         symbol=t.symbol, action=t.action,
@@ -583,7 +587,26 @@ async def main():
                 logger.info(f"📊 [HYBRID SIGNAL] {s['symbol']} {s['action'].upper()} on {tf}m | {s['trigger']}")
 
         for sig in signals:
-            # Unlocked execution: all available setups taken (concurrency cap removed)
+            # Safeguard 1: Post-loss lockout (15m falling-knife protection)
+            lockout_until = controller.pair_loss_lockouts.get(sig.symbol, 0.0)
+            if time.time() < lockout_until:
+                rem_s = int(lockout_until - time.time())
+                logger.info(f"🛡️ [LOCKOUT] {sig.symbol} in post-loss cooldown ({rem_s}s remaining) — skipping {sig.action.upper()} to avoid falling knife")
+                continue
+
+            # Safeguard 2: Prevent duplicate / overlapping trade sequences on the same symbol
+            if sig.symbol in active_symbols:
+                logger.info(f"⏳ [PAIR-BUSY] {sig.symbol} already has an active trade sequence — skipping duplicate")
+                continue
+
+            # Safeguard 3: Gale-Active Directional Lock (Stops the Multi-Pair Cascade / Triple Bust)
+            # If any other pair is currently struggling in Gale 1 or Gale 2 in the same direction, freeze new entries
+            struggling_gales = [t for t in controller.active_trades if t.action == sig.action.lower() and t.gale_level > 0 and t.symbol != sig.symbol]
+            if struggling_gales:
+                g = struggling_gales[0]
+                logger.info(f"🛡️ [GALE-LOCK] Blocking new {sig.symbol} {sig.action.upper()} because {g.symbol} is currently in GALE {g.gale_level} in the same direction")
+                continue
+
             pair_trades = [t for t in controller.active_trades if t.symbol == sig.symbol]
             # Dedup: prevent taking duplicate trades on the exact same second/candle close
             if any(abs(t.entry_time - time.time()) < 5 and t.action == sig.action.lower() for t in pair_trades):
