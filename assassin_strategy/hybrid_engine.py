@@ -123,8 +123,8 @@ class HybridSignalEngine:
         self.setups_by_pair_tf: Dict[Tuple[str, int], List[SetupConfig]] = {}
         self.load_config(config_path)
 
-        # Collect unique timeframes
-        timeframes = list({s.tf for s in self.setups})
+        # Collect unique timeframes (always include 15m for HTF trend filter)
+        timeframes = list({s.tf for s in self.setups} | {15})
         self.aggregator = MultiTFCandleAggregator(timeframes)
         logger.info(f"Initialized HybridSignalEngine with {len(self.setups)} setups across {len(timeframes)} timeframes.")
 
@@ -485,6 +485,49 @@ class HybridSignalEngine:
                 elif mfi_val >= (100 - mfi_th) and rsi_val >= (100 - rsi_th) and (min_vol <= 0 or vol_ratio_20 >= min_vol):
                     action = "put"
                     trigger_detail = f"MFI={mfi_val:.1f}>={100-mfi_th} | RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th}"
+
+            # ─── HTF TREND PULLBACK (1-GALE 90.10% CHAMPION) ───
+            elif stype == "HTF_PULLBACK":
+                trend_type = p.get("trend", "15m_EMA20")
+                rsi_p = int(p.get("rsi_period", 7))
+                rsi_th = float(p.get("rsi_th", 25.0))
+                bb_th = float(p.get("bb_th", 2.0))
+                min_wick = float(p.get("min_wick", 0.0))
+                min_vol = float(p.get("min_vol", 1.0))
+
+                # Check 15m trend from aggregator history
+                history_15m = self.aggregator.history.get((sym, 15), [])
+                if len(history_15m) >= 20:
+                    c15 = [c.close for c in history_15m]
+                    span = 20 if "EMA20" in trend_type else 50
+                    alpha = 2.0 / (span + 1.0)
+                    ema15 = c15[0]
+                    for c_val in c15[1:]:
+                        ema15 = alpha * c_val + (1.0 - alpha) * ema15
+                    is_bull = c15[-1] > ema15
+                    is_bear = c15[-1] < ema15
+                else:
+                    is_bull = closes[-1] > ma20
+                    is_bear = closes[-1] < ma20
+                    ema15 = ma20
+
+                # RSI on current timeframe
+                deltas = np.diff(closes[-(rsi_p + 30):])
+                gains = np.where(deltas > 0, deltas, 0.0)
+                losses_arr = np.where(deltas < 0, -deltas, 0.0)
+                ag = np.mean(gains[:rsi_p])
+                al = np.mean(losses_arr[:rsi_p])
+                for j in range(rsi_p, len(deltas)):
+                    ag = (ag * (rsi_p - 1) + gains[j]) / rsi_p
+                    al = (al * (rsi_p - 1) + losses_arr[j]) / rsi_p
+                rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+
+                if is_bull and rsi_val <= rsi_th and bb_z <= -bb_th and lw >= min_wick and vol_ratio_20 >= min_vol:
+                    action = "call"
+                    trigger_detail = f"15mBull(C>{ema15:.1f}) | RSI{rsi_p}={rsi_val:.1f}<={rsi_th} | BBz={bb_z:.2f}<=-{bb_th} | Vol={vol_ratio_20:.1f}"
+                elif is_bear and rsi_val >= (100.0 - rsi_th) and bb_z >= bb_th and uw >= min_wick and vol_ratio_20 >= min_vol:
+                    action = "put"
+                    trigger_detail = f"15mBear(C<{ema15:.1f}) | RSI{rsi_p}={rsi_val:.1f}>={100.0-rsi_th} | BBz={bb_z:.2f}>={bb_th} | Vol={vol_ratio_20:.1f}"
 
             if action:
                 # Support variable expiry_bars from config (default: 1 bar)

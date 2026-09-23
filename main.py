@@ -365,8 +365,8 @@ async def main():
         simulation_mode=simulation_mode
     )
 
-    # 3. Instantiate Signal Engine (supports GALE2, GALE1, and ZERO_GALE modes)
-    strategy_mode = os.environ.get("STRATEGY_MODE", "GALE2").upper()
+    # 3. Instantiate Signal Engine (supports GALE1, GALE2, and ZERO_GALE modes)
+    strategy_mode = os.environ.get("STRATEGY_MODE", "GALE1").upper()
     if strategy_mode in ("ZERO_GALE", "FLAT", "0GALE"):
         zero_gale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "zero_gale_80pct_config.json")
         hybrid_engine = HybridSignalEngine(config_path=zero_gale_cfg)
@@ -376,8 +376,10 @@ async def main():
         hybrid_engine = HybridSignalEngine(config_path=gale2_cfg)
         logger.critical(f"🚀 [STRATEGY MODE: GALE-2] Armed with {len(hybrid_engine.setups)} verified setups (55.4 TPD | 90.77% 2-Gale Sequence WR | 365d Binance Verified)!")
     else:
-        hybrid_engine = HybridSignalEngine()
-        logger.info(f"📊 [STRATEGY MODE: GALE1] Armed with {len(hybrid_engine.setups)} setups (85% 1-Gale Sequence WR)")
+        # Default: Champion 1-GALE 90.10% Portfolio (33.67 TPD | 1-Gale Only | Pure Compounding)
+        gale1_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale1_90pct_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=gale1_cfg)
+        logger.critical(f"🏆 [STRATEGY MODE: 1-GALE] Armed with {len(hybrid_engine.setups)} champion setups (33.67 TPD | 90.10% 1-Gale Sequence WR | Pure Compounding)!")
     controller.hybrid_engine = hybrid_engine
     logger.info("⏳ Preloading 1,000 historical candles from Binance to warm up timeframes...")
     try:
@@ -468,7 +470,7 @@ async def main():
                                 )
                         else:
                             # 0 for ZERO_GALE, 2 for GALE2, 1 for GALE1
-                            strategy_mode = os.environ.get("STRATEGY_MODE", "GALE2").upper()
+                            strategy_mode = os.environ.get("STRATEGY_MODE", "GALE1").upper()
                             if strategy_mode in ("ZERO_GALE", "FLAT", "0GALE"):
                                 max_allowed_gale = 0
                             elif strategy_mode in ("GALE2", "2GALE", "GALE-2"):
@@ -496,21 +498,23 @@ async def main():
                             else:
                                 controller.losses += 1
                                 controller.marts_since_loss = 0
-                                controller.is_in_mart_recovery = True
-                                controller.lost_mart_amount = round(controller.lost_mart_amount + t.total_sequence_stake, 4)
-                                # Queue a recovery debt for this symbol
-                                controller.recovery_queue.append(RecoveryDebt(
-                                    symbol=t.symbol,
-                                    lost_amount=round(t.total_sequence_stake, 4),
-                                    created_at=time.time(),
-                                    cooldown_bars=5,
-                                    bars_elapsed=0,
-                                    is_ready=False
-                                ))
                                 # 15-minute (3 x 5m candles) lockout on this pair to prevent falling-knife re-entry
                                 controller.pair_loss_lockouts[t.symbol] = time.time() + 900.0
+
+                                # Pure compounding: no extra debt surcharge or recovery queue in GALE1
+                                if strategy_mode in ("GALE2", "2GALE", "GALE-2"):
+                                    controller.is_in_mart_recovery = True
+                                    controller.lost_mart_amount = round(controller.lost_mart_amount + t.total_sequence_stake, 4)
+                                    controller.recovery_queue.append(RecoveryDebt(
+                                        symbol=t.symbol,
+                                        lost_amount=round(t.total_sequence_stake, 4),
+                                        created_at=time.time(),
+                                        cooldown_bars=5,
+                                        bars_elapsed=0,
+                                        is_ready=False
+                                    ))
                                 controller.save_current_state()
-                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} (Gale {t.gale_level}) | Lost: {t.total_sequence_stake:.4f} | 15m lockout active | Recovery queued (5-bar cooldown)")
+                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} (Gale {t.gale_level}) | Lost: {t.total_sequence_stake:.4f} | 15m lockout active | Reset to Base stake")
                                 if tg_bot:
                                     await tg_bot.send_settlement_alert(
                                         symbol=t.symbol, action=t.action,
@@ -647,8 +651,8 @@ async def main():
             else:
                 logger.warning(f"⚠️ Trade Execution Failed / Skipped: {tx_or_reason}")
 
-            # 2. Check if a RECOVERY trade should fire on this signal
-            ready_debts = [d for d in controller.recovery_queue if d.symbol == sig.symbol and d.is_ready]
+            # 2. Check if a RECOVERY trade should fire on this signal (Gale-2 legacy only)
+            ready_debts = [d for d in controller.recovery_queue if d.symbol == sig.symbol and d.is_ready] if strategy_mode in ("GALE2", "2GALE", "GALE-2") else []
             if ready_debts:
                 debt = ready_debts[0]  # Oldest ready debt first
                 # Recovery stake: enough to recoup loss in one Gale-2 win (loss / payout_rate)
