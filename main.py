@@ -324,16 +324,16 @@ async def main():
     logger.info("  Strategy: 30-40 TPD 1-Gale (HTF 15m Trend-Pullbacks)")
     logger.info("  Performance: 33.67 Trades/Day | 90.10% 1-Gale SeqWR (365d Verified)")
     logger.info("  Staking: Pure Compounding (Base Staking with Zero Recovery Inflation)")
-    logger.info("  Pairs: BTCUSDT, ETHUSDT, BNBUSDT, SOLUSDT")
-    logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 | SOL $250 Max Bet Safeguards")
+    logger.info("  Pairs: BTCUSDT, ETHUSDT, BNBUSDT")
+    logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 Max Bet Safeguards")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent) + Webhook")
     logger.info("  Feeder: Binance Live WebSocket (1m multi-TF aggregator)")
     logger.info("  Telegram: Interactive Control + Real/Demo Mode Switcher")
     logger.info("=" * 65)
 
     # 1. Configuration from Environment
-    # Trade BTC + ETH + BNB + SOL (Full 4-Pair Champion Portfolio)
-    default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT,SOLUSDT"
+    # Trade BTC + ETH + BNB (Top 3 Pairs, 90% Payout Portfolio)
+    default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT"
     symbols = os.environ.get("TRADING_SYMBOLS", default_symbols).split(",")
     symbols = [s.strip().upper() for s in symbols if s.strip()]
 
