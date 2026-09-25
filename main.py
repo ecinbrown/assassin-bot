@@ -154,6 +154,8 @@ class ActiveTrade:
     gale_level: int = 0  # 0 = Base, 1 = Gale 1, 2 = Gale 2
     total_sequence_stake: float = 0.0
     is_recovery_trade: bool = False
+    strategy_key: str = ""
+    indicator_family: str = ""
 
 
 @dataclass
@@ -205,6 +207,9 @@ class AssassinController:
         # Post-loss lockout: symbol -> timestamp until which all trades are paused (15m falling-knife protection)
         self.pair_loss_lockouts: Dict[str, float] = {}
         self.latest_prices: dict = {}
+        self.last_trade_time: float = 0.0
+        self.last_pair_trade_time: Dict[str, float] = {}
+        self.last_pair_strategy: Dict[str, str] = {}
         
         self.engine: Optional[AssassinSignalEngine] = None
         self.hybrid_engine: Optional[HybridSignalEngine] = None
@@ -401,9 +406,10 @@ async def main():
         simulation_mode=simulation_mode
     )
     prdt_agent.initialize()
-    # Restore saved simulated balance if available
+    # Restore saved simulated balance if available (auto-heal corrupted negative balance)
     saved_state = load_saved_state()
-    prdt_agent.simulated_balance = saved_state.get("balance", 20.0)
+    loaded_bal = saved_state.get("balance", 20.0)
+    prdt_agent.simulated_balance = 15.0 if loaded_bal <= 0 else loaded_bal
     controller.prdt_agent = prdt_agent
 
     # Webhook Dispatcher (if configured)
@@ -494,7 +500,9 @@ async def main():
                                     epoch=prdt_agent.get_current_epoch(),
                                     gale_level=next_gale,
                                     total_sequence_stake=round(t.total_sequence_stake + next_stake, 4),
-                                    is_recovery_trade=t.is_recovery_trade
+                                    is_recovery_trade=t.is_recovery_trade,
+                                    strategy_key=t.strategy_key,
+                                    indicator_family=t.indicator_family
                                 ))
                                 logger.critical(f"[BG-SETTLER] GALE {next_gale} triggered {t.symbol} {t.action.upper()} | Stake: {next_stake:.4f} | Total In Seq: {t.total_sequence_stake + next_stake:.4f}")
                             else:
@@ -580,6 +588,13 @@ async def main():
         for tf, tf_candle in closed_tf_candles:
             tf_sigs = hybrid_engine.evaluate_setups(symbol, tf, tf_candle)
             for s in tf_sigs:
+                setup_desc = s["setup"].desc if hasattr(s["setup"], "desc") else s.get("trigger", "")
+                strat_key = setup_desc.split("|", 1)[-1].strip() if "|" in setup_desc else setup_desc
+                trend = s["setup"].params.get("trend", "") if hasattr(s["setup"], "params") else ""
+                rsi_p = s["setup"].params.get("rsi_period", "") if hasattr(s["setup"], "params") else ""
+                stype = s["setup"].type if hasattr(s["setup"], "type") else "HYBRID"
+                indicator_family = f"{stype}_{trend}_RSI{rsi_p}" if (trend or rsi_p) else strat_key
+
                 sig = AssassinSignal(
                     symbol=s["symbol"],
                     action=s["action"],
@@ -593,7 +608,12 @@ async def main():
                     regime="HYBRID_85PCT",
                     solid_count=3,
                     soft_count=0,
-                    metadata={"tf": tf, "desc": s["setup"].desc}
+                    metadata={
+                        "tf": tf,
+                        "desc": setup_desc,
+                        "strategy_key": strat_key,
+                        "indicator_family": indicator_family
+                    }
                 )
                 signals.append(sig)
                 logger.info(f"📊 [HYBRID SIGNAL] {s['symbol']} {s['action'].upper()} on {tf}m | {s['trigger']}")
@@ -611,7 +631,36 @@ async def main():
                 logger.info(f"⏳ [PAIR-BUSY] {sig.symbol} already has an active trade sequence — skipping duplicate")
                 continue
 
-            # Safeguard 3: Gale-Active Directional Lock (Stops the Multi-Pair Cascade / Triple Bust)
+            # Safeguard 3: Minimum Execution Time Spacing (User Rule: never the exact same second, separate by at least 90s)
+            min_trade_interval = float(os.environ.get("MIN_TRADE_INTERVAL_SECONDS", "90.0"))
+            time_since_last_trade = time.time() - controller.last_trade_time
+            if controller.last_trade_time > 0 and time_since_last_trade < min_trade_interval:
+                rem = int(min_trade_interval - time_since_last_trade)
+                logger.info(f"⏳ [TIME-SPACING] Skipping {sig.symbol} {sig.action.upper()} — only {int(time_since_last_trade)}s since last trade (min {int(min_trade_interval)}s interval, {rem}s remaining)")
+                continue
+
+            # Safeguard 4: Strategy / Indicator Collision Lock Across Pairs (User Rule: no duplicate indicator across pairs)
+            sig_family = sig.metadata.get("indicator_family", "")
+            sig_strat = sig.metadata.get("strategy_key", "")
+            colliding_trades = [
+                t for t in controller.active_trades
+                if t.symbol != sig.symbol and (
+                    (t.indicator_family and t.indicator_family == sig_family) or
+                    (t.strategy_key and t.strategy_key == sig_strat)
+                )
+            ]
+            if colliding_trades:
+                ct = colliding_trades[0]
+                logger.info(f"🛡️ [INDICATOR-COLLISION] Skipping {sig.symbol} — identical indicator ({sig_family}) is already active on {ct.symbol}!")
+                continue
+
+            # Safeguard 5: Same-Pair Strategy Rotation (User Rule: next trade on same pair MUST be different strategy)
+            last_strat_for_pair = controller.last_pair_strategy.get(sig.symbol, "")
+            if last_strat_for_pair and (last_strat_for_pair == sig_family or last_strat_for_pair == sig_strat):
+                logger.info(f"🛡️ [SAME-PAIR-ROTATION] Skipping {sig.symbol} — strategy ({sig_family}) matches previous trade on this pair (must rotate strategy)!")
+                continue
+
+            # Safeguard 6: Gale-Active Directional Lock (Stops the Multi-Pair Cascade / Triple Bust)
             # If any other pair is currently struggling in Gale 1 or Gale 2 in the same direction, freeze new entries
             struggling_gales = [t for t in controller.active_trades if t.action == sig.action.lower() and t.gale_level > 0 and t.symbol != sig.symbol]
             if struggling_gales:
@@ -653,9 +702,14 @@ async def main():
                     epoch=prdt_agent.get_current_epoch(),
                     gale_level=0,
                     total_sequence_stake=trade_stake,
-                    is_recovery_trade=False
+                    is_recovery_trade=False,
+                    strategy_key=sig_strat,
+                    indicator_family=sig_family
                 ))
                 active_symbols.add(sig.symbol)
+                controller.last_trade_time = time.time()
+                controller.last_pair_trade_time[sig.symbol] = time.time()
+                controller.last_pair_strategy[sig.symbol] = sig_family or sig_strat
             else:
                 logger.warning(f"⚠️ Trade Execution Failed / Skipped: {tx_or_reason}")
 
@@ -676,22 +730,22 @@ async def main():
                 if strategy_mode in ("GALE2", "2GALE", "GALE-2"):
                     # Legacy Gale-2 recovery: sized for 7.15x multiplier
                     recovery_base = round(debt.lost_amount / pair_payout / 7.15, 2)
-                    recovery_base = max(recovery_base, controller.stake_native)
                     max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(sig.symbol, 250.0)
                     recovery_base = min(recovery_base, round(max_pool_bet / 4.93, 2))
-                    recovery_base = min(recovery_base, round(current_balance * 0.02, 2))
+                    if current_balance > 0:
+                        recovery_base = min(recovery_base, round(current_balance * 0.02, 2))
+                    recovery_base = max(recovery_base, controller.stake_native)
                 else:
                     # GALE1 Recovery: stake enough so G1 sequence payout covers the loss
-                    # G1 worst-case payout = base_stake * 2.22 * payout_rate - (base + base*2.22)
-                    # Simplify: to recover X, need base = X / (2.22 * payout - 3.22) ... but safer:
-                    # Just stake loss_amount / payout_rate, split across 2 trades max
                     total_debt = sum(d.lost_amount for d in ready_debts)
                     # Split recovery: each trade recovers half the total debt
                     recovery_target = min(total_debt, debt.lost_amount)
                     recovery_base = round(recovery_target / pair_payout, 2)
+                    # Safety cap: never risk more than 37% of balance on a single recovery (ONLY if balance > 0)
+                    if current_balance > 0:
+                        recovery_base = min(recovery_base, round(current_balance * 0.37, 2))
+                    # Crucial fix: ALWAYS enforce minimum positive base stake (never allow negative or 0 stake!)
                     recovery_base = max(recovery_base, controller.stake_native)
-                    # Safety cap: never risk more than 37% of balance on a single recovery
-                    recovery_base = min(recovery_base, round(current_balance * 0.37, 2))
                     max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(sig.symbol, 250.0)
                     recovery_base = min(recovery_base, round(max_pool_bet / 2.22, 2))  # Cap for G1 headroom
 
@@ -707,9 +761,14 @@ async def main():
                         epoch=prdt_agent.get_current_epoch(),
                         gale_level=0,
                         total_sequence_stake=recovery_base,
-                        is_recovery_trade=True
+                        is_recovery_trade=True,
+                        strategy_key=sig_strat,
+                        indicator_family=sig_family
                     ))
                     controller.recovery_queue.remove(debt)
+                    controller.last_trade_time = time.time()
+                    controller.last_pair_trade_time[sig.symbol] = time.time()
+                    controller.last_pair_strategy[sig.symbol] = sig_family or sig_strat
                     logger.critical(
                         f"🔄 [RECOVERY TRADE] {sig.symbol} {sig.action.upper()} | "
                         f"Stake: ${recovery_base:.2f} | Recouping: ${debt.lost_amount:.2f} loss | "
@@ -719,6 +778,7 @@ async def main():
                         await tg_bot.send_trade_alert(sig, f"🔄 RECOVERY ${recovery_base:.2f} (recoup ${debt.lost_amount:.2f})", True)
                 else:
                     logger.warning(f"⚠️ Recovery trade failed: {rec_tx}")
+
 
             # Send Trade Execution Alert to Telegram
             if tg_bot:
