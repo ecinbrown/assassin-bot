@@ -210,6 +210,7 @@ class AssassinController:
         self.last_trade_time: float = 0.0
         self.last_pair_trade_time: Dict[str, float] = {}
         self.last_pair_strategy: Dict[str, str] = {}
+        self.last_strategy_time: Dict[str, float] = {}
         
         self.engine: Optional[AssassinSignalEngine] = None
         self.hybrid_engine: Optional[HybridSignalEngine] = None
@@ -631,33 +632,40 @@ async def main():
                 logger.info(f"⏳ [PAIR-BUSY] {sig.symbol} already has an active trade sequence — skipping duplicate")
                 continue
 
-            # Safeguard 3: Minimum Execution Time Spacing (User Rule: never the exact same second, separate by at least 90s)
-            min_trade_interval = float(os.environ.get("MIN_TRADE_INTERVAL_SECONDS", "90.0"))
-            time_since_last_trade = time.time() - controller.last_trade_time
-            if controller.last_trade_time > 0 and time_since_last_trade < min_trade_interval:
-                rem = int(min_trade_interval - time_since_last_trade)
-                logger.info(f"⏳ [TIME-SPACING] Skipping {sig.symbol} {sig.action.upper()} — only {int(time_since_last_trade)}s since last trade (min {int(min_trade_interval)}s interval, {rem}s remaining)")
-                continue
-
-            # Safeguard 4: Strategy / Indicator Collision Lock Across Pairs (User Rule: no duplicate indicator across pairs)
+            # Safeguard 3: Indicator Collision & Time Spacing (User Rule: identical indicator cannot fire simultaneously or within 60s; different indicators CAN fire at the exact same second!)
             sig_family = sig.metadata.get("indicator_family", "")
             sig_strat = sig.metadata.get("strategy_key", "")
-            colliding_trades = [
+            min_indicator_interval = float(os.environ.get("MIN_TRADE_INTERVAL_SECONDS", "60.0"))
+
+            # Check if identical indicator is currently active on ANY pair (blocks duplicate indicator at the same second or while active)
+            colliding_active = [
                 t for t in controller.active_trades
-                if t.symbol != sig.symbol and (
+                if (t.indicator_family and t.indicator_family == sig_family) or
+                   (t.strategy_key and t.strategy_key == sig_strat)
+            ]
+            if colliding_active:
+                ca = colliding_active[0]
+                logger.info(f"🛡️ [INDICATOR-COLLISION] Skipping {sig.symbol} — identical indicator ({sig_family}) is currently active on {ca.symbol}!")
+                continue
+
+            # Check if this exact indicator fired within the last 60 seconds (spacing applies to the same indicator)
+            last_strat_ts = controller.last_strategy_time.get(sig_family, 0.0)
+            time_since_strat = time.time() - last_strat_ts
+            if last_strat_ts > 0 and time_since_strat < min_indicator_interval:
+                rem = int(min_indicator_interval - time_since_strat)
+                logger.info(f"⏳ [TIME-SPACING] Skipping {sig.symbol} — indicator ({sig_family}) fired {int(time_since_strat)}s ago (min {int(min_indicator_interval)}s spacing for identical indicator, {rem}s remaining)")
+                continue
+
+            # Safeguard 4: Same-Pair Simultaneous Collision (User Rule: multiple trades at the exact same second on the same pair must use different indicators)
+            same_pair_simultaneous = [
+                t for t in controller.active_trades
+                if t.symbol == sig.symbol and abs(t.entry_time - time.time()) < 5 and (
                     (t.indicator_family and t.indicator_family == sig_family) or
                     (t.strategy_key and t.strategy_key == sig_strat)
                 )
             ]
-            if colliding_trades:
-                ct = colliding_trades[0]
-                logger.info(f"🛡️ [INDICATOR-COLLISION] Skipping {sig.symbol} — identical indicator ({sig_family}) is already active on {ct.symbol}!")
-                continue
-
-            # Safeguard 5: Same-Pair Strategy Rotation (User Rule: next trade on same pair MUST be different strategy)
-            last_strat_for_pair = controller.last_pair_strategy.get(sig.symbol, "")
-            if last_strat_for_pair and (last_strat_for_pair == sig_family or last_strat_for_pair == sig_strat):
-                logger.info(f"🛡️ [SAME-PAIR-ROTATION] Skipping {sig.symbol} — strategy ({sig_family}) matches previous trade on this pair (must rotate strategy)!")
+            if same_pair_simultaneous:
+                logger.info(f"🛡️ [SAME-PAIR-COLLISION] Skipping {sig.symbol} — duplicate indicator ({sig_family}) fired at the same second on this pair!")
                 continue
 
             # Safeguard 6: Gale-Active Directional Lock (Stops the Multi-Pair Cascade / Triple Bust)
@@ -710,6 +718,9 @@ async def main():
                 controller.last_trade_time = time.time()
                 controller.last_pair_trade_time[sig.symbol] = time.time()
                 controller.last_pair_strategy[sig.symbol] = sig_family or sig_strat
+                controller.last_strategy_time[sig_family] = time.time()
+                if sig_strat:
+                    controller.last_strategy_time[sig_strat] = time.time()
             else:
                 logger.warning(f"⚠️ Trade Execution Failed / Skipped: {tx_or_reason}")
 
@@ -769,6 +780,9 @@ async def main():
                     controller.last_trade_time = time.time()
                     controller.last_pair_trade_time[sig.symbol] = time.time()
                     controller.last_pair_strategy[sig.symbol] = sig_family or sig_strat
+                    controller.last_strategy_time[sig_family] = time.time()
+                    if sig_strat:
+                        controller.last_strategy_time[sig_strat] = time.time()
                     logger.critical(
                         f"🔄 [RECOVERY TRADE] {sig.symbol} {sig.action.upper()} | "
                         f"Stake: ${recovery_base:.2f} | Recouping: ${debt.lost_amount:.2f} loss | "
