@@ -519,8 +519,6 @@ async def main():
                             else:
                                 controller.losses += 1
                                 controller.marts_since_loss = 0
-                                # 15-minute (3 x 5m candles) lockout on this pair to prevent falling-knife re-entry
-                                controller.pair_loss_lockouts[t.symbol] = time.time() + 900.0
 
                                 # Queue recovery debt ONLY for Gale modes (strictly disabled in No-Gale)
                                 if max_allowed_gale > 0:
@@ -541,7 +539,7 @@ async def main():
                                         f"Recovery will boost next qualifying signal"
                                     )
                                 controller.save_current_state()
-                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} (Gale {t.gale_level}) | Lost: {t.total_sequence_stake:.4f} | 15m lockout active | Reset to Base stake")
+                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} (Gale {t.gale_level}) | Lost: {t.total_sequence_stake:.4f} | Reset to Base stake")
                                 if tg_bot:
                                     await tg_bot.send_settlement_alert(
                                         symbol=t.symbol, action=t.action,
@@ -630,22 +628,15 @@ async def main():
                 logger.info(f"📊 [HYBRID SIGNAL] {s['symbol']} {s['action'].upper()} on {tf}m | {s['trigger']}")
 
         for sig in signals:
-            # Safeguard 1: Post-loss lockout (15m falling-knife protection)
-            lockout_until = controller.pair_loss_lockouts.get(sig.symbol, 0.0)
-            if time.time() < lockout_until:
-                rem_s = int(lockout_until - time.time())
-                logger.info(f"🛡️ [LOCKOUT] {sig.symbol} in post-loss cooldown ({rem_s}s remaining) — skipping {sig.action.upper()} to avoid falling knife")
-                continue
-
-            # Safeguard 2: Prevent duplicate / overlapping trade sequences on the same symbol
+            # Safeguard 1: Prevent duplicate / overlapping trade sequences on the same symbol
             if sig.symbol in active_symbols:
                 logger.info(f"⏳ [PAIR-BUSY] {sig.symbol} already has an active trade sequence — skipping duplicate")
                 continue
 
-            # Safeguard 3: Indicator Collision & Time Spacing (User Rule: identical indicator cannot fire simultaneously or within 60s; different indicators CAN fire at the exact same second!)
+            # Safeguard 2: Indicator Collision & Time Spacing (User Rule: identical indicator cannot fire simultaneously; different indicators CAN fire at the exact same second!)
             sig_family = sig.metadata.get("indicator_family", "")
             sig_strat = sig.metadata.get("strategy_key", "")
-            min_indicator_interval = float(os.environ.get("MIN_TRADE_INTERVAL_SECONDS", "60.0"))
+            min_indicator_interval = float(os.environ.get("MIN_TRADE_INTERVAL_SECONDS", "0.0"))
 
             # Check if identical indicator is currently active on ANY pair (blocks duplicate indicator at the same second or while active)
             colliding_active = [
@@ -658,13 +649,14 @@ async def main():
                 logger.info(f"🛡️ [INDICATOR-COLLISION] Skipping {sig.symbol} — identical indicator ({sig_family}) is currently active on {ca.symbol}!")
                 continue
 
-            # Check if this exact indicator fired within the last 60 seconds (spacing applies to the same indicator)
-            last_strat_ts = controller.last_strategy_time.get(sig_family, 0.0)
-            time_since_strat = time.time() - last_strat_ts
-            if last_strat_ts > 0 and time_since_strat < min_indicator_interval:
-                rem = int(min_indicator_interval - time_since_strat)
-                logger.info(f"⏳ [TIME-SPACING] Skipping {sig.symbol} — indicator ({sig_family}) fired {int(time_since_strat)}s ago (min {int(min_indicator_interval)}s spacing for identical indicator, {rem}s remaining)")
-                continue
+            # Check if this exact indicator fired within the minimum interval (0s / disabled by default)
+            if min_indicator_interval > 0:
+                last_strat_ts = controller.last_strategy_time.get(sig_family, 0.0)
+                time_since_strat = time.time() - last_strat_ts
+                if last_strat_ts > 0 and time_since_strat < min_indicator_interval:
+                    rem = int(min_indicator_interval - time_since_strat)
+                    logger.info(f"⏳ [TIME-SPACING] Skipping {sig.symbol} — indicator ({sig_family}) fired {int(time_since_strat)}s ago (min {int(min_indicator_interval)}s spacing for identical indicator, {rem}s remaining)")
+                    continue
 
             # Safeguard 4: Same-Pair Simultaneous Collision (User Rule: multiple trades at the exact same second on the same pair must use different indicators)
             same_pair_simultaneous = [
