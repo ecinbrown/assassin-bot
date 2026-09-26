@@ -307,17 +307,27 @@ class AssassinController:
         if balance <= 0:
             return max(1.0, self.stake_native)
 
-        strategy_mode = os.environ.get("STRATEGY_MODE", "GALE2").upper()
-        # Default to 0.5% for Gale-2 (total 3-step sequence risk = 4.07% of balance)
-        default_pct = 0.005 if ("GALE2" in strategy_mode or "2GALE" in strategy_mode) else 0.061
+        strategy_mode = os.environ.get("STRATEGY_MODE", "NOGALE_55TPD").upper()
+        is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD"))
+        is_gale2 = ("GALE2" in strategy_mode or "2GALE" in strategy_mode)
+
+        # Default staking pct: 5% for No-Gale (55TPD), 0.5% for Gale-2, 6.1% for legacy Gale-1
+        if is_nogale:
+            default_pct = 0.05
+            max_multiplier = 1.0  # Zero-Gale: no multiplier headroom needed, allow full $250/$1000 platform caps!
+        elif is_gale2:
+            default_pct = 0.005
+            max_multiplier = 4.93
+        else:
+            default_pct = 0.061
+            max_multiplier = 2.22
+
         raw_pct = float(os.environ.get("BASE_STAKE_PCT", str(default_pct)))
         # Auto-normalize: if someone sets "10" meaning 10%, convert to 0.10
         base_pct = raw_pct / 100.0 if raw_pct > 1.0 else raw_pct
         base_stake = max(1.0, round(balance * base_pct, 2))
 
         # Enforce PRDT platform max bet caps (BTC: $1000, ETH: $250, BNB: $250)
-        # If Gale 2, max multiplier is 4.93x (2.22 * 2.22), so base cannot exceed max_pool / 4.93
-        max_multiplier = 4.93 if ("GALE2" in strategy_mode or "2GALE" in strategy_mode) else 2.22
         max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(symbol, 250.0)
         max_allowed_base = round(max_pool_bet / max_multiplier, 2)
         base_stake = min(base_stake, max_allowed_base)
@@ -375,15 +385,20 @@ async def main():
 
     # 3. Instantiate Signal Engine (supports GALE1, GALE2, ZERO_GALE, and NOGALE_55TPD modes)
     strategy_mode = os.environ.get("STRATEGY_MODE", "NOGALE_55TPD").upper()
-    if strategy_mode in ("NOGALE_55TPD", "NOGALE55", "83WR", "55TPD"):
+    is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD"))
+    is_gale2 = any(x in strategy_mode for x in ("GALE2", "2GALE", "GALE-2"))
+    if is_nogale:
+        max_allowed_gale = 0
+    elif is_gale2:
+        max_allowed_gale = 2
+    else:
+        max_allowed_gale = 1
+
+    if is_nogale:
         nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_83wr_55tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-        logger.critical(f"💰 [STRATEGY MODE: NO-GALE 55TPD] Armed with {len(hybrid_engine.setups)} verified setups (55.6 TPD | 83.3% Direct WR | $32/day/$1 EV | Multi-Bar Expiry)!")
-    elif strategy_mode in ("ZERO_GALE", "FLAT", "0GALE"):
-        zero_gale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "zero_gale_80pct_config.json")
-        hybrid_engine = HybridSignalEngine(config_path=zero_gale_cfg)
-        logger.critical(f"🎯 [STRATEGY MODE: ZERO-GALE] Armed with {len(hybrid_engine.setups)} verified flat setups (18.75 TPD | 83.95% Direct WR | Zero Martingale)!")
-    elif strategy_mode in ("GALE2", "2GALE", "GALE-2"):
+        logger.critical(f"💰 [STRATEGY MODE: NO-GALE 55TPD] Armed with {len(hybrid_engine.setups)} verified setups (55.6 TPD | 83.3% Direct WR | $32/day/$1 EV | Zero Martingale)!")
+    elif is_gale2:
         gale2_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale2_40tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=gale2_cfg)
         logger.critical(f"🚀 [STRATEGY MODE: GALE-2] Armed with {len(hybrid_engine.setups)} verified setups (55.4 TPD | 90.77% 2-Gale Sequence WR | 365d Binance Verified)!")
@@ -482,16 +497,7 @@ async def main():
                                     wins=controller.wins, losses=controller.losses, step_info=f"WIN {step_name}"
                                 )
                         else:
-                            # 0 for ZERO_GALE, 2 for GALE2, 1 for GALE1
-                            strategy_mode = os.environ.get("STRATEGY_MODE", "GALE1").upper()
-                            if strategy_mode in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE_55TPD", "NOGALE55", "83WR", "55TPD"):
-                                max_allowed_gale = 0
-                            elif strategy_mode in ("GALE2", "2GALE", "GALE-2"):
-                                max_allowed_gale = 2
-                            else:
-                                max_allowed_gale = 1
-
-                            if t.gale_level < max_allowed_gale:
+                            if max_allowed_gale > 0 and t.gale_level < max_allowed_gale:
                                 next_gale = t.gale_level + 1
                                 max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(t.symbol, 250.0)
                                 next_stake = min(round(t.stake_native * 2.22, 4), max_pool_bet)
@@ -516,12 +522,11 @@ async def main():
                                 # 15-minute (3 x 5m candles) lockout on this pair to prevent falling-knife re-entry
                                 controller.pair_loss_lockouts[t.symbol] = time.time() + 900.0
 
-                                # Queue recovery debt for both GALE1 and GALE2 modes
-                                # GALE1 recovery: boost next BTCUSDT signal to recover the loss (96.8% WR verified 365d)
+                                # Queue recovery debt ONLY for Gale modes (strictly disabled in No-Gale)
                                 if max_allowed_gale > 0:
                                     controller.is_in_mart_recovery = True
                                     controller.lost_mart_amount = round(controller.lost_mart_amount + t.total_sequence_stake, 4)
-                                    cooldown = 5 if strategy_mode in ("GALE2", "2GALE", "GALE-2") else 3
+                                    cooldown = 5 if is_gale2 else 3
                                     controller.recovery_queue.append(RecoveryDebt(
                                         symbol=t.symbol,
                                         lost_amount=round(t.total_sequence_stake, 4),
@@ -729,74 +734,73 @@ async def main():
             else:
                 logger.warning(f"⚠️ Trade Execution Failed / Skipped: {tx_or_reason}")
 
-            # 2. Check if a RECOVERY trade should fire on this signal
-            # GALE1 Recovery: any ready debt can recover on ANY qualifying signal (cross-pair)
-            # GALE2 Recovery: debt recovers only on the same symbol
-            if strategy_mode in ("GALE2", "2GALE", "GALE-2"):
-                ready_debts = [d for d in controller.recovery_queue if d.symbol == sig.symbol and d.is_ready]
-            else:
-                # GALE1: recovery fires on any ready debt (cross-pair, highest WR signal wins)
-                ready_debts = [d for d in controller.recovery_queue if d.is_ready]
-
-            if ready_debts:
-                debt = ready_debts[0]  # Oldest ready debt first
-                pair_payout = AssassinController.PAIR_PAYOUTS.get(sig.symbol, 0.70)
-                current_balance = prdt_agent.simulated_balance if controller.simulation_mode else prdt_agent.get_balance()
-
-                if strategy_mode in ("GALE2", "2GALE", "GALE-2"):
-                    # Legacy Gale-2 recovery: sized for 7.15x multiplier
-                    recovery_base = round(debt.lost_amount / pair_payout / 7.15, 2)
-                    max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(sig.symbol, 250.0)
-                    recovery_base = min(recovery_base, round(max_pool_bet / 4.93, 2))
-                    if current_balance > 0:
-                        recovery_base = min(recovery_base, round(current_balance * 0.02, 2))
-                    recovery_base = max(recovery_base, controller.stake_native)
+            # 2. Check if a RECOVERY trade should fire on this signal (ONLY in Gale modes)
+            if max_allowed_gale > 0:
+                if is_gale2:
+                    ready_debts = [d for d in controller.recovery_queue if d.symbol == sig.symbol and d.is_ready]
                 else:
-                    # GALE1 Recovery: stake enough so G1 sequence payout covers the loss
-                    total_debt = sum(d.lost_amount for d in ready_debts)
-                    # Split recovery: each trade recovers half the total debt
-                    recovery_target = min(total_debt, debt.lost_amount)
-                    recovery_base = round(recovery_target / pair_payout, 2)
-                    # Safety cap: never risk more than 37% of balance on a single recovery (ONLY if balance > 0)
-                    if current_balance > 0:
-                        recovery_base = min(recovery_base, round(current_balance * 0.37, 2))
-                    # Crucial fix: ALWAYS enforce minimum positive base stake (never allow negative or 0 stake!)
-                    recovery_base = max(recovery_base, controller.stake_native)
-                    max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(sig.symbol, 250.0)
-                    recovery_base = min(recovery_base, round(max_pool_bet / 2.22, 2))  # Cap for G1 headroom
+                    # GALE1: recovery fires on any ready debt (cross-pair, highest WR signal wins)
+                    ready_debts = [d for d in controller.recovery_queue if d.is_ready]
 
-                rec_success, rec_tx = await prdt_agent.execute_trade(sig, stake_native=recovery_base)
-                if rec_success:
-                    controller.active_trades.append(ActiveTrade(
-                        symbol=sig.symbol,
-                        action=sig.action.lower(),
-                        entry_price=sig.price,
-                        stake_native=recovery_base,
-                        entry_time=time.time(),
-                        expiry_time=time.time() + sig.expiry_seconds,
-                        epoch=prdt_agent.get_current_epoch(),
-                        gale_level=0,
-                        total_sequence_stake=recovery_base,
-                        is_recovery_trade=True,
-                        strategy_key=sig_strat,
-                        indicator_family=sig_family
-                    ))
-                    controller.recovery_queue.remove(debt)
-                    controller.last_trade_time = time.time()
-                    controller.last_pair_trade_time[sig.symbol] = time.time()
-                    controller.last_pair_strategy[sig.symbol] = sig_family or sig_strat
-                    controller.last_strategy_time[sig_family] = time.time()
-                    if sig_strat:
-                        controller.last_strategy_time[sig_strat] = time.time()
-                    logger.critical(
-                        f"🔄 [RECOVERY TRADE] {sig.symbol} {sig.action.upper()} | "
-                        f"Stake: ${recovery_base:.2f} | Recouping: ${debt.lost_amount:.2f} loss | "
-                        f"Remaining debts: {len(controller.recovery_queue)}"
-                    )
-                    if tg_bot:
-                        await tg_bot.send_trade_alert(sig, f"🔄 RECOVERY ${recovery_base:.2f} (recoup ${debt.lost_amount:.2f})", True)
-                else:
-                    logger.warning(f"⚠️ Recovery trade failed: {rec_tx}")
+                if ready_debts:
+                    debt = ready_debts[0]  # Oldest ready debt first
+                    pair_payout = AssassinController.PAIR_PAYOUTS.get(sig.symbol, 0.70)
+                    current_balance = prdt_agent.simulated_balance if controller.simulation_mode else prdt_agent.get_balance()
+
+                    if is_gale2:
+                        # Legacy Gale-2 recovery: sized for 7.15x multiplier
+                        recovery_base = round(debt.lost_amount / pair_payout / 7.15, 2)
+                        max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(sig.symbol, 250.0)
+                        recovery_base = min(recovery_base, round(max_pool_bet / 4.93, 2))
+                        if current_balance > 0:
+                            recovery_base = min(recovery_base, round(current_balance * 0.02, 2))
+                        recovery_base = max(recovery_base, controller.stake_native)
+                    else:
+                        # GALE1 Recovery: stake enough so G1 sequence payout covers the loss
+                        total_debt = sum(d.lost_amount for d in ready_debts)
+                        # Split recovery: each trade recovers half the total debt
+                        recovery_target = min(total_debt, debt.lost_amount)
+                        recovery_base = round(recovery_target / pair_payout, 2)
+                        # Safety cap: never risk more than 37% of balance on a single recovery (ONLY if balance > 0)
+                        if current_balance > 0:
+                            recovery_base = min(recovery_base, round(current_balance * 0.37, 2))
+                        # Crucial fix: ALWAYS enforce minimum positive base stake (never allow negative or 0 stake!)
+                        recovery_base = max(recovery_base, controller.stake_native)
+                        max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(sig.symbol, 250.0)
+                        recovery_base = min(recovery_base, round(max_pool_bet / 2.22, 2))  # Cap for G1 headroom
+
+                    rec_success, rec_tx = await prdt_agent.execute_trade(sig, stake_native=recovery_base)
+                    if rec_success:
+                        controller.active_trades.append(ActiveTrade(
+                            symbol=sig.symbol,
+                            action=sig.action.lower(),
+                            entry_price=sig.price,
+                            stake_native=recovery_base,
+                            entry_time=time.time(),
+                            expiry_time=time.time() + sig.expiry_seconds,
+                            epoch=prdt_agent.get_current_epoch(),
+                            gale_level=0,
+                            total_sequence_stake=recovery_base,
+                            is_recovery_trade=True,
+                            strategy_key=sig_strat,
+                            indicator_family=sig_family
+                        ))
+                        controller.recovery_queue.remove(debt)
+                        controller.last_trade_time = time.time()
+                        controller.last_pair_trade_time[sig.symbol] = time.time()
+                        controller.last_pair_strategy[sig.symbol] = sig_family or sig_strat
+                        controller.last_strategy_time[sig_family] = time.time()
+                        if sig_strat:
+                            controller.last_strategy_time[sig_strat] = time.time()
+                        logger.critical(
+                            f"🔄 [RECOVERY TRADE] {sig.symbol} {sig.action.upper()} | "
+                            f"Stake: ${recovery_base:.2f} | Recouping: ${debt.lost_amount:.2f} loss | "
+                            f"Remaining debts: {len(controller.recovery_queue)}"
+                        )
+                        if tg_bot:
+                            await tg_bot.send_trade_alert(sig, f"🔄 RECOVERY ${recovery_base:.2f} (recoup ${debt.lost_amount:.2f})", True)
+                    else:
+                        logger.warning(f"⚠️ Recovery trade failed: {rec_tx}")
 
 
             # Send Trade Execution Alert to Telegram
