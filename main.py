@@ -327,12 +327,12 @@ class AssassinController:
 
 async def main():
     logger.info("=" * 65)
-    logger.info("  ASSASSIN BOT v5.0 — 90.10% 1-Gale Champion Engine")
+    logger.info("  ASSASSIN BOT v6.0 — 83.3% No-Gale 55 TPD Engine")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: 30-40 TPD 1-Gale (HTF 15m Trend-Pullbacks)")
-    logger.info("  Performance: 33.67 Trades/Day | 90.10% 1-Gale SeqWR (365d Verified)")
-    logger.info("  Staking: Pure Compounding (Base Staking with Zero Recovery Inflation)")
-    logger.info("  Pairs: BTCUSDT, ETHUSDT, BNBUSDT")
+    logger.info("  Strategy: 55.6 TPD No-Gale (Multi-Bar HTF Trend-Pullbacks)")
+    logger.info("  Performance: 55.6 Trades/Day | 83.3% Direct WR | $0.58 EV/trade (365d Verified)")
+    logger.info("  Staking: Pure Compounding (Zero Martingale)")
+    logger.info("  Pairs: BTCUSDT, ETHUSDT, BNBUSDT (90% Payout)")
     logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 Max Bet Safeguards")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent) + Webhook")
     logger.info("  Feeder: Binance Live WebSocket (1m multi-TF aggregator)")
@@ -373,9 +373,13 @@ async def main():
         simulation_mode=simulation_mode
     )
 
-    # 3. Instantiate Signal Engine (supports GALE1, GALE2, and ZERO_GALE modes)
-    strategy_mode = os.environ.get("STRATEGY_MODE", "GALE1").upper()
-    if strategy_mode in ("ZERO_GALE", "FLAT", "0GALE"):
+    # 3. Instantiate Signal Engine (supports GALE1, GALE2, ZERO_GALE, and NOGALE_55TPD modes)
+    strategy_mode = os.environ.get("STRATEGY_MODE", "NOGALE_55TPD").upper()
+    if strategy_mode in ("NOGALE_55TPD", "NOGALE55", "83WR", "55TPD"):
+        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_83wr_55tpd_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+        logger.critical(f"💰 [STRATEGY MODE: NO-GALE 55TPD] Armed with {len(hybrid_engine.setups)} verified setups (55.6 TPD | 83.3% Direct WR | $32/day/$1 EV | Multi-Bar Expiry)!")
+    elif strategy_mode in ("ZERO_GALE", "FLAT", "0GALE"):
         zero_gale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "zero_gale_80pct_config.json")
         hybrid_engine = HybridSignalEngine(config_path=zero_gale_cfg)
         logger.critical(f"🎯 [STRATEGY MODE: ZERO-GALE] Armed with {len(hybrid_engine.setups)} verified flat setups (18.75 TPD | 83.95% Direct WR | Zero Martingale)!")

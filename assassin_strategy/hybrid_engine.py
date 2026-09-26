@@ -123,8 +123,9 @@ class HybridSignalEngine:
         self.setups_by_pair_tf: Dict[Tuple[str, int], List[SetupConfig]] = {}
         self.load_config(config_path)
 
-        # Collect unique timeframes (always include 15m for HTF trend filter)
-        timeframes = list({s.tf for s in self.setups} | {15})
+        # Collect unique timeframes (always include HTF trend filter TFs: 15m, 30m, 1h, 4h)
+        htf_tfs = {15, 30, 60, 240}
+        timeframes = list({s.tf for s in self.setups} | htf_tfs)
         self.aggregator = MultiTFCandleAggregator(timeframes)
         logger.info(f"Initialized HybridSignalEngine with {len(self.setups)} setups across {len(timeframes)} timeframes.")
 
@@ -486,7 +487,7 @@ class HybridSignalEngine:
                     action = "put"
                     trigger_detail = f"MFI={mfi_val:.1f}>={100-mfi_th} | RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th}"
 
-            # ─── HTF TREND PULLBACK (1-GALE 90.10% CHAMPION) ───
+            # ─── HTF TREND PULLBACK (Multi-Bar No-Gale 83%WR 55TPD) ───
             elif stype == "HTF_PULLBACK":
                 trend_type = p.get("trend", "15m_EMA20")
                 rsi_p = int(p.get("rsi_period", 7))
@@ -495,21 +496,33 @@ class HybridSignalEngine:
                 min_wick = float(p.get("min_wick", 0.0))
                 min_vol = float(p.get("min_vol", 1.0))
 
-                # Check 15m trend from aggregator history
-                history_15m = self.aggregator.history.get((sym, 15), [])
-                if len(history_15m) >= 20:
-                    c15 = [c.close for c in history_15m]
-                    span = 20 if "EMA20" in trend_type else 50
+                # Parse trend string: "15m_EMA20", "30m_EMA20", "1h_EMA50", "4h_EMA50"
+                trend_parts = trend_type.split("_")
+                htf_str = trend_parts[0]  # e.g. "15m", "30m", "1h", "4h"
+                ema_str = trend_parts[1] if len(trend_parts) > 1 else "EMA20"
+                span = int(ema_str.replace("EMA", ""))
+
+                # Convert HTF string to minutes for aggregator lookup
+                if htf_str.endswith("h"):
+                    htf_min = int(htf_str[:-1]) * 60
+                elif htf_str.endswith("m"):
+                    htf_min = int(htf_str[:-1])
+                else:
+                    htf_min = 15
+
+                htf_history = self.aggregator.history.get((sym, htf_min), [])
+                if len(htf_history) >= span:
+                    c_htf = [c.close for c in htf_history]
                     alpha = 2.0 / (span + 1.0)
-                    ema15 = c15[0]
-                    for c_val in c15[1:]:
-                        ema15 = alpha * c_val + (1.0 - alpha) * ema15
-                    is_bull = c15[-1] > ema15
-                    is_bear = c15[-1] < ema15
+                    ema_htf = c_htf[0]
+                    for c_val in c_htf[1:]:
+                        ema_htf = alpha * c_val + (1.0 - alpha) * ema_htf
+                    is_bull = c_htf[-1] > ema_htf
+                    is_bear = c_htf[-1] < ema_htf
                 else:
                     is_bull = closes[-1] > ma20
                     is_bear = closes[-1] < ma20
-                    ema15 = ma20
+                    ema_htf = ma20
 
                 # RSI on current timeframe
                 deltas = np.diff(closes[-(rsi_p + 30):])
@@ -524,10 +537,10 @@ class HybridSignalEngine:
 
                 if is_bull and rsi_val <= rsi_th and bb_z <= -bb_th and lw >= min_wick and vol_ratio_20 >= min_vol:
                     action = "call"
-                    trigger_detail = f"15mBull(C>{ema15:.1f}) | RSI{rsi_p}={rsi_val:.1f}<={rsi_th} | BBz={bb_z:.2f}<=-{bb_th} | Vol={vol_ratio_20:.1f}"
+                    trigger_detail = f"{htf_str}Bull(C>{ema_htf:.1f}) | RSI{rsi_p}={rsi_val:.1f}<={rsi_th} | BBz={bb_z:.2f}<=-{bb_th} | Vol={vol_ratio_20:.1f}"
                 elif is_bear and rsi_val >= (100.0 - rsi_th) and bb_z >= bb_th and uw >= min_wick and vol_ratio_20 >= min_vol:
                     action = "put"
-                    trigger_detail = f"15mBear(C<{ema15:.1f}) | RSI{rsi_p}={rsi_val:.1f}>={100.0-rsi_th} | BBz={bb_z:.2f}>={bb_th} | Vol={vol_ratio_20:.1f}"
+                    trigger_detail = f"{htf_str}Bear(C<{ema_htf:.1f}) | RSI{rsi_p}={rsi_val:.1f}>={100.0-rsi_th} | BBz={bb_z:.2f}>={bb_th} | Vol={vol_ratio_20:.1f}"
 
             if action:
                 # Support variable expiry_bars from config (default: 1 bar)
