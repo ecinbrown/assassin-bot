@@ -484,7 +484,7 @@ async def main():
                         else:
                             # 0 for ZERO_GALE, 2 for GALE2, 1 for GALE1
                             strategy_mode = os.environ.get("STRATEGY_MODE", "GALE1").upper()
-                            if strategy_mode in ("ZERO_GALE", "FLAT", "0GALE"):
+                            if strategy_mode in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE_55TPD", "NOGALE55", "83WR", "55TPD"):
                                 max_allowed_gale = 0
                             elif strategy_mode in ("GALE2", "2GALE", "GALE-2"):
                                 max_allowed_gale = 2
@@ -518,22 +518,23 @@ async def main():
 
                                 # Queue recovery debt for both GALE1 and GALE2 modes
                                 # GALE1 recovery: boost next BTCUSDT signal to recover the loss (96.8% WR verified 365d)
-                                controller.is_in_mart_recovery = True
-                                controller.lost_mart_amount = round(controller.lost_mart_amount + t.total_sequence_stake, 4)
-                                cooldown = 5 if strategy_mode in ("GALE2", "2GALE", "GALE-2") else 3
-                                controller.recovery_queue.append(RecoveryDebt(
-                                    symbol=t.symbol,
-                                    lost_amount=round(t.total_sequence_stake, 4),
-                                    created_at=time.time(),
-                                    cooldown_bars=cooldown,
-                                    bars_elapsed=0,
-                                    is_ready=False
-                                ))
-                                logger.critical(
-                                    f"🔴 [RECOVERY QUEUED] Lost {t.total_sequence_stake:.4f} on {t.symbol} | "
-                                    f"Total debt: {controller.lost_mart_amount:.4f} | "
-                                    f"Recovery will boost next qualifying signal"
-                                )
+                                if max_allowed_gale > 0:
+                                    controller.is_in_mart_recovery = True
+                                    controller.lost_mart_amount = round(controller.lost_mart_amount + t.total_sequence_stake, 4)
+                                    cooldown = 5 if strategy_mode in ("GALE2", "2GALE", "GALE-2") else 3
+                                    controller.recovery_queue.append(RecoveryDebt(
+                                        symbol=t.symbol,
+                                        lost_amount=round(t.total_sequence_stake, 4),
+                                        created_at=time.time(),
+                                        cooldown_bars=cooldown,
+                                        bars_elapsed=0,
+                                        is_ready=False
+                                    ))
+                                    logger.critical(
+                                        f"🔴 [RECOVERY QUEUED] Lost {t.total_sequence_stake:.4f} on {t.symbol} | "
+                                        f"Total debt: {controller.lost_mart_amount:.4f} | "
+                                        f"Recovery will boost next qualifying signal"
+                                    )
                                 controller.save_current_state()
                                 logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} (Gale {t.gale_level}) | Lost: {t.total_sequence_stake:.4f} | 15m lockout active | Reset to Base stake")
                                 if tg_bot:
