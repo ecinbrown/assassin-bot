@@ -393,9 +393,9 @@ async def main():
         simulation_mode=simulation_mode
     )
 
-    # 3. Instantiate Signal Engine (supports 85PCT_30TPD, GALE1, GALE2, and NOGALE_55TPD modes)
-    strategy_mode = os.environ.get("STRATEGY_MODE", "85PCT_30TPD").upper()
-    is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "85PCT", "30TPD"))
+    # 3. Instantiate Signal Engine (supports SNIPER_89PCT, 85PCT_30TPD, GALE1, GALE2, and NOGALE_55TPD modes)
+    strategy_mode = os.environ.get("STRATEGY_MODE", "SNIPER_89PCT").upper()
+    is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "85PCT", "30TPD", "SNIPER", "89PCT"))
     is_gale2 = any(x in strategy_mode for x in ("GALE2", "2GALE", "GALE-2"))
     if is_nogale:
         max_allowed_gale = 0
@@ -404,7 +404,11 @@ async def main():
     else:
         max_allowed_gale = 1
 
-    if "85PCT" in strategy_mode or "30TPD" in strategy_mode:
+    if "SNIPER" in strategy_mode or "89PCT" in strategy_mode:
+        cfg_sniper = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_89pct_sniper_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=cfg_sniper)
+        logger.critical(f"🎯 [STRATEGY MODE: SNIPER ZERO-GALE 89.4%] Armed with {len(hybrid_engine.setups)} verified setups (89.44% Direct WR | 360 OOS Trades | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+    elif "85PCT" in strategy_mode or "30TPD" in strategy_mode:
         cfg_85 = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_85pct_30tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=cfg_85)
         logger.critical(f"🎯 [STRATEGY MODE: 85% 30+ TPD] Armed with {len(hybrid_engine.setups)} verified setups (85%+ WR | 30+ Trades/Day | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
