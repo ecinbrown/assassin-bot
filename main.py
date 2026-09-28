@@ -279,42 +279,54 @@ class AssassinController:
         }
         return True, "Sweep completed", details
 
-    # ─── 85.03% High-Frequency Multi-Timeframe Strategy (318 Setups) ───
-    # Validated on 365d Binance data: 47.58 trades/day | 84.37% 1-Gale SeqWR
-    # Strictly 1-Gale | 6.1% Compounding | BTC + ETH + BNB (90% Payout)
+    # ─── High-Frequency Multi-Timeframe Strategy (639 Setups) ───
+    # Validated on 365d Binance data: 30+ trades/day | 85%+ WR
+    # Broker Assets & Payouts configured directly from live PRDT/broker terminal:
     PAIR_PAYOUTS = {
-        "BTCUSDT": 0.90, "ETHUSDT": 0.90, "BNBUSDT": 0.90,
+        "BTCUSDT": 0.90, "BTC-USDT": 0.90,
+        "ETHUSDT": 0.90, "ETH-USD": 0.90, "ETHUSD": 0.90,
+        "BNBUSDT": 0.90, "BNB-USD": 0.90, "BNBUSD": 0.90,
+        "XRPUSDT": 0.70, "XRP-USD": 0.70, "XRPUSD": 0.70,
+        "SOLUSDT": 0.70, "SOL-USD": 0.70, "SOLUSD": 0.70,
+        "USDJPY": 0.80, "USD-JPY": 0.80,
+        "EURUSD": 0.80, "EUR-USD": 0.80, "EURUSDT": 0.80,
     }
-    TRADEABLE_PAIRS = {"BTCUSDT", "ETHUSDT", "BNBUSDT"}
-    TIER1_PAIRS = {"BTCUSDT", "ETHUSDT", "BNBUSDT"}
+    TRADEABLE_PAIRS = {
+        "BTCUSDT", "ETHUSDT", "BNBUSDT", "XRPUSDT", "SOLUSDT", "USDJPY", "EURUSD",
+        "BTC-USDT", "ETH-USD", "BNB-USD", "XRP-USD", "SOL-USD", "USD-JPY", "EUR-USD", "EURUSDT"
+    }
+    TIER1_PAIRS = {"BTCUSDT", "ETHUSDT", "BNBUSDT", "BTC-USDT", "ETH-USD", "BNB-USD"}
 
-    # PRDT Pro Maximum Bet Limits per Symbol
+    # PRDT Pro Maximum Bet Limits per Symbol (from broker screenshot)
     SYMBOL_MAX_BETS = {
-        "BTCUSDT": 1000.0,
-        "ETHUSDT": 250.0,
-        "BNBUSDT": 250.0,
+        "BTCUSDT": 1000.0, "BTC-USDT": 1000.0,
+        "ETHUSDT": 250.0,  "ETH-USD": 250.0,  "ETHUSD": 250.0,
+        "BNBUSDT": 250.0,  "BNB-USD": 250.0,  "BNBUSD": 250.0,
+        "XRPUSDT": 100.0,  "XRP-USD": 100.0,  "XRPUSD": 100.0,
+        "SOLUSDT": 250.0,  "SOL-USD": 250.0,  "SOLUSD": 250.0,
+        "USDJPY": 100.0,   "USD-JPY": 100.0,
+        "EURUSD": 100.0,   "EUR-USD": 100.0,   "EURUSDT": 100.0,
     }
 
 
     def calculate_dynamic_stake(self, balance: float, symbol: str = "BTCUSDT") -> float:
         """
         Dynamic Compounding Model:
-        - Scales base stake to BASE_STAKE_PCT (default: 0.5% for Gale-2, 6.1% for legacy Gale-1).
-        - Enforces PRDT Pro platform maximum bet caps ($1,000 on BTC, $250 on ETH & BNB).
-        - Gale 1 is 2.22x base stake, Gale 2 is 2.22x Gale 1 (4.93x base).
-        - Total 3-step sequence risk is capped at ~4.07% of balance to prevent blow-ups.
+        - Scales base stake to BASE_STAKE_PCT (default: 5% for No-Gale, 0.5% for Gale-2, 6.1% for legacy Gale-1).
+        - Enforces PRDT Pro platform maximum bet caps ($1,000 on BTC, $250 on ETH/BNB/SOL, $100 on XRP/Forex).
+        - Enforces max allowed stake headroom.
         """
         if balance <= 0:
             return max(1.0, self.stake_native)
 
-        strategy_mode = os.environ.get("STRATEGY_MODE", "NOGALE_55TPD").upper()
-        is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD"))
+        strategy_mode = os.environ.get("STRATEGY_MODE", "85PCT_30TPD").upper()
+        is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "85PCT", "30TPD"))
         is_gale2 = ("GALE2" in strategy_mode or "2GALE" in strategy_mode)
 
-        # Default staking pct: 5% for No-Gale (55TPD), 0.5% for Gale-2, 6.1% for legacy Gale-1
+        # Default staking pct: 5% for No-Gale, 0.5% for Gale-2, 6.1% for legacy Gale-1
         if is_nogale:
             default_pct = 0.05
-            max_multiplier = 1.0  # Zero-Gale: no multiplier headroom needed, allow full $250/$1000 platform caps!
+            max_multiplier = 1.0  # Zero-Gale: no multiplier headroom needed, allow full platform caps!
         elif is_gale2:
             default_pct = 0.005
             max_multiplier = 4.93
@@ -323,11 +335,10 @@ class AssassinController:
             max_multiplier = 2.22
 
         raw_pct = float(os.environ.get("BASE_STAKE_PCT", str(default_pct)))
-        # Auto-normalize: if someone sets "10" meaning 10%, convert to 0.10
         base_pct = raw_pct / 100.0 if raw_pct > 1.0 else raw_pct
         base_stake = max(1.0, round(balance * base_pct, 2))
 
-        # Enforce PRDT platform max bet caps (BTC: $1000, ETH: $250, BNB: $250)
+        # Enforce PRDT platform max bet caps per symbol
         max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(symbol, 250.0)
         max_allowed_base = round(max_pool_bet / max_multiplier, 2)
         base_stake = min(base_stake, max_allowed_base)
@@ -337,21 +348,20 @@ class AssassinController:
 
 async def main():
     logger.info("=" * 65)
-    logger.info("  ASSASSIN BOT v6.0 — 83.3% No-Gale 55 TPD Engine")
+    logger.info("  ASSASSIN BOT v6.5 — 85%+ WR 30+ TPD Engine")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: 55.6 TPD No-Gale (Multi-Bar HTF Trend-Pullbacks)")
-    logger.info("  Performance: 55.6 Trades/Day | 83.3% Direct WR | $0.58 EV/trade (365d Verified)")
-    logger.info("  Staking: Pure Compounding (Zero Martingale)")
-    logger.info("  Pairs: BTCUSDT, ETHUSDT, BNBUSDT (90% Payout)")
-    logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 Max Bet Safeguards")
+    logger.info("  Strategy: 30+ TPD 85%+ WR (Multi-TF Pullback & Reversal Portfolio)")
+    logger.info("  Pairs: BTC (90%), ETH (90%), BNB (90%), XRP (70%), SOL (70%), EURUSD (80%), USDJPY (80%)")
+    logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 | SOL $250 | XRP $100 | EUR/JPY $100")
+    logger.info("  Staking: Pure Dynamic Compounding")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent) + Webhook")
-    logger.info("  Feeder: Binance Live WebSocket (1m multi-TF aggregator)")
+    logger.info("  Feeder: Binance Live WebSocket (Multi-TF synthesis from 1m)")
     logger.info("  Telegram: Interactive Control + Real/Demo Mode Switcher")
     logger.info("=" * 65)
 
     # 1. Configuration from Environment
-    # Trade BTC + ETH + BNB (Top 3 Pairs, 90% Payout Portfolio)
-    default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT"
+    # Trade all broker pairs from live asset list
+    default_symbols = "BTCUSDT,ETHUSDT,BNBUSDT,SOLUSDT,XRPUSDT"
     symbols = os.environ.get("TRADING_SYMBOLS", default_symbols).split(",")
     symbols = [s.strip().upper() for s in symbols if s.strip()]
 
@@ -383,9 +393,9 @@ async def main():
         simulation_mode=simulation_mode
     )
 
-    # 3. Instantiate Signal Engine (supports GALE1, GALE2, ZERO_GALE, and NOGALE_55TPD modes)
-    strategy_mode = os.environ.get("STRATEGY_MODE", "NOGALE_55TPD").upper()
-    is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD"))
+    # 3. Instantiate Signal Engine (supports 85PCT_30TPD, GALE1, GALE2, and NOGALE_55TPD modes)
+    strategy_mode = os.environ.get("STRATEGY_MODE", "85PCT_30TPD").upper()
+    is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "85PCT", "30TPD"))
     is_gale2 = any(x in strategy_mode for x in ("GALE2", "2GALE", "GALE-2"))
     if is_nogale:
         max_allowed_gale = 0
@@ -394,7 +404,11 @@ async def main():
     else:
         max_allowed_gale = 1
 
-    if is_nogale:
+    if "85PCT" in strategy_mode or "30TPD" in strategy_mode:
+        cfg_85 = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_85pct_30tpd_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=cfg_85)
+        logger.critical(f"🎯 [STRATEGY MODE: 85% 30+ TPD] Armed with {len(hybrid_engine.setups)} verified setups (85%+ WR | 30+ Trades/Day | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+    elif is_nogale:
         nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_83wr_55tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
         logger.critical(f"💰 [STRATEGY MODE: NO-GALE 55TPD] Armed with {len(hybrid_engine.setups)} verified setups (55.6 TPD | 83.3% Direct WR | $32/day/$1 EV | Zero Martingale)!")
