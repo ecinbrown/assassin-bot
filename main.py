@@ -195,7 +195,7 @@ class AssassinController:
         self.total_swept_profit: float = saved.get("total_swept_profit", 0.0)
         self.last_sweep_ts: float = saved.get("last_sweep_ts", time.time())
         self.sweep_profit_ratio: float = float(os.environ.get("SWEEP_PROFIT_RATIO", "0.30"))
-        self.sweep_interval_hours: float = float(os.environ.get("SWEEP_INTERVAL_HOURS", "24.0"))
+        self.sweep_interval_hours: float = float(os.environ.get("SWEEP_INTERVAL_HOURS", "168.0"))
         self.safe_vault_address: str = os.environ.get("SAFE_VAULT_ADDRESS", "")
         self.min_sweep_usd: float = float(os.environ.get("MIN_SWEEP_USD", "2.00"))
 
@@ -848,7 +848,7 @@ async def main():
                 now = time.time()
                 interval_secs = controller.sweep_interval_hours * 3600.0
                 if now - controller.last_sweep_ts >= interval_secs:
-                    logger.info("⏰ [70/30 SWEEPER] 24-hour window elapsed. Evaluating daily profit sweep...")
+                    logger.info(f"⏰ [70/30 SWEEPER] Weekly window ({controller.sweep_interval_hours:.0f}h) elapsed. Evaluating weekly profit sweep...")
                     success, reason, details = controller.execute_sweep()
                     if success:
                         logger.critical(

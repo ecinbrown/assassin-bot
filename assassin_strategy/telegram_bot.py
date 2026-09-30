@@ -524,7 +524,7 @@ class AssassinTelegramBot:
         now = time.time()
         last_sweep = getattr(c, 'last_sweep_ts', now)
         elapsed = now - last_sweep
-        interval_secs = getattr(c, 'sweep_interval_hours', 24.0) * 3600.0
+        interval_secs = getattr(c, 'sweep_interval_hours', 168.0) * 3600.0
         rem_secs = max(0, interval_secs - elapsed)
         rem_hours = int(rem_secs // 3600)
         rem_mins = int((rem_secs % 3600) // 60)
@@ -553,6 +553,7 @@ class AssassinTelegramBot:
                 await update.message.reply_text(f"⚠️ <b>Manual Sweep Not Executed:</b> {reason}", parse_mode='HTML')
             return
 
+        days_label = f"Once Weekly ({int(interval_secs//86400)}d)" if interval_secs >= 86400 * 2 else "Once Daily"
         status_msg = (
             "💸 <b>70/30 PROFIT WITHDRAWAL STATUS</b> 💸\n\n"
             f"• <b>Active Trading Balance:</b> <code>${cur_bal:.2f}</code>\n"
@@ -561,7 +562,7 @@ class AssassinTelegramBot:
             f"• <b>Pending Withdrawal (30%):</b> <code>${swept_30:.2f}</code>\n"
             f"• <b>Compounding Retained (70%):</b> <code>${retained_70:.2f}</code>\n"
             f"• <b>Total Withdrawn to Date:</b> <code>${total_swept:.2f}</code>\n"
-            f"• <b>Next Scheduled Withdrawal:</b> in ~{rem_hours}h {rem_mins}m (Once Daily)\n"
+            f"• <b>Next Scheduled Withdrawal:</b> in ~{rem_hours}h {rem_mins}m ({days_label})\n"
             f"• <b>Destination Wallet:</b> <code>{masked_wallet}</code>\n\n"
             "<i>💡 Type <code>/sweep now</code> to trigger an immediate manual withdrawal.</i>"
         )
