@@ -12901,5 +12901,1134 @@
     "desc": "BNB 30m HTF_4h_EMA50_RSI5_BB1.2_exp2",
     "wr": 88.1,
     "trades": 42
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0
+    },
+    "desc": "SOL 6m | BBRev_RSI7<=2_BB3.0",
+    "wr": 86.67,
+    "trades": 15,
+    "expiry_bars": 5,
+    "holdout_wr": 14.29,
+    "holdout_trades": 7,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 3m | BB3.5_Run>=5_V>=2.0",
+    "wr": 85.71,
+    "trades": 14,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 3m | BB3.5_Run>=4_V>=2.0",
+    "wr": 85.71,
+    "trades": 28,
+    "expiry_bars": 5,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 3m | BB3.5_Run>=5_V>=2.0",
+    "wr": 85.71,
+    "trades": 14,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 6m | BBRev_RSI7<=2_BB3.0_V>=1.5",
+    "wr": 85.71,
+    "trades": 14,
+    "expiry_bars": 5,
+    "holdout_wr": 28.57,
+    "holdout_trades": 7,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 6m | BBRev_RSI7<=2_BB3.0_V>=1.0",
+    "wr": 85.71,
+    "trades": 14,
+    "expiry_bars": 5,
+    "holdout_wr": 14.29,
+    "holdout_trades": 7,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 1.2
+    },
+    "desc": "SOL 6m | BBRev_RSI7<=2_BB3.0_V>=1.2",
+    "wr": 85.71,
+    "trades": 14,
+    "expiry_bars": 5,
+    "holdout_wr": 28.57,
+    "holdout_trades": 7,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0,
+      "min_vol": 1.2
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0_V>=1.2",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 1,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0,
+      "min_vol": 1.2
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0_V>=1.2",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 2,
+    "holdout_wr": 60.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0_V>=1.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 2,
+    "holdout_wr": 60.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0_V>=1.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 1,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 2,
+    "holdout_wr": 60.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 6m | BBRev_RSI7<=2_BB3.0_V>=2.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 5,
+    "holdout_wr": 28.57,
+    "holdout_trades": 7,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 1,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.5,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 5m | Wick>=0.5_Body<=0.2_BB2.5_V>=1.5",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 2,
+    "holdout_wr": 75.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4
+    },
+    "desc": "SOL 3m | BB3.5_Run>=4",
+    "wr": 84.38,
+    "trades": 32,
+    "expiry_bars": 5,
+    "holdout_wr": 66.67,
+    "holdout_trades": 6,
+    "train_tpd": 0.11
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.5,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 5m | Wick>=0.5_Body<=0.2_BB2.5_V>=1.0",
+    "wr": 84.21,
+    "trades": 19,
+    "expiry_bars": 2,
+    "holdout_wr": 75.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0_V>=2.0",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 1,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0_V>=1.5",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 1,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 8m | BBRev_RSI7<=2_BB3.0_V>=2.0",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 3,
+    "holdout_wr": 25.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 8m | BBRev_RSI7<=2_BB3.0_V>=1.0",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 3,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 8m | BBRev_RSI7<=2_BB3.0_V>=1.5",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 3,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 1.2
+    },
+    "desc": "SOL 8m | BBRev_RSI7<=2_BB3.0_V>=1.2",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 3,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 3m | BB3.5_Run>=4_V>=1.5",
+    "wr": 83.33,
+    "trades": 30,
+    "expiry_bars": 5,
+    "holdout_wr": 66.67,
+    "holdout_trades": 6,
+    "train_tpd": 0.1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 3m | BB3.5_Run>=4_V>=1.0",
+    "wr": 83.33,
+    "trades": 30,
+    "expiry_bars": 5,
+    "holdout_wr": 66.67,
+    "holdout_trades": 6,
+    "train_tpd": 0.1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0_V>=2.0",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 2,
+    "holdout_wr": 60.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0_V>=1.5",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 2,
+    "holdout_wr": 60.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5
+    },
+    "desc": "SOL 3m | BB3.5_Run>=5",
+    "wr": 82.35,
+    "trades": 17,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5
+    },
+    "desc": "SOL 3m | BB3.5_Run>=5",
+    "wr": 82.35,
+    "trades": 17,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 3m | BB3.5_Run>=4_V>=2.0",
+    "wr": 82.14,
+    "trades": 28,
+    "expiry_bars": 3,
+    "holdout_wr": 100.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.4,
+      "bb_th": 2.5
+    },
+    "desc": "SOL 8m | Wick>=0.7_Body<=0.4_BB2.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.4,
+      "bb_th": 2.5
+    },
+    "desc": "SOL 10m | Wick>=0.7_Body<=0.4_BB2.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 2,
+    "holdout_wr": 50.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.3,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 8m | Wick>=0.7_Body<=0.3_BB2.5_V>=1.0",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.3,
+      "bb_th": 2.5
+    },
+    "desc": "SOL 8m | Wick>=0.7_Body<=0.3_BB2.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.3,
+      "bb_th": 2.5
+    },
+    "desc": "SOL 10m | Wick>=0.7_Body<=0.3_BB2.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 2,
+    "holdout_wr": 50.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 15,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.4,
+      "max_body": 0.15,
+      "bb_th": 2.5
+    },
+    "desc": "SOL 15m | Wick>=0.4_Body<=0.15_BB2.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.4,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 8m | Wick>=0.7_Body<=0.4_BB2.5_V>=1.0",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 3m | Wick>=0.7_Body<=0.15_BB2.5_V>=1.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 3m | Wick>=0.7_Body<=0.15_BB2.5_V>=1.0",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 3m | BB3.5_Run>=5_V>=1.5",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 3m | BB3.5_Run>=5_V>=1.5",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 3m | BB3.5_Run>=5_V>=1.0",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 3m | BB3.5_Run>=5_V>=1.0",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4
+    },
+    "desc": "SOL 3m | BB3.5_Run>=4",
+    "wr": 81.25,
+    "trades": 32,
+    "expiry_bars": 3,
+    "holdout_wr": 83.33,
+    "holdout_trades": 6,
+    "train_tpd": 0.11
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.4,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 5m | Wick>=0.4_Body<=0.2_BB2.5_V>=1.0",
+    "wr": 80.95,
+    "trades": 21,
+    "expiry_bars": 2,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.3,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 10m | Wick>=0.7_Body<=0.3_BB2.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 2,
+    "holdout_wr": 50.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 1.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 3m | BBRev_RSI14<=2_BB1.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 3,
+    "holdout_wr": 75.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 3m | BB3.5_Run>=4_V>=1.0",
+    "wr": 80.0,
+    "trades": 30,
+    "expiry_bars": 3,
+    "holdout_wr": 83.33,
+    "holdout_trades": 6,
+    "train_tpd": 0.1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "RSI_ONLY",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 5m | RSI14<=2_V>=2.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 3m | BB3.5_Run>=4_V>=1.5",
+    "wr": 80.0,
+    "trades": 30,
+    "expiry_bars": 3,
+    "holdout_wr": 83.33,
+    "holdout_trades": 6,
+    "train_tpd": 0.1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0
+    },
+    "desc": "SOL 6m | BBRev_RSI7<=2_BB3.0",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 2,
+    "holdout_wr": 42.86,
+    "holdout_trades": 7,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0
+    },
+    "desc": "SOL 6m | BBRev_RSI7<=2_BB3.0",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 3,
+    "holdout_wr": 28.57,
+    "holdout_trades": 7,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.5,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 5m | Wick>=0.5_Body<=0.15_BB2.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.4,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 5m | Wick>=0.4_Body<=0.2_BB2.5_V>=1.5",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 2,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.4,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 10m | Wick>=0.7_Body<=0.4_BB2.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 2,
+    "holdout_wr": 50.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 2,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 14,
+      "rsi_th": 25.0,
+      "bb_th": 1.5,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "XRP 2m HTF_15_PB exp=2",
+    "wr": 86.67,
+    "trades": 50
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 3,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 7,
+      "rsi_th": 15.0,
+      "bb_th": 0.8,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 4
+    },
+    "desc": "XRP 3m HTF_15_PB exp=4",
+    "wr": 92.86,
+    "trades": 50
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 3,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 7,
+      "rsi_th": 15.0,
+      "bb_th": 1.5,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 5
+    },
+    "desc": "XRP 3m HTF_15_PB exp=5",
+    "wr": 91.67,
+    "trades": 50
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 3,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 14,
+      "rsi_th": 30.0,
+      "bb_th": 0.8,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "XRP 3m HTF_15_PB exp=1",
+    "wr": 100.0,
+    "trades": 50
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 3,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 14,
+      "rsi_th": 30.0,
+      "bb_th": 0.8,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "XRP 3m HTF_15_PB exp=2",
+    "wr": 92.86,
+    "trades": 50
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 3,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 14,
+      "rsi_th": 30.0,
+      "bb_th": 0.8,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "XRP 3m HTF_15_PB exp=3",
+    "wr": 92.86,
+    "trades": 50
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 7,
+      "rsi_th": 20.0,
+      "bb_th": 0.8,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "XRP 5m HTF_15_PB exp=1",
+    "wr": 88.89,
+    "trades": 50
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 15,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "30m_EMA20",
+      "rsi_period": 5,
+      "rsi_th": 20.0,
+      "bb_th": 1.8,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "XRP 15m HTF_30_PB exp=1",
+    "wr": 100.0,
+    "trades": 50
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 15,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "30m_EMA20",
+      "rsi_period": 5,
+      "rsi_th": 20.0,
+      "bb_th": 1.8,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "XRP 15m HTF_30_PB exp=2",
+    "wr": 100.0,
+    "trades": 50
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 15,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "30m_EMA20",
+      "rsi_period": 5,
+      "rsi_th": 20.0,
+      "bb_th": 1.8,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "XRP 15m HTF_30_PB exp=3",
+    "wr": 100.0,
+    "trades": 50
   }
 ]
