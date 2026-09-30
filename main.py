@@ -656,15 +656,18 @@ async def main():
             sig_strat = sig.metadata.get("strategy_key", "")
             min_indicator_interval = float(os.environ.get("MIN_TRADE_INTERVAL_SECONDS", "0.0"))
 
-            # Check if identical indicator is currently active on ANY pair (blocks duplicate indicator at the same second or while active)
+            # Check if identical indicator is currently active on the SAME pair only
+            # (Different pairs are allowed to use the same indicator simultaneously for max throughput)
             colliding_active = [
                 t for t in controller.active_trades
-                if (t.indicator_family and t.indicator_family == sig_family) or
-                   (t.strategy_key and t.strategy_key == sig_strat)
+                if t.symbol == sig.symbol and (
+                    (t.indicator_family and t.indicator_family == sig_family) or
+                    (t.strategy_key and t.strategy_key == sig_strat)
+                )
             ]
             if colliding_active:
                 ca = colliding_active[0]
-                logger.info(f"🛡️ [INDICATOR-COLLISION] Skipping {sig.symbol} — identical indicator ({sig_family}) is currently active on {ca.symbol}!")
+                logger.info(f"🛡️ [INDICATOR-COLLISION] Skipping {sig.symbol} — identical indicator ({sig_family}) is already active on this pair!")
                 continue
 
             # Check if this exact indicator fired within the minimum interval (0s / disabled by default)
@@ -688,12 +691,12 @@ async def main():
                 logger.info(f"🛡️ [SAME-PAIR-COLLISION] Skipping {sig.symbol} — duplicate indicator ({sig_family}) fired at the same second on this pair!")
                 continue
 
-            # Safeguard 6: Gale-Active Directional Lock (Stops the Multi-Pair Cascade / Triple Bust)
-            # If any other pair is currently struggling in Gale 1 or Gale 2 in the same direction, freeze new entries
-            struggling_gales = [t for t in controller.active_trades if t.action == sig.action.lower() and t.gale_level > 0 and t.symbol != sig.symbol]
+            # Safeguard 6: Gale-Active Lock — only block new entries on the SAME pair that is currently in gale recovery
+            # (Other pairs can trade freely even if one pair is struggling)
+            struggling_gales = [t for t in controller.active_trades if t.action == sig.action.lower() and t.gale_level > 0 and t.symbol == sig.symbol]
             if struggling_gales:
                 g = struggling_gales[0]
-                logger.info(f"🛡️ [GALE-LOCK] Blocking new {sig.symbol} {sig.action.upper()} because {g.symbol} is currently in GALE {g.gale_level} in the same direction")
+                logger.info(f"🛡️ [GALE-LOCK] Blocking new {sig.symbol} {sig.action.upper()} — this pair is currently in GALE {g.gale_level} recovery")
                 continue
 
             pair_trades = [t for t in controller.active_trades if t.symbol == sig.symbol]
