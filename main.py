@@ -1,13 +1,13 @@
 """
-Assassin Bot - Main Application Runner v3.1
+Assassin Bot - Main Application Runner v7.0
 =============================================
-RSI-7 Reversal Strategy (Backtest-Proven: 80.6% Mart SeqWR | ~16/day)
-Binance Live Feeder → RSI-7 Signal Engine → PRDT Finance Web3 Smart Contract
+1-Gale 88% Sequence WR | 30+ Trades/Day | 5 PRDT Pairs
+Binance Live Feeder → Multi-TF RSI Pullback Engine → PRDT Finance Web3 Smart Contract
 + Interactive Telegram Controller & Live Alert Engine
 
-Winning Config (365d backtest, 5972 signals, honest mart-sequence counting):
-  RSI period=7 | lo≤20 CALL / hi≥72 PUT | Vol≥2.5x | Body/ATR≥0.5
-  3-candle cooldown | NO counter-trend filter | BTC+ETH ONLY (90% payout)
+Winning Config (365d backtest, OOS-verified on 90d hold-out):
+  RSI(5/7/9) Pullback into BB(1.2-2.0σ) + 15m EMA20 Trend Filter
+  3m & 5m candles | Single-candle expiry | BTC+ETH+BNB+SOL+XRP
   
 Nuance-validated (validate_v3_nuances.py):
   - RSI window: 50 closes (0.03% mismatch vs full history)
@@ -319,8 +319,8 @@ class AssassinController:
         if balance <= 0:
             return max(1.0, self.stake_native)
 
-        strategy_mode = os.environ.get("STRATEGY_MODE", "85PCT_30TPD").upper()
-        is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "85PCT", "30TPD"))
+        strategy_mode = os.environ.get("STRATEGY_MODE", "GALE1_88PCT").upper()
+        is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "85PCT"))
         is_gale2 = ("GALE2" in strategy_mode or "2GALE" in strategy_mode)
 
         # Default staking pct: 5% for No-Gale, 0.5% for Gale-2, 6.1% for legacy Gale-1
@@ -348,12 +348,12 @@ class AssassinController:
 
 async def main():
     logger.info("=" * 65)
-    logger.info("  ASSASSIN BOT v6.5 — 85%+ WR 30+ TPD Engine")
+    logger.info("  ASSASSIN BOT v7.0 — 88% 1-Gale | 30+ TPD Engine")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: 30+ TPD 85%+ WR (Multi-TF Pullback & Reversal Portfolio)")
-    logger.info("  Pairs: BTC (90%), ETH (90%), BNB (90%), XRP (70%), SOL (70%), EURUSD (80%), USDJPY (80%)")
-    logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 | SOL $250 | XRP $100 | EUR/JPY $100")
-    logger.info("  Staking: Pure Dynamic Compounding")
+    logger.info("  Strategy: 1-Gale 88% SeqWR | 30+ TPD (RSI Pullback + BB + 15m Trend)")
+    logger.info("  Pairs: BTC (90%), ETH (90%), BNB (90%), XRP (70%), SOL (70%)")
+    logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 | SOL $250 | XRP $100")
+    logger.info("  Staking: Dynamic Compounding (6.1% base, 2.22x gale)")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent) + Webhook")
     logger.info("  Feeder: Binance Live WebSocket (Multi-TF synthesis from 1m)")
     logger.info("  Telegram: Interactive Control + Real/Demo Mode Switcher")
@@ -394,8 +394,8 @@ async def main():
     )
 
     # 3. Instantiate Signal Engine (supports SNIPER_89PCT, 85PCT_30TPD, GALE1, GALE2, and NOGALE_55TPD modes)
-    strategy_mode = os.environ.get("STRATEGY_MODE", "SNIPER_89PCT").upper()
-    is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "85PCT", "30TPD", "SNIPER", "89PCT"))
+    strategy_mode = os.environ.get("STRATEGY_MODE", "GALE1_88PCT").upper()
+    is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "SNIPER", "89PCT"))
     is_gale2 = any(x in strategy_mode for x in ("GALE2", "2GALE", "GALE-2"))
     if is_nogale:
         max_allowed_gale = 0
@@ -404,11 +404,15 @@ async def main():
     else:
         max_allowed_gale = 1
 
-    if "SNIPER" in strategy_mode or "89PCT" in strategy_mode:
+    if "88PCT" in strategy_mode or "GALE1_88" in strategy_mode:
+        cfg_88 = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale1_88pct_30tpd_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=cfg_88)
+        logger.critical(f"🏆 [STRATEGY MODE: 1-GALE 88% 30+ TPD] Armed with {len(hybrid_engine.setups)} setups (69% Base | 88% 1-Gale SeqWR | 32+ TPD | BTC, ETH, BNB, SOL, XRP)!")
+    elif "SNIPER" in strategy_mode or "89PCT" in strategy_mode:
         cfg_sniper = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_89pct_sniper_config.json")
         hybrid_engine = HybridSignalEngine(config_path=cfg_sniper)
         logger.critical(f"🎯 [STRATEGY MODE: SNIPER ZERO-GALE 89.4%] Armed with {len(hybrid_engine.setups)} verified setups (89.44% Direct WR | 360 OOS Trades | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
-    elif "85PCT" in strategy_mode or "30TPD" in strategy_mode:
+    elif "85PCT" in strategy_mode:
         cfg_85 = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_85pct_30tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=cfg_85)
         logger.critical(f"🎯 [STRATEGY MODE: 85% 30+ TPD] Armed with {len(hybrid_engine.setups)} verified setups (85%+ WR | 30+ Trades/Day | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
@@ -421,10 +425,10 @@ async def main():
         hybrid_engine = HybridSignalEngine(config_path=gale2_cfg)
         logger.critical(f"🚀 [STRATEGY MODE: GALE-2] Armed with {len(hybrid_engine.setups)} verified setups (55.4 TPD | 90.77% 2-Gale Sequence WR | 365d Binance Verified)!")
     else:
-        # Default: Champion 1-GALE 90.10% Portfolio (33.67 TPD | 1-Gale Only | Pure Compounding)
-        gale1_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale1_90pct_config.json")
+        # Default fallback: same as GALE1_88PCT
+        gale1_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale1_88pct_30tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=gale1_cfg)
-        logger.critical(f"🏆 [STRATEGY MODE: 1-GALE] Armed with {len(hybrid_engine.setups)} champion setups (33.67 TPD | 90.10% 1-Gale Sequence WR | Pure Compounding)!")
+        logger.critical(f"🏆 [STRATEGY MODE: 1-GALE 88%] Armed with {len(hybrid_engine.setups)} setups (69% Base | 88% 1-Gale SeqWR | 32+ TPD | Pure Compounding)!")
     controller.hybrid_engine = hybrid_engine
     logger.info("⏳ Preloading 1,000 historical candles from Binance to warm up timeframes...")
     try:
