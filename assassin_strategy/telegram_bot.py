@@ -244,16 +244,15 @@ class AssassinTelegramBot:
         losses: int,
         step_info: str = ""
     ):
-        """Broadcast round settlement result with open count and structured stats."""
         total = wins + losses
         win_rate = (wins / total * 100.0) if total > 0 else 0.0
         icon = "🏆" if is_win else "❌"
         outcome = "WIN ✅" if is_win else "SEQUENCE LOSS ❌"
+        outcome_tag = f"{outcome} [{step_info}]" if step_info else outcome
         pnl_str = f"+${profit_loss:.2f}" if profit_loss >= 0 else f"-${abs(profit_loss):.2f}"
         open_count = len(getattr(self.controller, 'active_trades', []))
-
         msg = (
-            f"{icon} <b>RESULT: {symbol} {action.upper()} — {outcome}</b>\n"
+            f"{icon} <b>RESULT: {symbol} {action.upper()} — {outcome_tag}</b>\n"
             f"💰 P&L: <code>{pnl_str}</code> | Balance: <code>${new_balance:.2f}</code>\n"
             f"🎯 Entry: <code>${entry_price:.4f}</code> ➜ Exit: <code>${exit_price:.4f}</code>\n"
             f"📊 Scorecard: <b>{wins}W – {losses}L ({win_rate:.0f}% WR)</b>\n"

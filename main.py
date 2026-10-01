@@ -747,73 +747,9 @@ async def main():
             else:
                 logger.warning(f"⚠️ Trade Execution Failed / Skipped: {tx_or_reason}")
 
-            # 2. Check if a RECOVERY trade should fire on this signal (ONLY in Gale modes)
-            if max_allowed_gale > 0:
-                if is_gale2:
-                    ready_debts = [d for d in controller.recovery_queue if d.symbol == sig.symbol and d.is_ready]
-                else:
-                    # GALE1: recovery fires on any ready debt (cross-pair, highest WR signal wins)
-                    ready_debts = [d for d in controller.recovery_queue if d.is_ready]
+            # Recovery debt injection disabled in pure dynamic compounding mode:
+            # Compounding automatically scales with balance; duplicate trades distort risk and duplicate losses.
 
-                if ready_debts:
-                    debt = ready_debts[0]  # Oldest ready debt first
-                    pair_payout = AssassinController.PAIR_PAYOUTS.get(sig.symbol, 0.70)
-                    current_balance = prdt_agent.simulated_balance if controller.simulation_mode else prdt_agent.get_balance()
-
-                    if is_gale2:
-                        # Legacy Gale-2 recovery: sized for 7.15x multiplier
-                        recovery_base = round(debt.lost_amount / pair_payout / 7.15, 2)
-                        max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(sig.symbol, 250.0)
-                        recovery_base = min(recovery_base, round(max_pool_bet / 4.93, 2))
-                        if current_balance > 0:
-                            recovery_base = min(recovery_base, round(current_balance * 0.02, 2))
-                        recovery_base = max(recovery_base, controller.stake_native)
-                    else:
-                        # GALE1 Recovery: stake enough so G1 sequence payout covers the loss
-                        total_debt = sum(d.lost_amount for d in ready_debts)
-                        # Split recovery: each trade recovers half the total debt
-                        recovery_target = min(total_debt, debt.lost_amount)
-                        recovery_base = round(recovery_target / pair_payout, 2)
-                        # Safety cap: never risk more than 37% of balance on a single recovery (ONLY if balance > 0)
-                        if current_balance > 0:
-                            recovery_base = min(recovery_base, round(current_balance * 0.37, 2))
-                        # Crucial fix: ALWAYS enforce minimum positive base stake (never allow negative or 0 stake!)
-                        recovery_base = max(recovery_base, controller.stake_native)
-                        max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(sig.symbol, 250.0)
-                        recovery_base = min(recovery_base, round(max_pool_bet / 2.22, 2))  # Cap for G1 headroom
-
-                    rec_success, rec_tx = await prdt_agent.execute_trade(sig, stake_native=recovery_base)
-                    if rec_success:
-                        controller.active_trades.append(ActiveTrade(
-                            symbol=sig.symbol,
-                            action=sig.action.lower(),
-                            entry_price=sig.price,
-                            stake_native=recovery_base,
-                            entry_time=time.time(),
-                            expiry_time=time.time() + sig.expiry_seconds,
-                            epoch=prdt_agent.get_current_epoch(),
-                            gale_level=0,
-                            total_sequence_stake=recovery_base,
-                            is_recovery_trade=True,
-                            strategy_key=sig_strat,
-                            indicator_family=sig_family
-                        ))
-                        controller.recovery_queue.remove(debt)
-                        controller.last_trade_time = time.time()
-                        controller.last_pair_trade_time[sig.symbol] = time.time()
-                        controller.last_pair_strategy[sig.symbol] = sig_family or sig_strat
-                        controller.last_strategy_time[sig_family] = time.time()
-                        if sig_strat:
-                            controller.last_strategy_time[sig_strat] = time.time()
-                        logger.critical(
-                            f"🔄 [RECOVERY TRADE] {sig.symbol} {sig.action.upper()} | "
-                            f"Stake: ${recovery_base:.2f} | Recouping: ${debt.lost_amount:.2f} loss | "
-                            f"Remaining debts: {len(controller.recovery_queue)}"
-                        )
-                        if tg_bot:
-                            await tg_bot.send_trade_alert(sig, f"🔄 RECOVERY ${recovery_base:.2f} (recoup ${debt.lost_amount:.2f})", True)
-                    else:
-                        logger.warning(f"⚠️ Recovery trade failed: {rec_tx}")
 
 
             # Send Trade Execution Alert to Telegram
