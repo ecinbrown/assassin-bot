@@ -323,9 +323,9 @@ class AssassinController:
         is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "SNIPER", "89PCT", "88PCT", "86PCT", "85PCT", "80PCT")) and not any(x in strategy_mode for x in ("GALE1", "GALE2", "1GALE", "2GALE"))
         is_gale2 = any(x in strategy_mode for x in ("GALE2", "2GALE", "GALE-2"))
 
-        # Default staking pct: 5% for No-Gale, 0.5% for Gale-2, 6.1% for legacy Gale-1
+        # Default staking pct: 7.5% for No-Gale, 0.5% for Gale-2, 6.1% for legacy Gale-1
         if is_nogale:
-            default_pct = 0.05
+            default_pct = 0.075
             max_multiplier = 1.0  # Zero-Gale: no multiplier headroom needed, allow full platform caps!
         elif is_gale2:
             default_pct = 0.005
@@ -425,10 +425,10 @@ async def main():
             nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_80pct_20tpd_config.json")
             hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
             logger.critical(f"🚀 [STRATEGY MODE: DEFAULT NO-GALE 80% @ 20 TPD] Armed with {len(hybrid_engine.setups)} verified setups (80.42% Direct Flat WR | Zero Martingale)!")
-    elif "88PCT" in strategy_mode or "GALE1_88" in strategy_mode:
-        cfg_88 = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale1_88pct_30tpd_config.json")
-        hybrid_engine = HybridSignalEngine(config_path=cfg_88)
-        logger.critical(f"🏆 [STRATEGY MODE: 1-GALE 88% 30+ TPD] Armed with {len(hybrid_engine.setups)} setups (69% Base | 88% 1-Gale SeqWR | 32+ TPD | BTC, ETH, BNB, SOL, XRP)!")
+    elif any(x in strategy_mode for x in ("91PCT", "90PCT", "GALE1", "88PCT")):
+        cfg_91 = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale1_91pct_35tpd_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=cfg_91)
+        logger.critical(f"🏆 [STRATEGY MODE: 1-GALE 91.3% @ 37.5 TPD] Armed with {len(hybrid_engine.setups)} setups (93.10% Out-Of-Sample WR | 37.49 TPD | BTC, ETH, BNB, SOL, XRP | Max 1-Gale, Zero Gale-2)!")
     elif is_gale2:
         gale2_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale2_40tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=gale2_cfg)
