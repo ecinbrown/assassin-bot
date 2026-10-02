@@ -277,288 +277,347 @@ class HybridSignalEngine:
             if neg_flow > 0:
                 mfi_val = 100.0 - (100.0 / (1.0 + pos_flow / neg_flow))
 
+        def _get_htf_trend_state(trend_str: str) -> tuple:
+            # Parse trend string: e.g. '15m_EMA20', '30m_EMA20', '1h_EMA50', '4h_EMA50'
+            parts = trend_str.split("_")
+            htf_s = parts[0]
+            span = int(parts[1].replace("EMA", "")) if len(parts) > 1 else 20
+            if htf_s.endswith("h"):
+                h_min = int(htf_s[:-1]) * 60
+            elif htf_s.endswith("m"):
+                h_min = int(htf_s[:-1])
+            else:
+                h_min = 15
+
+            h_hist = self.aggregator.history.get((sym, h_min), [])
+            if len(h_hist) >= span:
+                c_vals = [c.close for c in h_hist]
+                a = 2.0 / (span + 1.0)
+                e_val = c_vals[0]
+                for cv in c_vals[1:]:
+                    e_val = a * cv + (1.0 - a) * e_val
+                return c_vals[-1] > e_val, c_vals[-1] < e_val, htf_s, e_val
+            else:
+                return closes[-1] > ma20, closes[-1] < ma20, "1m", ma20
+
         signals = []
 
         for s in setups:
-            stype = s.type
-            p = s.params
-            action = None
-            trigger_detail = ""
+            try:
+                stype = s.type
+                p = s.params or {}
+                action = None
+                trigger_detail = ""
 
-            # ─── BOLLINGER BANDS ───
-            if stype == "BB":
-                std_m = p["std"]
-                wick_req = p["wick"]
-                whale_req = p["whale"]
-                bb_u = ma20 + std_m * std20
-                bb_l = ma20 - std_m * std20
+                # ─── BOLLINGER BANDS ───
+                if stype == "BB":
+                    std_m = float(p.get("std", p.get("bb_th", 2.0)))
+                    wick_req = float(p.get("wick", p.get("min_wick", 0.0)))
+                    whale_req = float(p.get("whale", 0.0))
+                    bb_u = ma20 + std_m * std20
+                    bb_l = ma20 - std_m * std20
 
-                if closes[-1] < bb_l and lw >= wick_req and whale >= whale_req:
-                    action = "call"
-                    trigger_detail = f"Close<{bb_l:.2f} | LW={lw:.2f}>={wick_req} | Whale={whale:.1f}>={whale_req}"
-                elif closes[-1] > bb_u and uw >= wick_req and whale >= whale_req:
-                    action = "put"
-                    trigger_detail = f"Close>{bb_u:.2f} | UW={uw:.2f}>={wick_req} | Whale={whale:.1f}>={whale_req}"
+                    if closes[-1] < bb_l and lw >= wick_req and whale >= whale_req:
+                        action = "call"
+                        trigger_detail = f"Close<{bb_l:.2f} | LW={lw:.2f}>={wick_req} | Whale={whale:.1f}>={whale_req}"
+                    elif closes[-1] > bb_u and uw >= wick_req and whale >= whale_req:
+                        action = "put"
+                        trigger_detail = f"Close>{bb_u:.2f} | UW={uw:.2f}>={wick_req} | Whale={whale:.1f}>={whale_req}"
 
-            # ─── RSI ───
-            elif stype == "RSI":
-                period = p["period"]
-                lo_th = p["lo"]
-                hi_th = p["hi"]
-                whale_req = p["whale"]
+                # ─── RSI ───
+                elif stype == "RSI":
+                    period = int(p.get("period", p.get("rsi_period", 14)))
+                    lo_th = float(p.get("lo", p.get("rsi_th", 30)))
+                    hi_th = float(p.get("hi", 100 - lo_th))
+                    whale_req = float(p.get("whale", 0.0))
 
-                # Wilder's Smoothing RSI
-                deltas = np.diff(closes[-(period + 30):])
-                gains = np.where(deltas > 0, deltas, 0.0)
-                losses = np.where(deltas < 0, -deltas, 0.0)
-                ag = np.mean(gains[:period])
-                al = np.mean(losses[:period])
-                for j in range(period, len(deltas)):
-                    ag = (ag * (period - 1) + gains[j]) / period
-                    al = (al * (period - 1) + losses[j]) / period
-                rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+                    deltas = np.diff(closes[-(period + 30):])
+                    gains = np.where(deltas > 0, deltas, 0.0)
+                    losses = np.where(deltas < 0, -deltas, 0.0)
+                    ag = np.mean(gains[:period])
+                    al = np.mean(losses[:period])
+                    for j in range(period, len(deltas)):
+                        ag = (ag * (period - 1) + gains[j]) / period
+                        al = (al * (period - 1) + losses[j]) / period
+                    rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
 
-                if rsi_val <= lo_th and whale >= whale_req:
-                    action = "call"
-                    trigger_detail = f"RSI{period}={rsi_val:.1f}<={lo_th} | Whale={whale:.1f}>={whale_req}"
-                elif rsi_val >= hi_th and whale >= whale_req:
-                    action = "put"
-                    trigger_detail = f"RSI{period}={rsi_val:.1f}>={hi_th} | Whale={whale:.1f}>={whale_req}"
+                    if rsi_val <= lo_th and whale >= whale_req:
+                        action = "call"
+                        trigger_detail = f"RSI{period}={rsi_val:.1f}<={lo_th} | Whale={whale:.1f}>={whale_req}"
+                    elif rsi_val >= hi_th and whale >= whale_req:
+                        action = "put"
+                        trigger_detail = f"RSI{period}={rsi_val:.1f}>={hi_th} | Whale={whale:.1f}>={whale_req}"
 
-            # ─── WILLIAMS %R ───
-            elif stype == "WILLR":
-                wick_req = p["wick"]
-                whale_req = p["whale"]
-                wr_th = p.get("wr_th", 92)
-                hh = np.max(highs[-14:])
-                ll = np.min(lows[-14:])
-                diff = hh - ll
-                wr14 = -50.0 if diff < 1e-8 else -100.0 * (hh - closes[-1]) / diff
+                # ─── WILLIAMS %R (Direct & Confluence) ───
+                elif stype == "WILLR":
+                    wr_th = float(p.get("wr_th", 92))
+                    bb_th = float(p.get("bb_th", 0.0))
+                    vol_th = float(p.get("vol", p.get("min_vol", 0.0)))
+                    wick_req = float(p.get("wick", p.get("min_wick", 0.0)))
+                    whale_req = float(p.get("whale", 0.0))
 
-                if wr14 <= -wr_th and lw >= wick_req and whale >= whale_req:
-                    action = "call"
-                    trigger_detail = f"WillR={wr14:.1f}<=-{wr_th} | LW={lw:.2f}>={wick_req} | Whale={whale:.1f}>={whale_req}"
-                elif wr14 >= -(100 - wr_th) and uw >= wick_req and whale >= whale_req:
-                    action = "put"
-                    trigger_detail = f"WillR={wr14:.1f}>=-{100 - wr_th} | UW={uw:.2f}>={wick_req} | Whale={whale:.1f}>={whale_req}"
+                    hh = np.max(highs[-14:])
+                    ll = np.min(lows[-14:])
+                    diff = hh - ll
+                    wr14 = -50.0 if diff < 1e-8 else -100.0 * (hh - closes[-1]) / diff
 
-            # ─── CCI ───
-            elif stype == "CCI":
-                cci_th = p["cci_th"]
-                whale_req = p["whale"]
-                tp = (highs[-14:] + lows[-14:] + closes[-14:]) / 3.0
-                ma = np.mean(tp)
-                md = np.mean(np.abs(tp - ma))
-                cci_val = 0.0 if md < 1e-8 else (tp[-1] - ma) / (0.015 * md)
+                    # Check HTF trend if specified
+                    trend_req = p.get("trend")
+                    b_bull, b_bear = True, True
+                    if trend_req:
+                        b_bull, b_bear, _, _ = _get_htf_trend_state(trend_req)
 
-                if cci_val <= -cci_th and whale >= whale_req:
-                    action = "call"
-                    trigger_detail = f"CCI14={cci_val:.1f}<=-{cci_th} | Whale={whale:.1f}>={whale_req}"
-                elif cci_val >= cci_th and whale >= whale_req:
-                    action = "put"
-                    trigger_detail = f"CCI14={cci_val:.1f}>={cci_th} | Whale={whale:.1f}>={whale_req}"
+                    bb_call = (bb_th <= 0.0) or (bb_z <= -bb_th)
+                    bb_put = (bb_th <= 0.0) or (bb_z >= bb_th)
+                    vol_ok = (vol_th <= 0.0) or (vol_ratio_20 >= vol_th)
 
-            # ─── EXHAUSTION + VOL CLIMAX ───
-            elif stype == "EXHAUSTION":
-                bars_req = p["bars"]
-                vol_req = p["vol"]
+                    if b_bull and wr14 <= -wr_th and bb_call and vol_ok and lw >= wick_req and whale >= whale_req:
+                        action = "call"
+                        trigger_detail = f"WillR={wr14:.1f}<=-{wr_th} | BBz={bb_z:.2f} | Vol={vol_ratio_20:.1f}x"
+                    elif b_bear and wr14 >= -(100 - wr_th) and bb_put and vol_ok and uw >= wick_req and whale >= whale_req:
+                        action = "put"
+                        trigger_detail = f"WillR={wr14:.1f}>=-{100 - wr_th} | BBz={bb_z:.2f} | Vol={vol_ratio_20:.1f}x"
 
-                if cr >= bars_req and v_ratio >= vol_req and lw >= 0.25:
-                    action = "call"
-                    trigger_detail = f"ConsecRed={cr}>={bars_req} | Vol={v_ratio:.1f}x>={vol_req} | LW={lw:.2f}>=0.25"
-                elif cg >= bars_req and v_ratio >= vol_req and uw >= 0.25:
-                    action = "put"
-                    trigger_detail = f"ConsecGreen={cg}>={bars_req} | Vol={v_ratio:.1f}x>={vol_req} | UW={uw:.2f}>=0.25"
+                # ─── CCI (Direct & Confluence) ───
+                elif stype == "CCI":
+                    cci_th = float(p.get("cci_th", 150))
+                    bb_th = float(p.get("bb_th", 0.0))
+                    whale_req = float(p.get("whale", 0.0))
 
-            # ─── STOCHASTIC ───
-            elif stype == "STOCH":
-                st_th = p["st_th"]
-                whale_req = p["whale"]
-                hh = np.max(highs[-14:])
-                ll = np.min(lows[-14:])
-                diff = hh - ll
-                stoch_val = 50.0 if diff < 1e-8 else (closes[-1] - ll) / diff * 100.0
+                    # 14 or 20 period CCI
+                    tp = (highs[-14:] + lows[-14:] + closes[-14:]) / 3.0
+                    ma = np.mean(tp)
+                    md = np.mean(np.abs(tp - ma))
+                    cci_val = 0.0 if md < 1e-8 else (tp[-1] - ma) / (0.015 * md)
 
-                if stoch_val <= st_th and whale >= whale_req:
-                    action = "call"
-                    trigger_detail = f"Stoch14={stoch_val:.1f}<={st_th} | Whale={whale:.1f}>={whale_req}"
-                elif stoch_val >= (100 - st_th) and whale >= whale_req:
-                    action = "put"
-                    trigger_detail = f"Stoch14={stoch_val:.1f}>={100 - st_th} | Whale={whale:.1f}>={whale_req}"
+                    trend_req = p.get("trend")
+                    b_bull, b_bear = True, True
+                    if trend_req:
+                        b_bull, b_bear, _, _ = _get_htf_trend_state(trend_req)
 
-            # ─── BB + RSI REVERSAL (No-Gale) ───
-            elif stype == "BB_RSI_REV":
-                rsi_period = p.get("rsi_period", 14)
-                rsi_th = p.get("rsi_th", 5)
-                bb_th = p.get("bb_th", 2.5)
-                min_vol = p.get("min_vol", 0.0)
+                    bb_call = (bb_th <= 0.0) or (bb_z <= -bb_th)
+                    bb_put = (bb_th <= 0.0) or (bb_z >= bb_th)
 
-                deltas = np.diff(closes[-(rsi_period + 30):])
-                gains = np.where(deltas > 0, deltas, 0.0)
-                losses_arr = np.where(deltas < 0, -deltas, 0.0)
-                ag = np.mean(gains[:rsi_period])
-                al = np.mean(losses_arr[:rsi_period])
-                for j in range(rsi_period, len(deltas)):
-                    ag = (ag * (rsi_period - 1) + gains[j]) / rsi_period
-                    al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
-                rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+                    if b_bull and cci_val <= -cci_th and bb_call and whale >= whale_req:
+                        action = "call"
+                        trigger_detail = f"CCI={cci_val:.1f}<=-{cci_th} | BBz={bb_z:.2f}"
+                    elif b_bear and cci_val >= cci_th and bb_put and whale >= whale_req:
+                        action = "put"
+                        trigger_detail = f"CCI={cci_val:.1f}>={cci_th} | BBz={bb_z:.2f}"
 
-                if rsi_val <= rsi_th and bb_z <= -bb_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
-                    action = "call"
-                    trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}<={rsi_th} | BBz={bb_z:.2f}<=-{bb_th} | Vol={vol_ratio_20:.1f}"
-                elif rsi_val >= (100 - rsi_th) and bb_z >= bb_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
-                    action = "put"
-                    trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th} | BBz={bb_z:.2f}>={bb_th} | Vol={vol_ratio_20:.1f}"
+                # ─── EXHAUSTION + VOL CLIMAX ───
+                elif stype == "EXHAUSTION":
+                    bars_req = int(p.get("bars", 3))
+                    vol_req = float(p.get("vol", 1.5))
 
-            # ─── RSI ONLY (No-Gale) ───
-            elif stype == "RSI_ONLY":
-                rsi_period = p.get("rsi_period", 2)
-                rsi_th = p.get("rsi_th", 3)
-                min_vol = p.get("min_vol", 0.0)
+                    if cr >= bars_req and v_ratio >= vol_req and lw >= 0.25:
+                        action = "call"
+                        trigger_detail = f"ConsecRed={cr}>={bars_req} | Vol={v_ratio:.1f}x>={vol_req} | LW={lw:.2f}>=0.25"
+                    elif cg >= bars_req and v_ratio >= vol_req and uw >= 0.25:
+                        action = "put"
+                        trigger_detail = f"ConsecGreen={cg}>={bars_req} | Vol={v_ratio:.1f}x>={vol_req} | UW={uw:.2f}>=0.25"
 
-                deltas = np.diff(closes[-(rsi_period + 30):])
-                gains = np.where(deltas > 0, deltas, 0.0)
-                losses_arr = np.where(deltas < 0, -deltas, 0.0)
-                ag = np.mean(gains[:rsi_period])
-                al = np.mean(losses_arr[:rsi_period])
-                for j in range(rsi_period, len(deltas)):
-                    ag = (ag * (rsi_period - 1) + gains[j]) / rsi_period
-                    al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
-                rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+                # ─── STOCHASTIC (Direct & Confluence) ───
+                elif stype == "STOCH":
+                    st_th = float(p.get("st_th", 10))
+                    bb_th = float(p.get("bb_th", 0.0))
+                    whale_req = float(p.get("whale", 0.0))
 
-                if rsi_val <= rsi_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
-                    action = "call"
-                    trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}<={rsi_th} | Vol={vol_ratio_20:.1f}"
-                elif rsi_val >= (100 - rsi_th) and (min_vol <= 0 or vol_ratio_20 >= min_vol):
-                    action = "put"
-                    trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th} | Vol={vol_ratio_20:.1f}"
+                    hh = np.max(highs[-14:])
+                    ll = np.min(lows[-14:])
+                    diff = hh - ll
+                    stoch_val = 50.0 if diff < 1e-8 else (closes[-1] - ll) / diff * 100.0
 
-            # ─── BB + STREAK (No-Gale) ───
-            elif stype == "BB_STREAK":
-                bb_th = p.get("bb_th", 2.5)
-                min_run = p.get("min_run", 3)
-                min_vol = p.get("min_vol", 0.0)
+                    trend_req = p.get("trend")
+                    b_bull, b_bear = True, True
+                    if trend_req:
+                        b_bull, b_bear, _, _ = _get_htf_trend_state(trend_req)
 
-                if bb_z <= -bb_th and cr >= min_run and (min_vol <= 0 or vol_ratio_20 >= min_vol):
-                    action = "call"
-                    trigger_detail = f"BBz={bb_z:.2f}<=-{bb_th} | RedStreak={cr}>={min_run} | Vol={vol_ratio_20:.1f}"
-                elif bb_z >= bb_th and cg >= min_run and (min_vol <= 0 or vol_ratio_20 >= min_vol):
-                    action = "put"
-                    trigger_detail = f"BBz={bb_z:.2f}>={bb_th} | GreenStreak={cg}>={min_run} | Vol={vol_ratio_20:.1f}"
+                    bb_call = (bb_th <= 0.0) or (bb_z <= -bb_th)
+                    bb_put = (bb_th <= 0.0) or (bb_z >= bb_th)
 
-            # ─── WICK REJECTION (No-Gale) ───
-            elif stype == "WICK_REJ":
-                min_wick = p.get("min_wick", 0.5)
-                max_body = p.get("max_body", 0.3)
-                bb_th = p.get("bb_th", 0.0)
-                min_vol = p.get("min_vol", 0.0)
+                    if b_bull and stoch_val <= st_th and bb_call and whale >= whale_req:
+                        action = "call"
+                        trigger_detail = f"Stoch14={stoch_val:.1f}<={st_th} | BBz={bb_z:.2f}"
+                    elif b_bear and stoch_val >= (100 - st_th) and bb_put and whale >= whale_req:
+                        action = "put"
+                        trigger_detail = f"Stoch14={stoch_val:.1f}>={100 - st_th} | BBz={bb_z:.2f}"
 
-                bb_ok_call = (bb_th <= 0) or (bb_z <= -bb_th)
-                bb_ok_put = (bb_th <= 0) or (bb_z >= bb_th)
+                # ─── BB + RSI REVERSAL (No-Gale) ───
+                elif stype == "BB_RSI_REV":
+                    rsi_period = p.get("rsi_period", 14)
+                    rsi_th = p.get("rsi_th", 5)
+                    bb_th = p.get("bb_th", 2.5)
+                    min_vol = p.get("min_vol", 0.0)
 
-                if lw >= min_wick and body_ratio <= max_body and bb_ok_call and (min_vol <= 0 or vol_ratio_20 >= min_vol):
-                    action = "call"
-                    trigger_detail = f"LW={lw:.2f}>={min_wick} | Body={body_ratio:.2f}<={max_body} | BBz={bb_z:.2f}"
-                elif uw >= min_wick and body_ratio <= max_body and bb_ok_put and (min_vol <= 0 or vol_ratio_20 >= min_vol):
-                    action = "put"
-                    trigger_detail = f"UW={uw:.2f}>={min_wick} | Body={body_ratio:.2f}<={max_body} | BBz={bb_z:.2f}"
+                    deltas = np.diff(closes[-(rsi_period + 30):])
+                    gains = np.where(deltas > 0, deltas, 0.0)
+                    losses_arr = np.where(deltas < 0, -deltas, 0.0)
+                    ag = np.mean(gains[:rsi_period])
+                    al = np.mean(losses_arr[:rsi_period])
+                    for j in range(rsi_period, len(deltas)):
+                        ag = (ag * (rsi_period - 1) + gains[j]) / rsi_period
+                        al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
+                    rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
 
-            # ─── MFI + RSI (No-Gale) ───
-            elif stype == "MFI_RSI":
-                mfi_th = p.get("mfi_th", 20)
-                rsi_period = p.get("rsi_period", 5)
-                rsi_th = p.get("rsi_th", 10)
-                min_vol = p.get("min_vol", 0.0)
+                    if rsi_val <= rsi_th and bb_z <= -bb_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                        action = "call"
+                        trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}<={rsi_th} | BBz={bb_z:.2f}<=-{bb_th} | Vol={vol_ratio_20:.1f}"
+                    elif rsi_val >= (100 - rsi_th) and bb_z >= bb_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                        action = "put"
+                        trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th} | BBz={bb_z:.2f}>={bb_th} | Vol={vol_ratio_20:.1f}"
 
-                deltas = np.diff(closes[-(rsi_period + 30):])
-                gains = np.where(deltas > 0, deltas, 0.0)
-                losses_arr = np.where(deltas < 0, -deltas, 0.0)
-                ag = np.mean(gains[:rsi_period])
-                al = np.mean(losses_arr[:rsi_period])
-                for j in range(rsi_period, len(deltas)):
-                    ag = (ag * (rsi_period - 1) + gains[j]) / rsi_period
-                    al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
-                rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+                # ─── RSI ONLY (No-Gale) ───
+                elif stype == "RSI_ONLY":
+                    rsi_period = p.get("rsi_period", 2)
+                    rsi_th = p.get("rsi_th", 3)
+                    min_vol = p.get("min_vol", 0.0)
 
-                if mfi_val <= mfi_th and rsi_val <= rsi_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
-                    action = "call"
-                    trigger_detail = f"MFI={mfi_val:.1f}<={mfi_th} | RSI{rsi_period}={rsi_val:.1f}<={rsi_th}"
-                elif mfi_val >= (100 - mfi_th) and rsi_val >= (100 - rsi_th) and (min_vol <= 0 or vol_ratio_20 >= min_vol):
-                    action = "put"
-                    trigger_detail = f"MFI={mfi_val:.1f}>={100-mfi_th} | RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th}"
+                    deltas = np.diff(closes[-(rsi_period + 30):])
+                    gains = np.where(deltas > 0, deltas, 0.0)
+                    losses_arr = np.where(deltas < 0, -deltas, 0.0)
+                    ag = np.mean(gains[:rsi_period])
+                    al = np.mean(losses_arr[:rsi_period])
+                    for j in range(rsi_period, len(deltas)):
+                        ag = (ag * (rsi_period - 1) + gains[j]) / rsi_period
+                        al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
+                    rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
 
-            # ─── HTF TREND PULLBACK (Multi-Bar No-Gale 83%WR 55TPD) ───
-            elif stype == "HTF_PULLBACK":
-                trend_type = p.get("trend", "15m_EMA20")
-                rsi_p = int(p.get("rsi_period", 7))
-                rsi_th = float(p.get("rsi_th", 25.0))
-                bb_th = float(p.get("bb_th", 2.0))
-                min_wick = float(p.get("min_wick", 0.0))
-                min_vol = float(p.get("min_vol", 1.0))
+                    if rsi_val <= rsi_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                        action = "call"
+                        trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}<={rsi_th} | Vol={vol_ratio_20:.1f}"
+                    elif rsi_val >= (100 - rsi_th) and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                        action = "put"
+                        trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th} | Vol={vol_ratio_20:.1f}"
 
-                # Parse trend string: "15m_EMA20", "30m_EMA20", "1h_EMA50", "4h_EMA50"
-                trend_parts = trend_type.split("_")
-                htf_str = trend_parts[0]  # e.g. "15m", "30m", "1h", "4h"
-                ema_str = trend_parts[1] if len(trend_parts) > 1 else "EMA20"
-                span = int(ema_str.replace("EMA", ""))
+                # ─── BB + STREAK (No-Gale) ───
+                elif stype == "BB_STREAK":
+                    bb_th = p.get("bb_th", 2.5)
+                    min_run = p.get("min_run", 3)
+                    min_vol = p.get("min_vol", 0.0)
 
-                # Convert HTF string to minutes for aggregator lookup
-                if htf_str.endswith("h"):
-                    htf_min = int(htf_str[:-1]) * 60
-                elif htf_str.endswith("m"):
-                    htf_min = int(htf_str[:-1])
-                else:
-                    htf_min = 15
+                    if bb_z <= -bb_th and cr >= min_run and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                        action = "call"
+                        trigger_detail = f"BBz={bb_z:.2f}<=-{bb_th} | RedStreak={cr}>={min_run} | Vol={vol_ratio_20:.1f}"
+                    elif bb_z >= bb_th and cg >= min_run and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                        action = "put"
+                        trigger_detail = f"BBz={bb_z:.2f}>={bb_th} | GreenStreak={cg}>={min_run} | Vol={vol_ratio_20:.1f}"
 
-                htf_history = self.aggregator.history.get((sym, htf_min), [])
-                if len(htf_history) >= span:
-                    c_htf = [c.close for c in htf_history]
-                    alpha = 2.0 / (span + 1.0)
-                    ema_htf = c_htf[0]
-                    for c_val in c_htf[1:]:
-                        ema_htf = alpha * c_val + (1.0 - alpha) * ema_htf
-                    is_bull = c_htf[-1] > ema_htf
-                    is_bear = c_htf[-1] < ema_htf
-                else:
-                    is_bull = closes[-1] > ma20
-                    is_bear = closes[-1] < ma20
-                    ema_htf = ma20
+                # ─── WICK REJECTION (No-Gale) ───
+                elif stype == "WICK_REJ":
+                    min_wick = p.get("min_wick", 0.5)
+                    max_body = p.get("max_body", 0.3)
+                    bb_th = p.get("bb_th", 0.0)
+                    min_vol = p.get("min_vol", 0.0)
 
-                # RSI on current timeframe
-                deltas = np.diff(closes[-(rsi_p + 30):])
-                gains = np.where(deltas > 0, deltas, 0.0)
-                losses_arr = np.where(deltas < 0, -deltas, 0.0)
-                ag = np.mean(gains[:rsi_p])
-                al = np.mean(losses_arr[:rsi_p])
-                for j in range(rsi_p, len(deltas)):
-                    ag = (ag * (rsi_p - 1) + gains[j]) / rsi_p
-                    al = (al * (rsi_p - 1) + losses_arr[j]) / rsi_p
-                rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+                    bb_ok_call = (bb_th <= 0) or (bb_z <= -bb_th)
+                    bb_ok_put = (bb_th <= 0) or (bb_z >= bb_th)
 
-                if is_bull and rsi_val <= rsi_th and bb_z <= -bb_th and lw >= min_wick and vol_ratio_20 >= min_vol:
-                    action = "call"
-                    trigger_detail = f"{htf_str}Bull(C>{ema_htf:.1f}) | RSI{rsi_p}={rsi_val:.1f}<={rsi_th} | BBz={bb_z:.2f}<=-{bb_th} | Vol={vol_ratio_20:.1f}"
-                elif is_bear and rsi_val >= (100.0 - rsi_th) and bb_z >= bb_th and uw >= min_wick and vol_ratio_20 >= min_vol:
-                    action = "put"
-                    trigger_detail = f"{htf_str}Bear(C<{ema_htf:.1f}) | RSI{rsi_p}={rsi_val:.1f}>={100.0-rsi_th} | BBz={bb_z:.2f}>={bb_th} | Vol={vol_ratio_20:.1f}"
+                    if lw >= min_wick and body_ratio <= max_body and bb_ok_call and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                        action = "call"
+                        trigger_detail = f"LW={lw:.2f}>={min_wick} | Body={body_ratio:.2f}<={max_body} | BBz={bb_z:.2f}"
+                    elif uw >= min_wick and body_ratio <= max_body and bb_ok_put and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                        action = "put"
+                        trigger_detail = f"UW={uw:.2f}>={min_wick} | Body={body_ratio:.2f}<={max_body} | BBz={bb_z:.2f}"
 
-            if action:
-                # Support variable expiry_bars from config (default: 1 bar)
-                expiry_bars = s.params.get("expiry_bars", 1) if hasattr(s, 'params') else 1
-                # Also check top-level expiry_bars on the setup dict during load
-                if hasattr(s, 'expiry_bars'):
-                    expiry_bars = s.expiry_bars
-                signals.append({
-                    "symbol": sym,
-                    "action": action,
-                    "price": closes[-1],
-                    "tf": tf,
-                    "expiry_seconds": tf * 60 * max(expiry_bars, 1),
-                    "confidence": s.wr / 100.0,
-                    "pattern_type": f"{s.type}_{tf}M",
-                    "trigger": f"{s.desc} | {trigger_detail}",
-                    "setup": s
-                })
-                logger.info(f"🎯 [HYBRID SIGNAL] {sym} {action.upper()} on {tf}m bar | WR: {s.wr}% | {s.desc}")
+                # ─── MFI + RSI (No-Gale) ───
+                elif stype == "MFI_RSI":
+                    mfi_th = p.get("mfi_th", 20)
+                    rsi_period = p.get("rsi_period", 5)
+                    rsi_th = p.get("rsi_th", 10)
+                    min_vol = p.get("min_vol", 0.0)
+
+                    deltas = np.diff(closes[-(rsi_period + 30):])
+                    gains = np.where(deltas > 0, deltas, 0.0)
+                    losses_arr = np.where(deltas < 0, -deltas, 0.0)
+                    ag = np.mean(gains[:rsi_period])
+                    al = np.mean(losses_arr[:rsi_period])
+                    for j in range(rsi_period, len(deltas)):
+                        ag = (ag * (rsi_period - 1) + gains[j]) / rsi_period
+                        al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
+                    rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+
+                    if mfi_val <= mfi_th and rsi_val <= rsi_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                        action = "call"
+                        trigger_detail = f"MFI={mfi_val:.1f}<={mfi_th} | RSI{rsi_period}={rsi_val:.1f}<={rsi_th}"
+                    elif mfi_val >= (100 - mfi_th) and rsi_val >= (100 - rsi_th) and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                        action = "put"
+                        trigger_detail = f"MFI={mfi_val:.1f}>={100-mfi_th} | RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th}"
+
+                # ─── HTF TREND PULLBACK (Multi-Bar No-Gale 83%WR 55TPD) ───
+                elif stype == "HTF_PULLBACK":
+                    trend_type = p.get("trend", "15m_EMA20")
+                    rsi_p = int(p.get("rsi_period", 7))
+                    rsi_th = float(p.get("rsi_th", 25.0))
+                    bb_th = float(p.get("bb_th", 2.0))
+                    min_wick = float(p.get("min_wick", 0.0))
+                    min_vol = float(p.get("min_vol", 1.0))
+
+                    # Parse trend string: "15m_EMA20", "30m_EMA20", "1h_EMA50", "4h_EMA50"
+                    trend_parts = trend_type.split("_")
+                    htf_str = trend_parts[0]  # e.g. "15m", "30m", "1h", "4h"
+                    ema_str = trend_parts[1] if len(trend_parts) > 1 else "EMA20"
+                    span = int(ema_str.replace("EMA", ""))
+
+                    # Convert HTF string to minutes for aggregator lookup
+                    if htf_str.endswith("h"):
+                        htf_min = int(htf_str[:-1]) * 60
+                    elif htf_str.endswith("m"):
+                        htf_min = int(htf_str[:-1])
+                    else:
+                        htf_min = 15
+
+                    htf_history = self.aggregator.history.get((sym, htf_min), [])
+                    if len(htf_history) >= span:
+                        c_htf = [c.close for c in htf_history]
+                        alpha = 2.0 / (span + 1.0)
+                        ema_htf = c_htf[0]
+                        for c_val in c_htf[1:]:
+                            ema_htf = alpha * c_val + (1.0 - alpha) * ema_htf
+                        is_bull = c_htf[-1] > ema_htf
+                        is_bear = c_htf[-1] < ema_htf
+                    else:
+                        is_bull = closes[-1] > ma20
+                        is_bear = closes[-1] < ma20
+                        ema_htf = ma20
+
+                    # RSI on current timeframe
+                    deltas = np.diff(closes[-(rsi_p + 30):])
+                    gains = np.where(deltas > 0, deltas, 0.0)
+                    losses_arr = np.where(deltas < 0, -deltas, 0.0)
+                    ag = np.mean(gains[:rsi_p])
+                    al = np.mean(losses_arr[:rsi_p])
+                    for j in range(rsi_p, len(deltas)):
+                        ag = (ag * (rsi_p - 1) + gains[j]) / rsi_p
+                        al = (al * (rsi_p - 1) + losses_arr[j]) / rsi_p
+                    rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+
+                    if is_bull and rsi_val <= rsi_th and bb_z <= -bb_th and lw >= min_wick and vol_ratio_20 >= min_vol:
+                        action = "call"
+                        trigger_detail = f"{htf_str}Bull(C>{ema_htf:.1f}) | RSI{rsi_p}={rsi_val:.1f}<={rsi_th} | BBz={bb_z:.2f}<=-{bb_th} | Vol={vol_ratio_20:.1f}"
+                    elif is_bear and rsi_val >= (100.0 - rsi_th) and bb_z >= bb_th and uw >= min_wick and vol_ratio_20 >= min_vol:
+                        action = "put"
+                        trigger_detail = f"{htf_str}Bear(C<{ema_htf:.1f}) | RSI{rsi_p}={rsi_val:.1f}>={100.0-rsi_th} | BBz={bb_z:.2f}>={bb_th} | Vol={vol_ratio_20:.1f}"
+
+                if action:
+                    # Support variable expiry_bars from config (default: 1 bar)
+                    expiry_bars = s.params.get("expiry_bars", 1) if hasattr(s, 'params') else 1
+                    # Also check top-level expiry_bars on the setup dict during load
+                    if hasattr(s, 'expiry_bars'):
+                        expiry_bars = s.expiry_bars
+                    signals.append({
+                        "symbol": sym,
+                        "action": action,
+                        "price": closes[-1],
+                        "tf": tf,
+                        "expiry_seconds": tf * 60 * max(expiry_bars, 1),
+                        "confidence": s.wr / 100.0,
+                        "pattern_type": f"{s.type}_{tf}M",
+                        "trigger": f"{s.desc} | {trigger_detail}",
+                        "setup": s
+                    })
+                    logger.info(f"🎯 [HYBRID SIGNAL] {sym} {action.upper()} on {tf}m bar | WR: {s.wr}% | {s.desc}")
+            except Exception as e:
+                logger.error(f"Error evaluating setup {getattr(s, 'desc', s)}: {e}")
 
         return signals
