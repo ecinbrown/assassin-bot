@@ -319,9 +319,9 @@ class AssassinController:
         if balance <= 0:
             return max(1.0, self.stake_native)
 
-        strategy_mode = os.environ.get("STRATEGY_MODE", "GALE1_88PCT").upper()
-        is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "85PCT"))
-        is_gale2 = ("GALE2" in strategy_mode or "2GALE" in strategy_mode)
+        strategy_mode = os.environ.get("STRATEGY_MODE", "NOGALE_88PCT").upper()
+        is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "SNIPER", "89PCT", "88PCT", "86PCT", "85PCT", "80PCT")) and not any(x in strategy_mode for x in ("GALE1", "GALE2", "1GALE", "2GALE"))
+        is_gale2 = any(x in strategy_mode for x in ("GALE2", "2GALE", "GALE-2"))
 
         # Default staking pct: 5% for No-Gale, 0.5% for Gale-2, 6.1% for legacy Gale-1
         if is_nogale:
@@ -393,9 +393,9 @@ async def main():
         simulation_mode=simulation_mode
     )
 
-    # 3. Instantiate Signal Engine (supports SNIPER_89PCT, 85PCT_30TPD, GALE1, GALE2, and NOGALE_55TPD modes)
-    strategy_mode = os.environ.get("STRATEGY_MODE", "GALE1_88PCT").upper()
-    is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "SNIPER", "89PCT"))
+    # 3. Instantiate Signal Engine (supports NOGALE_88PCT, NOGALE_86PCT, NOGALE_80PCT, GALE1, GALE2 modes)
+    strategy_mode = os.environ.get("STRATEGY_MODE", "NOGALE_88PCT").upper()
+    is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "SNIPER", "89PCT", "88PCT", "86PCT", "85PCT", "80PCT")) and not any(x in strategy_mode for x in ("GALE1", "GALE2", "1GALE", "2GALE"))
     is_gale2 = any(x in strategy_mode for x in ("GALE2", "2GALE", "GALE-2"))
     if is_nogale:
         max_allowed_gale = 0
@@ -404,31 +404,40 @@ async def main():
     else:
         max_allowed_gale = 1
 
-    if "88PCT" in strategy_mode or "GALE1_88" in strategy_mode:
+    if is_nogale:
+        if any(x in strategy_mode for x in ("20TPD", "80PCT", "BALANCED")):
+            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_80pct_20tpd_config.json")
+            hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+            logger.critical(f"🚀 [STRATEGY MODE: NO-GALE 80% @ 20 TPD] Armed with {len(hybrid_engine.setups)} verified setups (80.42% Direct Flat WR | 19.88 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+        elif any(x in strategy_mode for x in ("12TPD", "10TPD", "84PCT")):
+            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_84pct_12tpd_config.json")
+            hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+            logger.critical(f"🎯 [STRATEGY MODE: NO-GALE 84% @ 12 TPD] Armed with {len(hybrid_engine.setups)} verified setups (84.08% Direct Flat WR | 11.52 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+        elif any(x in strategy_mode for x in ("88PCT", "89PCT", "ULTRA")):
+            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_89pct_ultra_elite_config.json")
+            hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+            logger.critical(f"🏆 [STRATEGY MODE: ULTRA-ELITE NO-GALE 89.4%] Armed with {len(hybrid_engine.setups)} verified setups (89.40% Direct Flat WR | 1.01 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+        elif any(x in strategy_mode for x in ("86PCT", "85PCT", "CONFLUENCE")):
+            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_86pct_high_confluence_config.json")
+            hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+            logger.critical(f"🎯 [STRATEGY MODE: HIGH-CONFLUENCE NO-GALE 85.7%] Armed with {len(hybrid_engine.setups)} verified setups (85.73% Direct Flat WR | 2.04 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+        else:
+            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_80pct_20tpd_config.json")
+            hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+            logger.critical(f"🚀 [STRATEGY MODE: DEFAULT NO-GALE 80% @ 20 TPD] Armed with {len(hybrid_engine.setups)} verified setups (80.42% Direct Flat WR | Zero Martingale)!")
+    elif "88PCT" in strategy_mode or "GALE1_88" in strategy_mode:
         cfg_88 = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale1_88pct_30tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=cfg_88)
         logger.critical(f"🏆 [STRATEGY MODE: 1-GALE 88% 30+ TPD] Armed with {len(hybrid_engine.setups)} setups (69% Base | 88% 1-Gale SeqWR | 32+ TPD | BTC, ETH, BNB, SOL, XRP)!")
-    elif "SNIPER" in strategy_mode or "89PCT" in strategy_mode:
-        cfg_sniper = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_89pct_sniper_config.json")
-        hybrid_engine = HybridSignalEngine(config_path=cfg_sniper)
-        logger.critical(f"🎯 [STRATEGY MODE: SNIPER ZERO-GALE 89.4%] Armed with {len(hybrid_engine.setups)} verified setups (89.44% Direct WR | 360 OOS Trades | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
-    elif "85PCT" in strategy_mode:
-        cfg_85 = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_85pct_30tpd_config.json")
-        hybrid_engine = HybridSignalEngine(config_path=cfg_85)
-        logger.critical(f"🎯 [STRATEGY MODE: 85% 30+ TPD] Armed with {len(hybrid_engine.setups)} verified setups (85%+ WR | 30+ Trades/Day | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
-    elif is_nogale:
-        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_83wr_55tpd_config.json")
-        hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-        logger.critical(f"💰 [STRATEGY MODE: NO-GALE 55TPD] Armed with {len(hybrid_engine.setups)} verified setups (55.6 TPD | 83.3% Direct WR | $32/day/$1 EV | Zero Martingale)!")
     elif is_gale2:
         gale2_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale2_40tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=gale2_cfg)
         logger.critical(f"🚀 [STRATEGY MODE: GALE-2] Armed with {len(hybrid_engine.setups)} verified setups (55.4 TPD | 90.77% 2-Gale Sequence WR | 365d Binance Verified)!")
     else:
-        # Default fallback: same as GALE1_88PCT
-        gale1_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale1_88pct_30tpd_config.json")
-        hybrid_engine = HybridSignalEngine(config_path=gale1_cfg)
-        logger.critical(f"🏆 [STRATEGY MODE: 1-GALE 88%] Armed with {len(hybrid_engine.setups)} setups (69% Base | 88% 1-Gale SeqWR | 32+ TPD | Pure Compounding)!")
+        # Default fallback
+        cfg_fallback = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_89pct_ultra_elite_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=cfg_fallback)
+        logger.critical(f"🏆 [STRATEGY MODE: DEFAULT ZERO-GALE 89.4%] Armed with {len(hybrid_engine.setups)} setups!")
     controller.hybrid_engine = hybrid_engine
     logger.info("⏳ Preloading 1,000 historical candles from Binance to warm up timeframes...")
     try:
