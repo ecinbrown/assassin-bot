@@ -208,6 +208,11 @@ class AssassinController:
         self.pair_loss_lockouts: Dict[str, float] = {}
         self.latest_prices: dict = {}
         self.last_trade_time: float = 0.0
+        # Circuit breaker: 3 consecutive losses → pause 30 min
+        self.consecutive_losses: int = 0
+        self.circuit_breaker_until: float = 0.0
+        self.circuit_breaker_max: int = int(os.environ.get("CIRCUIT_BREAKER_MAX_LOSSES", "3"))
+        self.circuit_breaker_pause_minutes: int = int(os.environ.get("CIRCUIT_BREAKER_PAUSE_MIN", "30"))
         self.last_pair_trade_time: Dict[str, float] = {}
         self.last_pair_strategy: Dict[str, str] = {}
         self.last_strategy_time: Dict[str, float] = {}
@@ -413,10 +418,10 @@ async def main():
             nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_84pct_12tpd_config.json")
             hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
             logger.critical(f"🎯 [STRATEGY MODE: NO-GALE 84% @ 12 TPD] Armed with {len(hybrid_engine.setups)} verified setups (84.08% Direct Flat WR | 11.52 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
-        elif any(x in strategy_mode for x in ("88PCT", "89PCT", "ULTRA")):
-            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_89pct_ultra_elite_config.json")
+        elif any(x in strategy_mode for x in ("88PCT", "89PCT", "ULTRA", "ELITE", "92PCT")):
+            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_88pct_elite_config.json")
             hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-            logger.critical(f"🏆 [STRATEGY MODE: ULTRA-ELITE NO-GALE 89.4%] Armed with {len(hybrid_engine.setups)} verified setups (89.40% Direct Flat WR | 1.01 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+            logger.critical(f"🏆 [STRATEGY MODE: ELITE NO-GALE 92.4%] Armed with {len(hybrid_engine.setups)} verified setups (92.40% Weighted WR | 17.9 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
         elif any(x in strategy_mode for x in ("86PCT", "85PCT", "CONFLUENCE")):
             nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_86pct_high_confluence_config.json")
             hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
@@ -460,6 +465,12 @@ async def main():
     # Restore saved simulated balance if available (auto-heal corrupted negative balance)
     saved_state = load_saved_state()
     loaded_bal = saved_state.get("balance", 20.0)
+    # Use INITIAL_BALANCE env var as fallback when Render wipes bot_state.json on redeploy
+    env_bal = float(os.environ.get("INITIAL_BALANCE", "0"))
+    if loaded_bal == 20.0 and env_bal > 0:
+        # State file was wiped (default 20.0) but we have a known balance from env
+        loaded_bal = env_bal
+        logger.info(f"📦 [STATE RECOVERY] Using INITIAL_BALANCE env var: ${loaded_bal:.4f}")
     prdt_agent.simulated_balance = 15.0 if loaded_bal <= 0 else loaded_bal
     controller.prdt_agent = prdt_agent
 
@@ -505,6 +516,7 @@ async def main():
                         if is_win:
                             controller.wins += 1
                             controller.marts_since_loss += 1
+                            controller.consecutive_losses = 0  # Reset circuit breaker on any win
                             pair_payout = AssassinController.PAIR_PAYOUTS.get(t.symbol, 0.70)
                             gross_payout = round(t.stake_native * (1.0 + pair_payout), 4)
                             seq_profit = round(gross_payout - t.total_sequence_stake, 4)
@@ -550,6 +562,17 @@ async def main():
                             else:
                                 controller.losses += 1
                                 controller.marts_since_loss = 0
+                                controller.consecutive_losses += 1
+
+                                # Circuit breaker: pause trading after N consecutive losses
+                                if controller.consecutive_losses >= controller.circuit_breaker_max:
+                                    pause_seconds = controller.circuit_breaker_pause_minutes * 60
+                                    controller.circuit_breaker_until = time.time() + pause_seconds
+                                    logger.critical(
+                                        f"🛑 [CIRCUIT BREAKER] {controller.consecutive_losses} consecutive losses! "
+                                        f"Pausing ALL trades for {controller.circuit_breaker_pause_minutes} minutes "
+                                        f"(resumes at {time.strftime('%H:%M:%S UTC', time.gmtime(controller.circuit_breaker_until))})"
+                                    )
 
                                 # Queue recovery debt ONLY for Gale modes (strictly disabled in No-Gale)
                                 if max_allowed_gale > 0:
@@ -659,6 +682,12 @@ async def main():
                 logger.info(f"📊 [HYBRID SIGNAL] {s['symbol']} {s['action'].upper()} on {tf}m | {s['trigger']}")
 
         for sig in signals:
+            # Circuit breaker check: skip ALL signals if in cooldown period
+            if time.time() < controller.circuit_breaker_until:
+                remaining_min = (controller.circuit_breaker_until - time.time()) / 60
+                logger.info(f"🛑 [CIRCUIT BREAKER ACTIVE] Skipping {sig.symbol} — {remaining_min:.0f}m remaining in cooldown")
+                continue
+
             # Safeguard 1: Prevent duplicate / overlapping trade sequences on the same symbol
             if sig.symbol in active_symbols:
                 logger.info(f"⏳ [PAIR-BUSY] {sig.symbol} already has an active trade sequence — skipping duplicate")
