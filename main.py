@@ -199,20 +199,9 @@ class AssassinController:
         self.safe_vault_address: str = os.environ.get("SAFE_VAULT_ADDRESS", "")
         self.min_sweep_usd: float = float(os.environ.get("MIN_SWEEP_USD", "2.00"))
 
-        self.is_in_mart_recovery: bool = False
-        self.lost_mart_amount: float = 0.0
         self.active_trades: List[ActiveTrade] = []
-        # Recovery overlay: queue of debts waiting for cooldown then fresh signal
-        self.recovery_queue: List[RecoveryDebt] = []
-        # Post-loss lockout: symbol -> timestamp until which all trades are paused (15m falling-knife protection)
-        self.pair_loss_lockouts: Dict[str, float] = {}
         self.latest_prices: dict = {}
         self.last_trade_time: float = 0.0
-        # Circuit breaker: 3 consecutive losses → pause 30 min
-        self.consecutive_losses: int = 0
-        self.circuit_breaker_until: float = 0.0
-        self.circuit_breaker_max: int = int(os.environ.get("CIRCUIT_BREAKER_MAX_LOSSES", "3"))
-        self.circuit_breaker_pause_minutes: int = int(os.environ.get("CIRCUIT_BREAKER_PAUSE_MIN", "30"))
         self.last_pair_trade_time: Dict[str, float] = {}
         self.last_pair_strategy: Dict[str, str] = {}
         self.last_strategy_time: Dict[str, float] = {}
@@ -315,40 +304,8 @@ class AssassinController:
 
 
     def calculate_dynamic_stake(self, balance: float, symbol: str = "BTCUSDT") -> float:
-        """
-        Dynamic Compounding Model:
-        - Scales base stake to BASE_STAKE_PCT (default: 5% for No-Gale, 0.5% for Gale-2, 6.1% for legacy Gale-1).
-        - Enforces PRDT Pro platform maximum bet caps ($1,000 on BTC, $250 on ETH/BNB/SOL, $100 on XRP/Forex).
-        - Enforces max allowed stake headroom.
-        """
-        if balance <= 0:
-            return max(1.0, self.stake_native)
-
-        strategy_mode = os.environ.get("STRATEGY_MODE", "NOGALE_88PCT").upper()
-        is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "SNIPER", "89PCT", "88PCT", "86PCT", "85PCT", "80PCT")) and not any(x in strategy_mode for x in ("GALE1", "GALE2", "1GALE", "2GALE"))
-        is_gale2 = any(x in strategy_mode for x in ("GALE2", "2GALE", "GALE-2"))
-
-        # Default staking pct: 7.5% for No-Gale, 0.5% for Gale-2, 6.1% for legacy Gale-1
-        if is_nogale:
-            default_pct = 0.075
-            max_multiplier = 1.0  # Zero-Gale: no multiplier headroom needed, allow full platform caps!
-        elif is_gale2:
-            default_pct = 0.005
-            max_multiplier = 4.93
-        else:
-            default_pct = 0.061
-            max_multiplier = 2.22
-
-        raw_pct = float(os.environ.get("BASE_STAKE_PCT", str(default_pct)))
-        base_pct = raw_pct / 100.0 if raw_pct > 1.0 else raw_pct
-        base_stake = max(1.0, round(balance * base_pct, 2))
-
-        # Enforce PRDT platform max bet caps per symbol
-        max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(symbol, 250.0)
-        max_allowed_base = round(max_pool_bet / max_multiplier, 2)
-        base_stake = min(base_stake, max_allowed_base)
-
-        return max(self.stake_native, round(base_stake, 2))
+        """Pure flat stake (default: $1.00 or BASE_STAKE env var)."""
+        return max(1.0, float(os.environ.get("BASE_STAKE", "1.0")))
 
 
 async def main():
@@ -516,19 +473,10 @@ async def main():
                         if is_win:
                             controller.wins += 1
                             controller.marts_since_loss += 1
-                            controller.consecutive_losses = 0  # Reset circuit breaker on any win
                             pair_payout = AssassinController.PAIR_PAYOUTS.get(t.symbol, 0.70)
                             gross_payout = round(t.stake_native * (1.0 + pair_payout), 4)
                             seq_profit = round(gross_payout - t.total_sequence_stake, 4)
                             prdt_agent.simulated_balance = round(prdt_agent.simulated_balance + gross_payout, 4)
-                            if controller.is_in_mart_recovery and controller.lost_mart_amount > 0:
-                                # Micro-recovery deduction: each win recoups 50% of the loss debt
-                                recovered_slice = round(t.stake_native * pair_payout * 0.50, 4)
-                                controller.lost_mart_amount = max(0.0, round(controller.lost_mart_amount - recovered_slice, 4))
-                                if controller.lost_mart_amount <= 0.05:
-                                    controller.is_in_mart_recovery = False
-                                    controller.lost_mart_amount = 0.0
-                                    logger.critical("[INTRADAY RECOVERY] 🎯 All sequence losses fully recovered in the same day!")
                             controller.save_current_state()
                             logger.critical(f"[BG-SETTLER] WIN {t.symbol} {t.action.upper()} {step_name} | Profit: {seq_profit:+.4f} | Bal: {prdt_agent.simulated_balance:.4f}")
                             if tg_bot:
@@ -554,7 +502,7 @@ async def main():
                                     epoch=prdt_agent.get_current_epoch(),
                                     gale_level=next_gale,
                                     total_sequence_stake=round(t.total_sequence_stake + next_stake, 4),
-                                    is_recovery_trade=t.is_recovery_trade,
+                                    is_recovery_trade=False,
                                     strategy_key=t.strategy_key,
                                     indicator_family=t.indicator_family
                                 ))
@@ -562,45 +510,15 @@ async def main():
                             else:
                                 controller.losses += 1
                                 controller.marts_since_loss = 0
-                                controller.consecutive_losses += 1
-
-                                # Circuit breaker: pause trading after N consecutive losses
-                                if controller.consecutive_losses >= controller.circuit_breaker_max:
-                                    pause_seconds = controller.circuit_breaker_pause_minutes * 60
-                                    controller.circuit_breaker_until = time.time() + pause_seconds
-                                    logger.critical(
-                                        f"🛑 [CIRCUIT BREAKER] {controller.consecutive_losses} consecutive losses! "
-                                        f"Pausing ALL trades for {controller.circuit_breaker_pause_minutes} minutes "
-                                        f"(resumes at {time.strftime('%H:%M:%S UTC', time.gmtime(controller.circuit_breaker_until))})"
-                                    )
-
-                                # Queue recovery debt ONLY for Gale modes (strictly disabled in No-Gale)
-                                if max_allowed_gale > 0:
-                                    controller.is_in_mart_recovery = True
-                                    controller.lost_mart_amount = round(controller.lost_mart_amount + t.total_sequence_stake, 4)
-                                    cooldown = 5 if is_gale2 else 3
-                                    controller.recovery_queue.append(RecoveryDebt(
-                                        symbol=t.symbol,
-                                        lost_amount=round(t.total_sequence_stake, 4),
-                                        created_at=time.time(),
-                                        cooldown_bars=cooldown,
-                                        bars_elapsed=0,
-                                        is_ready=False
-                                    ))
-                                    logger.critical(
-                                        f"🔴 [RECOVERY QUEUED] Lost {t.total_sequence_stake:.4f} on {t.symbol} | "
-                                        f"Total debt: {controller.lost_mart_amount:.4f} | "
-                                        f"Recovery will boost next qualifying signal"
-                                    )
                                 controller.save_current_state()
-                                logger.warning(f"[BG-SETTLER] SEQ LOSS {t.symbol} {t.action.upper()} (Gale {t.gale_level}) | Lost: {t.total_sequence_stake:.4f} | Reset to Base stake")
+                                logger.warning(f"[BG-SETTLER] LOSS {t.symbol} {t.action.upper()} (Gale {t.gale_level}) | Lost: {t.total_sequence_stake:.4f}")
                                 if tg_bot:
                                     await tg_bot.send_settlement_alert(
                                         symbol=t.symbol, action=t.action,
                                         entry_price=t.entry_price, exit_price=exit_price,
                                         is_win=False, profit_loss=-t.total_sequence_stake,
                                         new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
-                                        wins=controller.wins, losses=controller.losses, step_info=f"SEQUENCE LOSS (GALE {t.gale_level}) | Recovery in 5 bars"
+                                        wins=controller.wins, losses=controller.losses, step_info=f"LOSS {step_name}"
                                     )
                     else:
                         remaining.append(t)
@@ -642,7 +560,6 @@ async def main():
         # 281 Setups across 19 Timeframes (BB 1.8-3.0σ, Whale, WillR, CCI, Exhaustion, RSI)
         # 40.05 trades/day | 85.03% 1-Gale WR (365d Binance Verified)
         # ═══════════════════════════════════════════════════════════════
-        active_symbols = {t.symbol for t in controller.active_trades}
         signals = []
 
         # Synthesize multi-minute candles from atomic 1m stream
@@ -682,70 +599,8 @@ async def main():
                 logger.info(f"📊 [HYBRID SIGNAL] {s['symbol']} {s['action'].upper()} on {tf}m | {s['trigger']}")
 
         for sig in signals:
-            # Circuit breaker check: skip ALL signals if in cooldown period
-            if time.time() < controller.circuit_breaker_until:
-                remaining_min = (controller.circuit_breaker_until - time.time()) / 60
-                logger.info(f"🛑 [CIRCUIT BREAKER ACTIVE] Skipping {sig.symbol} — {remaining_min:.0f}m remaining in cooldown")
-                continue
-
-            # Safeguard 1: Prevent duplicate / overlapping trade sequences on the same symbol
-            if sig.symbol in active_symbols:
-                logger.info(f"⏳ [PAIR-BUSY] {sig.symbol} already has an active trade sequence — skipping duplicate")
-                continue
-
-            # Safeguard 2: Indicator Collision & Time Spacing (User Rule: identical indicator cannot fire simultaneously; different indicators CAN fire at the exact same second!)
             sig_family = sig.metadata.get("indicator_family", "")
             sig_strat = sig.metadata.get("strategy_key", "")
-            min_indicator_interval = float(os.environ.get("MIN_TRADE_INTERVAL_SECONDS", "0.0"))
-
-            # Check if identical indicator is currently active on the SAME pair only
-            # (Different pairs are allowed to use the same indicator simultaneously for max throughput)
-            colliding_active = [
-                t for t in controller.active_trades
-                if t.symbol == sig.symbol and (
-                    (t.indicator_family and t.indicator_family == sig_family) or
-                    (t.strategy_key and t.strategy_key == sig_strat)
-                )
-            ]
-            if colliding_active:
-                ca = colliding_active[0]
-                logger.info(f"🛡️ [INDICATOR-COLLISION] Skipping {sig.symbol} — identical indicator ({sig_family}) is already active on this pair!")
-                continue
-
-            # Check if this exact indicator fired within the minimum interval (0s / disabled by default)
-            if min_indicator_interval > 0:
-                last_strat_ts = controller.last_strategy_time.get(sig_family, 0.0)
-                time_since_strat = time.time() - last_strat_ts
-                if last_strat_ts > 0 and time_since_strat < min_indicator_interval:
-                    rem = int(min_indicator_interval - time_since_strat)
-                    logger.info(f"⏳ [TIME-SPACING] Skipping {sig.symbol} — indicator ({sig_family}) fired {int(time_since_strat)}s ago (min {int(min_indicator_interval)}s spacing for identical indicator, {rem}s remaining)")
-                    continue
-
-            # Safeguard 4: Same-Pair Simultaneous Collision (User Rule: multiple trades at the exact same second on the same pair must use different indicators)
-            same_pair_simultaneous = [
-                t for t in controller.active_trades
-                if t.symbol == sig.symbol and abs(t.entry_time - time.time()) < 5 and (
-                    (t.indicator_family and t.indicator_family == sig_family) or
-                    (t.strategy_key and t.strategy_key == sig_strat)
-                )
-            ]
-            if same_pair_simultaneous:
-                logger.info(f"🛡️ [SAME-PAIR-COLLISION] Skipping {sig.symbol} — duplicate indicator ({sig_family}) fired at the same second on this pair!")
-                continue
-
-            # Safeguard 6: Gale-Active Lock — only block new entries on the SAME pair that is currently in gale recovery
-            # (Other pairs can trade freely even if one pair is struggling)
-            struggling_gales = [t for t in controller.active_trades if t.action == sig.action.lower() and t.gale_level > 0 and t.symbol == sig.symbol]
-            if struggling_gales:
-                g = struggling_gales[0]
-                logger.info(f"🛡️ [GALE-LOCK] Blocking new {sig.symbol} {sig.action.upper()} — this pair is currently in GALE {g.gale_level} recovery")
-                continue
-
-            pair_trades = [t for t in controller.active_trades if t.symbol == sig.symbol]
-            # Dedup: prevent taking duplicate trades on the exact same second/candle close
-            if any(abs(t.entry_time - time.time()) < 5 and t.action == sig.action.lower() for t in pair_trades):
-                continue
-
             tf_tag = sig.metadata.get('tf', '1m') if hasattr(sig, 'metadata') and sig.metadata else '1m'
             logger.info(f"✅ [HYBRID|{tf_tag}] {sig.symbol} {sig.action.upper()} — Setup triggered!")
 
@@ -757,14 +612,12 @@ async def main():
                 f"Regime={sig.regime} | {sig.trigger}"
             )
 
-            # 1. Execute NORMAL trade via Dynamic Compounding Staking
+            # Flat Stake (default $1.00 or BASE_STAKE env var)
             current_balance = prdt_agent.simulated_balance if controller.simulation_mode else prdt_agent.get_balance()
             trade_stake = controller.calculate_dynamic_stake(current_balance, symbol=sig.symbol)
             success, tx_or_reason = await prdt_agent.execute_trade(sig, stake_native=trade_stake)
             if success:
                 logger.info(f"✅ Trade Executed on PRDT Contract (Stake: {trade_stake} Native | Balance: {current_balance:.4f}): {tx_or_reason}")
-                # Register active trade for automated outcome tracking
-                is_rec = controller.is_in_mart_recovery
                 controller.active_trades.append(ActiveTrade(
                     symbol=sig.symbol,
                     action=sig.action.lower(),
@@ -779,13 +632,8 @@ async def main():
                     strategy_key=sig_strat,
                     indicator_family=sig_family
                 ))
-                active_symbols.add(sig.symbol)
                 controller.last_trade_time = time.time()
                 controller.last_pair_trade_time[sig.symbol] = time.time()
-                controller.last_pair_strategy[sig.symbol] = sig_family or sig_strat
-                controller.last_strategy_time[sig_family] = time.time()
-                if sig_strat:
-                    controller.last_strategy_time[sig_strat] = time.time()
             else:
                 logger.warning(f"⚠️ Trade Execution Failed / Skipped: {tx_or_reason}")
 
