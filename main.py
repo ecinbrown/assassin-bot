@@ -292,8 +292,23 @@ class AssassinController:
 
 
     def calculate_dynamic_stake(self, balance: float, symbol: str = "BTCUSDT") -> float:
-        """Pure flat stake (default: $1.00 or BASE_STAKE env var)."""
-        return max(1.0, float(os.environ.get("BASE_STAKE", "1.0")))
+        """
+        Dynamic Compounding Model:
+        - Scales base stake to 7.5% of active balance (compounds as account grows).
+        - Enforces minimum stake of $1.00.
+        - Enforces platform caps per symbol ($1,000 BTC, $250 ETH/BNB/SOL, $100 XRP).
+        """
+        if balance <= 0:
+            return max(1.0, self.stake_native)
+
+        raw_pct = float(os.environ.get("BASE_STAKE_PCT", "0.075"))
+        base_pct = raw_pct / 100.0 if raw_pct > 1.0 else raw_pct
+        base_stake = max(1.0, round(balance * base_pct, 2))
+
+        max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(symbol, 250.0)
+        base_stake = min(base_stake, max_pool_bet)
+
+        return max(1.0, round(base_stake, 2))
 
 
 async def main():
