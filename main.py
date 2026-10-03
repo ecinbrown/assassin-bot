@@ -673,6 +673,22 @@ async def main():
     await site.start()
     logger.info(f"🌐 HTTP Health server listening on port {port}")
 
+    # 8b. Background Keep-Alive Self-Ping (Pings public Render URL every 4m to prevent free tier spin-down)
+    public_url = os.environ.get("RENDER_EXTERNAL_URL", "https://assassin-sniper.onrender.com")
+    async def keep_alive_worker():
+        await asyncio.sleep(60)
+        while True:
+            try:
+                ping_url = f"{public_url.rstrip('/')}/health"
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(ping_url, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                        logger.info(f"💓 [KEEP-ALIVE] Pinged {ping_url} | Status: {resp.status} (anti-sleep active)")
+            except Exception as e:
+                logger.debug(f"[KEEP-ALIVE] Ping notice: {e}")
+            await asyncio.sleep(240)
+
+    keep_alive_task = asyncio.create_task(keep_alive_worker())
+
     # 9. Start Multi-TF Binance Feed
     feed = BinanceFeed(
         symbols=controller.symbols,
@@ -702,6 +718,7 @@ async def main():
     except KeyboardInterrupt:
         logger.info("Shutting down Assassin Bot...")
     finally:
+        keep_alive_task.cancel()
         claim_task.cancel()
         sweep_task.cancel()
         settler_task.cancel()
