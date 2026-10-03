@@ -157,18 +157,6 @@ class ActiveTrade:
     strategy_key: str = ""
     indicator_family: str = ""
 
-
-@dataclass
-class RecoveryDebt:
-    """Tracks a loss that needs recovery on a specific symbol."""
-    symbol: str
-    lost_amount: float          # Total sequence stake lost
-    created_at: float           # time.time() when loss occurred
-    cooldown_bars: int = 5      # Bars to wait before recovery eligible
-    bars_elapsed: int = 0       # 1m candles seen since loss
-    is_ready: bool = False      # True once cooldown_bars passed
-
-
 class AssassinController:
     """Master controller managing runtime state, mode toggling, and services."""
     def __init__(
@@ -496,14 +484,6 @@ async def main():
 
         controller.latest_prices[symbol] = candle.close
         now = time.time()
-
-        # Tick recovery cooldowns for this symbol
-        for debt in controller.recovery_queue:
-            if debt.symbol == symbol and not debt.is_ready:
-                debt.bars_elapsed += 1
-                if debt.bars_elapsed >= debt.cooldown_bars:
-                    debt.is_ready = True
-                    logger.info(f"🔄 [RECOVERY] {symbol} cooldown complete — next fresh signal triggers recovery trade")
 
         # Route candle to the correct engine's history buffer
         engine = engines.get(interval)
