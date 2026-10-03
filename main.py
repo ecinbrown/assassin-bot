@@ -355,51 +355,30 @@ async def main():
         simulation_mode=simulation_mode
     )
 
-    # 3. Instantiate Signal Engine (supports NOGALE_88PCT, NOGALE_86PCT, NOGALE_80PCT, GALE1, GALE2 modes)
+    # 3. Instantiate Signal Engine (STRICT 100% NO-GALE FLAT BETTING)
     strategy_mode = os.environ.get("STRATEGY_MODE", "NOGALE_88PCT").upper()
-    is_nogale = any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NOGALE", "83WR", "55TPD", "SNIPER", "89PCT", "88PCT", "86PCT", "85PCT", "80PCT")) and not any(x in strategy_mode for x in ("GALE1", "GALE2", "1GALE", "2GALE"))
-    is_gale2 = any(x in strategy_mode for x in ("GALE2", "2GALE", "GALE-2"))
-    if is_nogale:
-        max_allowed_gale = 0
-    elif is_gale2:
-        max_allowed_gale = 2
-    else:
-        max_allowed_gale = 1
+    max_allowed_gale = 0  # STRICT ZERO MARTINGALE
 
-    if is_nogale:
-        if any(x in strategy_mode for x in ("20TPD", "80PCT", "BALANCED")):
-            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_80pct_20tpd_config.json")
-            hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-            logger.critical(f"🚀 [STRATEGY MODE: NO-GALE 80% @ 20 TPD] Armed with {len(hybrid_engine.setups)} verified setups (80.42% Direct Flat WR | 19.88 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
-        elif any(x in strategy_mode for x in ("12TPD", "10TPD", "84PCT")):
-            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_84pct_12tpd_config.json")
-            hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-            logger.critical(f"🎯 [STRATEGY MODE: NO-GALE 84% @ 12 TPD] Armed with {len(hybrid_engine.setups)} verified setups (84.08% Direct Flat WR | 11.52 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
-        elif any(x in strategy_mode for x in ("88PCT", "89PCT", "ULTRA", "ELITE", "92PCT")):
-            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_88pct_elite_config.json")
-            hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-            logger.critical(f"🏆 [STRATEGY MODE: ELITE NO-GALE 92.4%] Armed with {len(hybrid_engine.setups)} verified setups (92.40% Weighted WR | 17.9 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
-        elif any(x in strategy_mode for x in ("86PCT", "85PCT", "CONFLUENCE")):
-            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_86pct_high_confluence_config.json")
-            hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-            logger.critical(f"🎯 [STRATEGY MODE: HIGH-CONFLUENCE NO-GALE 85.7%] Armed with {len(hybrid_engine.setups)} verified setups (85.73% Direct Flat WR | 2.04 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
-        else:
-            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_80pct_20tpd_config.json")
-            hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-            logger.critical(f"🚀 [STRATEGY MODE: DEFAULT NO-GALE 80% @ 20 TPD] Armed with {len(hybrid_engine.setups)} verified setups (80.42% Direct Flat WR | Zero Martingale)!")
-    elif any(x in strategy_mode for x in ("91PCT", "90PCT", "GALE1", "88PCT")):
-        cfg_91 = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale1_91pct_35tpd_config.json")
-        hybrid_engine = HybridSignalEngine(config_path=cfg_91)
-        logger.critical(f"🏆 [STRATEGY MODE: 1-GALE 91.3% @ 37.5 TPD] Armed with {len(hybrid_engine.setups)} setups (93.10% Out-Of-Sample WR | 37.49 TPD | BTC, ETH, BNB, SOL, XRP | Max 1-Gale, Zero Gale-2)!")
-    elif is_gale2:
-        gale2_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale2_40tpd_config.json")
-        hybrid_engine = HybridSignalEngine(config_path=gale2_cfg)
-        logger.critical(f"🚀 [STRATEGY MODE: GALE-2] Armed with {len(hybrid_engine.setups)} verified setups (55.4 TPD | 90.77% 2-Gale Sequence WR | 365d Binance Verified)!")
+    if any(x in strategy_mode for x in ("20TPD", "80PCT", "BALANCED")):
+        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_80pct_20tpd_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+        logger.critical(f"🚀 [STRATEGY MODE: NO-GALE 80% @ 20 TPD] Armed with {len(hybrid_engine.setups)} verified setups (80.42% Direct Flat WR | 19.88 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+    elif any(x in strategy_mode for x in ("12TPD", "10TPD", "84PCT")):
+        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_84pct_12tpd_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+        logger.critical(f"🎯 [STRATEGY MODE: NO-GALE 84% @ 12 TPD] Armed with {len(hybrid_engine.setups)} verified setups (84.08% Direct Flat WR | 11.52 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+    elif any(x in strategy_mode for x in ("88PCT", "89PCT", "ULTRA", "ELITE", "92PCT")):
+        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_88pct_elite_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+        logger.critical(f"🏆 [STRATEGY MODE: ELITE NO-GALE 92.4%] Armed with {len(hybrid_engine.setups)} verified setups (92.40% Weighted WR | 17.9 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+    elif any(x in strategy_mode for x in ("86PCT", "85PCT", "CONFLUENCE")):
+        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_86pct_high_confluence_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+        logger.critical(f"🎯 [STRATEGY MODE: HIGH-CONFLUENCE NO-GALE 85.7%] Armed with {len(hybrid_engine.setups)} verified setups (85.73% Direct Flat WR | 2.04 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
     else:
-        # Default fallback
-        cfg_fallback = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_89pct_ultra_elite_config.json")
-        hybrid_engine = HybridSignalEngine(config_path=cfg_fallback)
-        logger.critical(f"🏆 [STRATEGY MODE: DEFAULT ZERO-GALE 89.4%] Armed with {len(hybrid_engine.setups)} setups!")
+        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_88pct_elite_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+        logger.critical(f"🏆 [STRATEGY MODE: NO-GALE ELITE] Armed with {len(hybrid_engine.setups)} setups (Zero Martingale)!")
     controller.hybrid_engine = hybrid_engine
     logger.info("⏳ Preloading 1,000 historical candles from Binance to warm up timeframes...")
     try:
@@ -488,38 +467,18 @@ async def main():
                                     wins=controller.wins, losses=controller.losses, step_info=f"WIN {step_name}"
                                 )
                         else:
-                            if max_allowed_gale > 0 and t.gale_level < max_allowed_gale:
-                                next_gale = t.gale_level + 1
-                                max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(t.symbol, 250.0)
-                                next_stake = min(round(t.stake_native * 2.22, 4), max_pool_bet)
-                                prdt_agent.simulated_balance = round(prdt_agent.simulated_balance - next_stake, 4)
-                                controller.save_current_state()
-                                trade_duration = t.expiry_time - t.entry_time
-                                remaining.append(ActiveTrade(
-                                    symbol=t.symbol, action=t.action.lower(),
-                                    entry_price=exit_price, stake_native=next_stake,
-                                    entry_time=now, expiry_time=now + trade_duration,
-                                    epoch=prdt_agent.get_current_epoch(),
-                                    gale_level=next_gale,
-                                    total_sequence_stake=round(t.total_sequence_stake + next_stake, 4),
-                                    is_recovery_trade=False,
-                                    strategy_key=t.strategy_key,
-                                    indicator_family=t.indicator_family
-                                ))
-                                logger.critical(f"[BG-SETTLER] GALE {next_gale} triggered {t.symbol} {t.action.upper()} | Stake: {next_stake:.4f} | Total In Seq: {t.total_sequence_stake + next_stake:.4f}")
-                            else:
-                                controller.losses += 1
-                                controller.marts_since_loss = 0
-                                controller.save_current_state()
-                                logger.warning(f"[BG-SETTLER] LOSS {t.symbol} {t.action.upper()} (Gale {t.gale_level}) | Lost: {t.total_sequence_stake:.4f}")
-                                if tg_bot:
-                                    await tg_bot.send_settlement_alert(
-                                        symbol=t.symbol, action=t.action,
-                                        entry_price=t.entry_price, exit_price=exit_price,
-                                        is_win=False, profit_loss=-t.total_sequence_stake,
-                                        new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
-                                        wins=controller.wins, losses=controller.losses, step_info=f"LOSS {step_name}"
-                                    )
+                            controller.losses += 1
+                            controller.marts_since_loss = 0
+                            controller.save_current_state()
+                            logger.warning(f"[BG-SETTLER] LOSS {t.symbol} {t.action.upper()} | Lost: {t.total_sequence_stake:.4f}")
+                            if tg_bot:
+                                await tg_bot.send_settlement_alert(
+                                    symbol=t.symbol, action=t.action,
+                                    entry_price=t.entry_price, exit_price=exit_price,
+                                    is_win=False, profit_loss=-t.total_sequence_stake,
+                                    new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
+                                    wins=controller.wins, losses=controller.losses, step_info="LOSS (0-GALE FLAT)"
+                                )
                     else:
                         remaining.append(t)
                 controller.active_trades = remaining
