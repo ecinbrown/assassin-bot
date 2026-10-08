@@ -709,6 +709,31 @@ async def main():
         logger.warning(f"Historical preload failed ({e}). Will build history from live feed.")
 
 
+    # 9b. Feed Watchdog — detects silent feed death and force-reconnects
+    FEED_SILENCE_TIMEOUT = 300  # 5 minutes without a candle = feed is dead
+    async def feed_watchdog():
+        await asyncio.sleep(120)  # Give feed time to connect and warm up
+        feed.last_message_time = time.time()  # Seed so first check doesn't false-fire
+        while True:
+            await asyncio.sleep(60)
+            silence = time.time() - feed.last_message_time
+            if silence > FEED_SILENCE_TIMEOUT:
+                logger.critical(f"🚨 [FEED WATCHDOG] No candles for {silence:.0f}s — feed is dead! Force-reconnecting...")
+                try:
+                    feed._current_host_idx += 1  # Rotate to next Binance endpoint
+                    if feed._ws and not feed._ws.closed:
+                        await feed._ws.close()
+                    if feed._session and not feed._session.closed:
+                        await feed._session.close()
+                    feed._session = None
+                    feed._ws = None
+                except Exception as e:
+                    logger.warning(f"[FEED WATCHDOG] Cleanup error (ok): {e}")
+                feed.last_message_time = time.time()  # Reset timer
+                logger.info("🔄 [FEED WATCHDOG] Kicked dead socket. Feed loop will auto-reconnect.")
+
+    watchdog_task = asyncio.create_task(feed_watchdog())
+
     try:
         logger.info(f"Armed: {controller.symbols} × {INTERVALS} = {len(controller.symbols) * len(INTERVALS)} channels")
         logger.info(f"Mode: {'🧪 SIMULATION (Demo)' if controller.simulation_mode else '🟢 LIVE ON-CHAIN (Real)'}")
@@ -719,6 +744,7 @@ async def main():
         logger.info("Shutting down Assassin Bot...")
     finally:
         keep_alive_task.cancel()
+        watchdog_task.cancel()
         claim_task.cancel()
         sweep_task.cancel()
         settler_task.cancel()

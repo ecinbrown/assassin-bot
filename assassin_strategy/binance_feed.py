@@ -61,6 +61,7 @@ class BinanceFeed:
             self.intervals = [interval]
         self.on_candle_closed = on_candle_closed
         self.is_running = False
+        self.last_message_time: float = 0.0
         self._session: Optional[aiohttp.ClientSession] = None
         self._ws: Optional[aiohttp.ClientWebSocketResponse] = None
         self._current_host_idx = 0
@@ -134,7 +135,7 @@ class BinanceFeed:
 
             try:
                 session = await self._get_session()
-                async with session.ws_connect(stream_url, heartbeat=25, timeout=aiohttp.ClientTimeout(total=10)) as ws:
+                async with session.ws_connect(stream_url, heartbeat=25, timeout=aiohttp.ClientTimeout(connect=10)) as ws:
                     self._ws = ws
                     logger.info(f"🟢 Binance Multi-TF WebSocket connected! Streaming {total_streams} channels.")
 
@@ -143,6 +144,7 @@ class BinanceFeed:
                             break
 
                         if msg.type == aiohttp.WSMsgType.TEXT:
+                            self.last_message_time = time.time()
                             try:
                                 payload = json.loads(msg.data)
                                 await self._handle_kline_event(payload)
