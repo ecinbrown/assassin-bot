@@ -710,7 +710,7 @@ async def main():
 
 
     # 9b. Feed Watchdog — detects silent feed death and force-reconnects
-    FEED_SILENCE_TIMEOUT = 300  # 5 minutes without a candle = feed is dead
+    FEED_SILENCE_TIMEOUT = 120  # 2 minutes without a candle = feed is dead
     async def feed_watchdog():
         await asyncio.sleep(120)  # Give feed time to connect and warm up
         feed.last_message_time = time.time()  # Seed so first check doesn't false-fire
