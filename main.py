@@ -910,6 +910,61 @@ async def main():
 
     watchdog_task = asyncio.create_task(feed_watchdog())
 
+    # 9c. Trade Liveness Watchdog — alerts you if bot goes silent (no trades in 4h)
+    async def trade_liveness_watchdog():
+        """Telegram alert if no trade fires in 4 hours — catches signal engine death."""
+        await asyncio.sleep(600)  # Give bot 10 min to warm up first
+        last_trade_ping_balance = prdt_agent.simulated_balance
+        no_trade_alert_sent = False
+        daily_summary_hour = -1
+        while True:
+            await asyncio.sleep(900)  # Check every 15 minutes
+            now_local = time.localtime()
+
+            # Daily P&L summary at midnight
+            if now_local.tm_hour == 0 and daily_summary_hour != now_local.tm_mday:
+                daily_summary_hour = now_local.tm_mday
+                bal = prdt_agent.simulated_balance if controller.simulation_mode else prdt_agent.get_balance()
+                if tg_bot:
+                    try:
+                        mode = "📊 DEMO" if controller.simulation_mode else "💰 LIVE"
+                        await tg_bot.send_message(
+                            f"🌙 DAILY SUMMARY [{mode}]\n"
+                            f"💰 Balance: ${bal:.2f}\n"
+                            f"🏆 Total: {controller.wins}W / {controller.losses}L "
+                            f"({controller.wins/(controller.wins+controller.losses)*100:.1f}% WR)\n"
+                            f"📈 Active Trades: {len(controller.active_trades)}\n"
+                            f"Bot is alive and running ✅"
+                        )
+                    except Exception:
+                        pass
+
+            # Alert if no new trades for 4 hours (silent engine death)
+            current_bal = prdt_agent.simulated_balance if controller.simulation_mode else prdt_agent.get_balance()
+            total_trades = controller.wins + controller.losses
+            if total_trades == 0:
+                continue  # Still warming up
+            last_trade_time = controller.last_pair_trade_time
+            if last_trade_time:
+                most_recent = max(last_trade_time.values()) if last_trade_time else 0
+                silence_hours = (time.time() - most_recent) / 3600
+                if silence_hours > 4 and not no_trade_alert_sent:
+                    no_trade_alert_sent = True
+                    if tg_bot:
+                        try:
+                            await tg_bot.send_message(
+                                f"⚠️ [LIVENESS ALERT] No trades for {silence_hours:.1f} hours!\n"
+                                f"Feed may be dead or market too quiet.\n"
+                                f"Balance: ${current_bal:.2f} | Check bot immediately!"
+                            )
+                        except Exception:
+                            pass
+                elif silence_hours <= 4:
+                    no_trade_alert_sent = False  # Reset after trade fires
+
+    liveness_task = asyncio.create_task(trade_liveness_watchdog())
+
+
     try:
         logger.info(f"Armed: {controller.symbols} × {INTERVALS} = {len(controller.symbols) * len(INTERVALS)} channels")
         logger.info(f"Mode: {'🧪 SIMULATION (Demo)' if controller.simulation_mode else '🟢 LIVE ON-CHAIN (Real)'}")
@@ -921,6 +976,7 @@ async def main():
     finally:
         keep_alive_task.cancel()
         watchdog_task.cancel()
+        liveness_task.cancel()
         claim_task.cancel()
         sweep_task.cancel()
         settler_task.cancel()
