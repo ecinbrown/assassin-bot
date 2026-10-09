@@ -269,6 +269,44 @@ class PRDTAgent:
         """
         return await asyncio.to_thread(self._sync_execute_trade, signal, stake_native)
 
+    def get_balance(self) -> float:
+        """Get current wallet balance in native token (BNB/ETH/MATIC)."""
+        if self.simulation_mode:
+            return self.simulated_balance
+        if self.account and self.w3 and self.w3.is_connected():
+            try:
+                balance_wei = self.w3.eth.get_balance(self.account.address)
+                return float(self.w3.from_wei(balance_wei, 'ether'))
+            except Exception as e:
+                logger.warning(f"Failed to fetch on-chain balance: {e}")
+        return 0.0
+
+    def _try_reconnect_rpc(self) -> bool:
+        """Try alternate RPC endpoints if primary is down."""
+        rpc_fallbacks = [
+            "https://bsc-dataseed1.binance.org/",
+            "https://bsc-dataseed2.binance.org/",
+            "https://bsc-dataseed3.binance.org/",
+            "https://bsc-dataseed4.binance.org/",
+            "https://bsc-dataseed1.defibit.io/",
+            "https://bsc-dataseed1.ninicoin.io/",
+        ]
+        from web3 import Web3
+        for rpc in rpc_fallbacks:
+            try:
+                w3 = Web3(Web3.HTTPProvider(rpc, request_kwargs={'timeout': 5}))
+                if w3.is_connected():
+                    self.w3 = w3
+                    if self.contract_address:
+                        checksum_addr = self.w3.to_checksum_address(self.contract_address)
+                        self.contract = self.w3.eth.contract(address=checksum_addr, abi=PRDT_PREDICTION_ABI)
+                    logger.info(f"🔄 [RPC FAILOVER] Reconnected via {rpc}")
+                    return True
+            except Exception:
+                continue
+        logger.error("❌ All RPC endpoints failed")
+        return False
+
     def _sync_execute_trade(self, signal, stake_native: Optional[float] = None) -> Tuple[bool, str]:
         stake = self.calculate_stake(stake_native)
         action = signal.action.lower()  # 'call' or 'put'
@@ -309,18 +347,47 @@ class PRDTAgent:
             self.simulated_balance -= stake
             return True, sim_tx
 
-        # LIVE ON-CHAIN TRANSACTION EXECUTION
+        # ═══════════════════════════════════════════════════════════════
+        # LIVE ON-CHAIN TRANSACTION EXECUTION (WITH SAFETY CHECKS)
+        # ═══════════════════════════════════════════════════════════════
         try:
-            stake_wei = self.w3.to_wei(stake, 'ether')
-            fn = self.contract.functions.betBull(epoch) if action == 'call' else self.contract.functions.betBear(epoch)
+            # FIX 1: RPC health check — try failover if primary is down
+            if not self.w3.is_connected():
+                logger.warning("⚠️ RPC disconnected, attempting failover...")
+                if not self._try_reconnect_rpc():
+                    return False, "All RPC endpoints unreachable"
 
+            # FIX 2: WALLET BALANCE PRE-CHECK — prevent "insufficient funds" reverts
             gas_price = self.w3.eth.gas_price
+            estimated_gas_cost = self.gas_limit * gas_price
+            stake_wei = self.w3.to_wei(stake, 'ether')
+            total_needed_wei = stake_wei + estimated_gas_cost
+
+            balance_wei = self.w3.eth.get_balance(self.account.address)
+            if balance_wei < total_needed_wei:
+                balance_native = float(self.w3.from_wei(balance_wei, 'ether'))
+                needed_native = float(self.w3.from_wei(total_needed_wei, 'ether'))
+                return False, f"Insufficient funds: have {balance_native:.4f}, need {needed_native:.4f} (stake + gas)"
+
+            fn = self.contract.functions.betBull(epoch) if action == 'call' else self.contract.functions.betBear(epoch)
             nonce = self.w3.eth.get_transaction_count(self.account.address)
+
+            # FIX 3: GAS ESTIMATION with fallback
+            try:
+                estimated_gas = fn.estimate_gas({
+                    'from': self.account.address,
+                    'value': stake_wei
+                })
+                # Add 20% buffer to estimated gas
+                gas_to_use = int(estimated_gas * 1.2)
+            except Exception as e:
+                logger.warning(f"⚠️ Gas estimation failed ({e}), using default {self.gas_limit}")
+                gas_to_use = self.gas_limit
 
             tx_params = {
                 'from': self.account.address,
                 'value': stake_wei,
-                'gas': self.gas_limit,
+                'gas': gas_to_use,
                 'gasPrice': int(gas_price * 1.15),  # 15% priority bump for fast inclusion
                 'nonce': nonce,
                 'chainId': self.w3.eth.chain_id
@@ -336,8 +403,20 @@ class PRDTAgent:
 
             logger.critical(
                 f"🚀 [ON-CHAIN TX BROADCAST] Epoch #{epoch} {action.upper()} | "
-                f"Stake: {stake:.4f} Native | TxHash: {tx_hash_hex}"
+                f"Stake: {stake:.4f} Native | Gas: {gas_to_use} | TxHash: {tx_hash_hex}"
             )
+
+            # FIX 4: TX RECEIPT CONFIRMATION — wait up to 30s for on-chain confirmation
+            try:
+                receipt = self.w3.eth.wait_for_transaction_receipt(raw_tx_hash, timeout=30)
+                if receipt.status == 1:
+                    logger.info(f"✅ [TX CONFIRMED] Block #{receipt.blockNumber} | Gas Used: {receipt.gasUsed}")
+                else:
+                    logger.error(f"❌ [TX REVERTED] TxHash: {tx_hash_hex} — contract reverted on-chain")
+                    return False, f"TX reverted on-chain: {tx_hash_hex}"
+            except Exception as e:
+                # Tx might still succeed — log warning but continue
+                logger.warning(f"⚠️ [TX RECEIPT TIMEOUT] Could not confirm in 30s: {e}. Trade may still land.")
 
             # Register entered round for automated settlement claiming
             self.entered_rounds[epoch] = EnteredRound(

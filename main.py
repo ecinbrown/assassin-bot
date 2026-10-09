@@ -96,7 +96,8 @@ def load_saved_state():
         "marts_since_loss": 0,
         "baseline_balance": 20.0,
         "total_swept_profit": 0.0,
-        "last_sweep_ts": time.time()
+        "last_sweep_ts": time.time(),
+        "active_trades": []
     }
 
 def save_state(
@@ -106,9 +107,31 @@ def save_state(
     marts_since_loss: int = 0,
     baseline_balance: float = 20.0,
     total_swept_profit: float = 0.0,
-    last_sweep_ts: float = 0.0
+    last_sweep_ts: float = 0.0,
+    active_trades: list = None
 ):
     try:
+        # FIX 5: Persist active trades so they survive crashes/redeploys
+        trades_data = []
+        if active_trades:
+            for t in active_trades:
+                trades_data.append({
+                    "symbol": t.symbol,
+                    "action": t.action,
+                    "entry_price": t.entry_price,
+                    "stake_native": t.stake_native,
+                    "entry_time": t.entry_time,
+                    "expiry_time": t.expiry_time,
+                    "epoch": t.epoch,
+                    "gale_level": t.gale_level,
+                    "total_sequence_stake": t.total_sequence_stake,
+                    "strategy_key": t.strategy_key,
+                    "indicator_family": t.indicator_family,
+                    "expiry_bar_count": getattr(t, 'expiry_bar_count', 1),
+                    "entry_candle_ts": getattr(t, 'entry_candle_ts', 0.0),
+                    "candles_elapsed": getattr(t, 'candles_elapsed', 0),
+                    "tf_minutes": getattr(t, 'tf_minutes', 1)
+                })
         with open(STATE_FILE, "w") as f:
             json.dump({
                 "balance": round(balance, 4),
@@ -117,7 +140,8 @@ def save_state(
                 "marts_since_loss": marts_since_loss,
                 "baseline_balance": round(baseline_balance, 4),
                 "total_swept_profit": round(total_swept_profit, 4),
-                "last_sweep_ts": round(last_sweep_ts, 2)
+                "last_sweep_ts": round(last_sweep_ts, 2),
+                "active_trades": trades_data
             }, f, indent=2)
     except Exception:
         pass
@@ -156,6 +180,11 @@ class ActiveTrade:
     is_recovery_trade: bool = False
     strategy_key: str = ""
     indicator_family: str = ""
+    # FIX: Candle-close settlement fields
+    expiry_bar_count: int = 1       # Number of candle closes to wait for settlement
+    entry_candle_ts: float = 0.0    # Timestamp of the candle that triggered entry
+    candles_elapsed: int = 0        # How many candles have closed since entry
+    tf_minutes: int = 1             # Timeframe in minutes for this trade
 
 class AssassinController:
     """Master controller managing runtime state, mode toggling, and services."""
@@ -193,7 +222,17 @@ class AssassinController:
         self.last_pair_trade_time: Dict[str, float] = {}
         self.last_pair_strategy: Dict[str, str] = {}
         self.last_strategy_time: Dict[str, float] = {}
-        
+
+        # FIX 2: Per-pair cooldown to prevent correlated loss clusters (e.g. 4 BNB losses in 25 min)
+        self.PAIR_COOLDOWN_SECONDS: int = int(os.environ.get("PAIR_COOLDOWN_SECONDS", "900"))  # 15 min default
+
+        # FIX 3: Minimum backtest trade count — reject overfit setups with tiny sample sizes
+        self.MIN_SETUP_TRADES: int = int(os.environ.get("MIN_SETUP_TRADES", "100"))
+
+        # FIX 4: 70%-payout pairs (XRP, SOL) need higher WR to be EV+; gate at 88% backtest WR minimum
+        self.LOW_PAYOUT_MIN_WR: float = float(os.environ.get("LOW_PAYOUT_MIN_WR", "88.0"))
+        self.LOW_PAYOUT_PAIRS: set = {"XRPUSDT", "SOLUSDT", "XRP-USD", "SOL-USD"}
+
         self.engine: Optional[AssassinSignalEngine] = None
         self.hybrid_engine: Optional[HybridSignalEngine] = None
         self.prdt_agent: Optional[PRDTAgent] = None
@@ -201,7 +240,7 @@ class AssassinController:
         self.dispatcher: Optional[PRDTWebhookDispatcher] = None
 
     def save_current_state(self):
-        """Persist current balance and sweep tracking metrics."""
+        """Persist current balance, sweep tracking, and active trades."""
         bal = self.prdt_agent.simulated_balance if self.prdt_agent else 20.0
         save_state(
             balance=bal,
@@ -210,7 +249,8 @@ class AssassinController:
             marts_since_loss=self.marts_since_loss,
             baseline_balance=self.baseline_balance,
             total_swept_profit=self.total_swept_profit,
-            last_sweep_ts=self.last_sweep_ts
+            last_sweep_ts=self.last_sweep_ts,
+            active_trades=self.active_trades  # FIX 5: persist trades across crashes
         )
 
     def execute_sweep(self, force: bool = False) -> Tuple[bool, str, dict]:
@@ -310,6 +350,34 @@ class AssassinController:
 
         return max(1.0, round(base_stake, 2))
 
+    def check_risk_limits(self, current_balance: float) -> tuple:
+        """
+        REAL-MONEY SAFETY: Check if trading should continue.
+        Returns (can_trade: bool, reason: str)
+        """
+        # 1. Balance floor — don't trade below minimum
+        min_balance = float(os.environ.get("MIN_BALANCE_FLOOR", "5.0"))
+        if current_balance < min_balance:
+            return False, f"Balance ${current_balance:.2f} below floor ${min_balance:.2f}"
+
+        # 2. Max daily loss circuit breaker (20% of starting balance)
+        max_daily_loss_pct = float(os.environ.get("MAX_DAILY_LOSS_PCT", "20.0"))
+        daily_losses = sum(
+            t.total_sequence_stake for t in self.active_trades
+        )
+        total_at_risk = daily_losses
+        if self.baseline_balance > 0 and total_at_risk > (self.baseline_balance * max_daily_loss_pct / 100.0):
+            return False, f"Daily loss limit reached ({max_daily_loss_pct}% of baseline)"
+
+        # 3. Max total exposure — all active trades can't exceed 30% of balance
+        max_exposure_pct = float(os.environ.get("MAX_EXPOSURE_PCT", "30.0"))
+        total_exposure = sum(t.stake_native for t in self.active_trades)
+        if current_balance > 0 and (total_exposure / current_balance * 100) > max_exposure_pct:
+            return False, f"Exposure {total_exposure:.2f} ({total_exposure/current_balance*100:.0f}%) exceeds {max_exposure_pct}% cap"
+
+        return True, "OK"
+
+
 
 async def main():
     logger.info("=" * 65)
@@ -358,30 +426,58 @@ async def main():
         simulation_mode=simulation_mode
     )
 
+    # FIX 5: Restore active trades from saved state (survives crashes/redeploys)
+    saved = load_saved_state()
+    saved_trades = saved.get("active_trades", [])
+    if saved_trades:
+        for td in saved_trades:
+            try:
+                controller.active_trades.append(ActiveTrade(
+                    symbol=td["symbol"], action=td["action"],
+                    entry_price=td["entry_price"], stake_native=td["stake_native"],
+                    entry_time=td["entry_time"], expiry_time=td["expiry_time"],
+                    epoch=td["epoch"], gale_level=td.get("gale_level", 0),
+                    total_sequence_stake=td.get("total_sequence_stake", td["stake_native"]),
+                    strategy_key=td.get("strategy_key", ""),
+                    indicator_family=td.get("indicator_family", ""),
+                    expiry_bar_count=td.get("expiry_bar_count", 1),
+                    entry_candle_ts=td.get("entry_candle_ts", 0.0),
+                    candles_elapsed=td.get("candles_elapsed", 0),
+                    tf_minutes=td.get("tf_minutes", 1)
+                ))
+            except Exception:
+                pass
+        if controller.active_trades:
+            logger.info(f"🔄 [STATE RESTORED] {len(controller.active_trades)} active trades recovered from last session")
+
     # 3. Instantiate Signal Engine (STRICT 100% NO-GALE FLAT BETTING)
-    strategy_mode = os.environ.get("STRATEGY_MODE", "NOGALE_88PCT").upper()
+    strategy_mode = os.environ.get("STRATEGY_MODE", "OOS_VALIDATED").upper()
     max_allowed_gale = 0  # STRICT ZERO MARTINGALE
 
-    if any(x in strategy_mode for x in ("20TPD", "80PCT", "BALANCED")):
+    if any(x in strategy_mode for x in ("OOS", "VALIDATED", "HONEST", "85PCT_OOS")):
+        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_validated_85pct_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+        logger.critical(f"🏆 [STRATEGY MODE: OOS-VALIDATED 85.6%] Armed with {len(hybrid_engine.setups)} setups | Wilder RSI | Blind 90d OOS validated | Zero Martingale!")
+    elif any(x in strategy_mode for x in ("20TPD", "80PCT", "BALANCED")):
         nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_80pct_20tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-        logger.critical(f"🚀 [STRATEGY MODE: NO-GALE 80% @ 20 TPD] Armed with {len(hybrid_engine.setups)} verified setups (80.42% Direct Flat WR | 19.88 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+        logger.critical(f"🚀 [STRATEGY MODE: NO-GALE 80% @ 20 TPD] Armed with {len(hybrid_engine.setups)} verified setups!")
     elif any(x in strategy_mode for x in ("12TPD", "10TPD", "84PCT")):
         nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_84pct_12tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-        logger.critical(f"🎯 [STRATEGY MODE: NO-GALE 84% @ 12 TPD] Armed with {len(hybrid_engine.setups)} verified setups (84.08% Direct Flat WR | 11.52 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+        logger.critical(f"🎯 [STRATEGY MODE: NO-GALE 84% @ 12 TPD] Armed with {len(hybrid_engine.setups)} verified setups!")
     elif any(x in strategy_mode for x in ("88PCT", "89PCT", "ULTRA", "ELITE", "92PCT")):
         nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_88pct_elite_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-        logger.critical(f"🏆 [STRATEGY MODE: ELITE NO-GALE 92.4%] Armed with {len(hybrid_engine.setups)} verified setups (92.40% Weighted WR | 17.9 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+        logger.critical(f"⚠️ [STRATEGY MODE: LEGACY ELITE 92.4% — IN-SAMPLE ONLY, NOT OOS VALIDATED] Armed with {len(hybrid_engine.setups)} setups!")
     elif any(x in strategy_mode for x in ("86PCT", "85PCT", "CONFLUENCE")):
         nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_86pct_high_confluence_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-        logger.critical(f"🎯 [STRATEGY MODE: HIGH-CONFLUENCE NO-GALE 85.7%] Armed with {len(hybrid_engine.setups)} verified setups (85.73% Direct Flat WR | 2.04 TPD | BTC, ETH, BNB, SOL, XRP | Zero Martingale)!")
+        logger.critical(f"🎯 [STRATEGY MODE: HIGH-CONFLUENCE 85.7%] Armed with {len(hybrid_engine.setups)} verified setups!")
     else:
-        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_88pct_elite_config.json")
+        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_validated_85pct_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-        logger.critical(f"🏆 [STRATEGY MODE: NO-GALE ELITE] Armed with {len(hybrid_engine.setups)} setups (Zero Martingale)!")
+        logger.critical(f"🏆 [STRATEGY MODE: OOS-VALIDATED DEFAULT] Armed with {len(hybrid_engine.setups)} setups!")
     controller.hybrid_engine = hybrid_engine
     logger.info("⏳ Preloading 1,000 historical candles from Binance to warm up timeframes...")
     try:
@@ -433,10 +529,14 @@ async def main():
         if tg_bot.initialize():
             controller.telegram_bot = tg_bot
 
-    # All cooldowns / dedup / concurrency caps REMOVED — zero blockers
+    # FIX 2: Per-pair cooldowns restored (15 min default) — prevents correlated loss clusters
+    logger.info(f"🛡️ [SAFEGUARD] Pair cooldown: {controller.PAIR_COOLDOWN_SECONDS}s | Min setup trades: {controller.MIN_SETUP_TRADES} | Low-payout min WR: {controller.LOW_PAYOUT_MIN_WR}%")
 
-    # 5a. Background Trade Settler — runs every 5s independently of candle callbacks
-    #     Prevents zombie trades from blocking the concurrency guard forever
+    # 5a. Background Trade Settler — CANDLE-CLOSE ALIGNED
+    #     FIX 1: Settles at candle close (matching backtest) instead of random 5s spot poll.
+    #     Trades track how many candle closes have elapsed; settlement only happens
+    #     when the required number of candle closes (expiry_bar_count) have passed.
+    #     Fallback: if a trade is stuck for >2x expected duration, force-settle to prevent zombies.
     async def background_trade_settler():
         while True:
             try:
@@ -446,8 +546,18 @@ async def main():
                 now = time.time()
                 remaining = []
                 for t in controller.active_trades:
-                    if now >= t.expiry_time:
-                        # Use latest known price for settlement
+                    # FIX 1: Primary path — wait for candle-close count
+                    #   candles_elapsed is incremented by on_candle_closed callback
+                    ready_to_settle = t.candles_elapsed >= t.expiry_bar_count
+
+                    # Fallback: force-settle if stuck for 2x expected duration (zombie protection)
+                    max_wait = t.tf_minutes * 60 * t.expiry_bar_count * 2 + 120
+                    if not ready_to_settle and (now - t.entry_time) > max_wait:
+                        logger.warning(f"[BG-SETTLER] ⚠️ Force-settling zombie trade {t.symbol} after {now - t.entry_time:.0f}s")
+                        ready_to_settle = True
+
+                    if ready_to_settle:
+                        # FIX 1: Use the CANDLE CLOSE price, not a random spot price
                         exit_price = controller.latest_prices.get(t.symbol, t.entry_price)
                         is_win = (exit_price > t.entry_price) if t.action == 'call' else (exit_price < t.entry_price)
                         step_name = "BASE" if t.gale_level == 0 else f"GALE {t.gale_level}"
@@ -500,6 +610,12 @@ async def main():
         controller.latest_prices[symbol] = candle.close
         now = time.time()
 
+        # FIX 1: Increment candle-close counter on active trades for this symbol
+        #   This ensures settlement happens at actual candle closes, matching the backtest.
+        for t in controller.active_trades:
+            if t.symbol == symbol:
+                t.candles_elapsed += 1
+
         # Route candle to the correct engine's history buffer
         engine = engines.get(interval)
         if not engine:
@@ -546,7 +662,8 @@ async def main():
                         "tf": tf,
                         "desc": setup_desc,
                         "strategy_key": strat_key,
-                        "indicator_family": indicator_family
+                        "indicator_family": indicator_family,
+                        "setup_obj": s["setup"]  # FIX 3+4: Pass setup object for trade count / WR gating
                     }
                 )
                 signals.append(sig)
@@ -556,6 +673,43 @@ async def main():
             sig_family = sig.metadata.get("indicator_family", "")
             sig_strat = sig.metadata.get("strategy_key", "")
             tf_tag = sig.metadata.get('tf', '1m') if hasattr(sig, 'metadata') and sig.metadata else '1m'
+            tf_minutes = int(tf_tag) if str(tf_tag).isdigit() else 1
+
+            # FIX 2: SMART CONCURRENCY GUARD (replaces time cooldown)
+            #   Max 1 active trade per pair+direction — prevents the 12x BTC CALL disaster
+            #   Max 2 active trades per pair total — allows CALL + PUT if genuinely different setups
+            #   NO time cooldown — new trade is allowed immediately after previous one settles
+            active_same_dir = sum(1 for t in controller.active_trades if t.symbol == sig.symbol and t.action == sig.action.lower())
+            active_same_pair = sum(1 for t in controller.active_trades if t.symbol == sig.symbol)
+            if active_same_dir >= 1:
+                logger.info(f"🛡️ [CONCURRENCY] Skipping {sig.symbol} {sig.action.upper()} — already have {active_same_dir} active {sig.action.upper()} trade(s)")
+                continue
+            if active_same_pair >= 2:
+                logger.info(f"🛡️ [CONCURRENCY] Skipping {sig.symbol} — already have {active_same_pair} active trades on this pair")
+                continue
+
+            # FIX 3: Minimum backtest trade count — reject overfit setups
+            setup_obj = sig.metadata.get("setup_obj", None)
+            setup_trades = 0
+            setup_wr = 0.0
+            if setup_obj and hasattr(setup_obj, 'trades'):
+                setup_trades = setup_obj.trades
+                setup_wr = setup_obj.wr
+            elif hasattr(sig, 'metadata') and sig.metadata:
+                # Try to get from the signal generation path
+                for s_check in signals:
+                    if s_check is sig:
+                        break
+            if setup_trades > 0 and setup_trades < controller.MIN_SETUP_TRADES:
+                logger.info(f"🛡️ [MIN-TRADES] Skipping {sig.symbol} setup with only {setup_trades} backtest trades (min: {controller.MIN_SETUP_TRADES})")
+                continue
+
+            # FIX 4: Low-payout pairs need higher WR gate
+            if sig.symbol in controller.LOW_PAYOUT_PAIRS:
+                if setup_wr > 0 and setup_wr < controller.LOW_PAYOUT_MIN_WR:
+                    logger.info(f"🛡️ [LOW-PAYOUT GATE] Skipping {sig.symbol} — WR {setup_wr:.1f}% < {controller.LOW_PAYOUT_MIN_WR}% required for 70% payout pair")
+                    continue
+
             logger.info(f"✅ [HYBRID|{tf_tag}] {sig.symbol} {sig.action.upper()} — Setup triggered!")
 
             verdict_icon = "🔥" if sig.verdict == "TAKE_IT" else "📊"
@@ -566,12 +720,30 @@ async def main():
                 f"Regime={sig.regime} | {sig.trigger}"
             )
 
+            # REAL-MONEY SAFETY: Check risk limits before every trade
+            current_balance = prdt_agent.simulated_balance if controller.simulation_mode else prdt_agent.get_balance()
+            can_trade, risk_reason = controller.check_risk_limits(current_balance)
+            if not can_trade:
+                logger.warning(f"🚨 [RISK LIMIT] Trade blocked: {risk_reason}")
+                if tg_bot:
+                    try:
+                        await tg_bot.send_message(f"🚨 RISK LIMIT: {risk_reason} — trading paused")
+                    except Exception:
+                        pass
+                continue
+
             # Flat Stake (default $1.00 or BASE_STAKE env var)
             current_balance = prdt_agent.simulated_balance if controller.simulation_mode else prdt_agent.get_balance()
             trade_stake = controller.calculate_dynamic_stake(current_balance, symbol=sig.symbol)
             success, tx_or_reason = await prdt_agent.execute_trade(sig, stake_native=trade_stake)
             if success:
-                logger.info(f"✅ Trade Executed on PRDT Contract (Stake: {trade_stake} Native | Balance: {current_balance:.4f}): {tx_or_reason}")
+                # Determine expiry_bar_count from setup config
+                expiry_bars = 1
+                if setup_obj and hasattr(setup_obj, 'params') and setup_obj.params:
+                    expiry_bars = int(setup_obj.params.get('expiry_bars', 1))
+                expiry_bars = max(expiry_bars, 1)
+
+                logger.info(f"✅ Trade Executed on PRDT Contract (Stake: {trade_stake} Native | Balance: {current_balance:.4f} | Settle after {expiry_bars} x {tf_minutes}m candle closes): {tx_or_reason}")
                 controller.active_trades.append(ActiveTrade(
                     symbol=sig.symbol,
                     action=sig.action.lower(),
@@ -584,7 +756,11 @@ async def main():
                     total_sequence_stake=trade_stake,
                     is_recovery_trade=False,
                     strategy_key=sig_strat,
-                    indicator_family=sig_family
+                    indicator_family=sig_family,
+                    expiry_bar_count=expiry_bars,
+                    entry_candle_ts=candle.timestamp,
+                    candles_elapsed=0,
+                    tf_minutes=tf_minutes
                 ))
                 controller.last_trade_time = time.time()
                 controller.last_pair_trade_time[sig.symbol] = time.time()

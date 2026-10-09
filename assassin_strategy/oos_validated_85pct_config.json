@@ -1,0 +1,110 @@
+[
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {"trend": "15m_EMA20", "rsi_period": 5, "rsi_th": 20.0, "bb_th": 2.0, "min_wick": 0.0, "min_vol": 0.0, "expiry_bars": 1},
+    "desc": "BTC 5m HTF_15m_EMA20_RSI5_BB2.0",
+    "wr": 83.87,
+    "trades": 242
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {"trend": "15m_EMA20", "rsi_period": 9, "rsi_th": 25.0, "bb_th": 2.5, "min_wick": 0.0, "min_vol": 0.0, "expiry_bars": 1},
+    "desc": "BTC 5m HTF_15m_EMA20_RSI9_BB2.5",
+    "wr": 87.5,
+    "trades": 115
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {"trend": "15m_EMA20", "rsi_period": 7, "rsi_th": 25.0, "bb_th": 1.5, "min_wick": 0.0, "min_vol": 0.0, "expiry_bars": 1},
+    "desc": "ETH 5m HTF_15m_EMA20_RSI7_BB1.5",
+    "wr": 81.97,
+    "trades": 258
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {"trend": "15m_EMA20", "rsi_period": 7, "rsi_th": 25.0, "bb_th": 2.5, "min_wick": 0.0, "min_vol": 0.0, "expiry_bars": 1},
+    "desc": "ETH 5m HTF_15m_EMA20_RSI7_BB2.5",
+    "wr": 91.67,
+    "trades": 98
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {"trend": "15m_EMA20", "rsi_period": 5, "rsi_th": 20.0, "bb_th": 2.0, "min_wick": 0.0, "min_vol": 1.5, "expiry_bars": 1},
+    "desc": "ETH 5m HTF_15m_EMA20_RSI5_BB2.0_VOL1.5",
+    "wr": 86.67,
+    "trades": 130
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {"trend": "15m_EMA20", "rsi_period": 7, "rsi_th": 25.0, "bb_th": 1.5, "min_wick": 0.0, "min_vol": 0.0, "expiry_bars": 1},
+    "desc": "BNB 5m HTF_15m_EMA20_RSI7_BB1.5",
+    "wr": 81.63,
+    "trades": 200
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {"trend": "15m_EMA20", "rsi_period": 5, "rsi_th": 20.0, "bb_th": 2.0, "min_wick": 0.0, "min_vol": 1.5, "expiry_bars": 1},
+    "desc": "BNB 5m HTF_15m_EMA20_RSI5_BB2.0_VOL1.5",
+    "wr": 81.82,
+    "trades": 95
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {"trend": "30m_EMA20", "rsi_period": 5, "rsi_th": 15.0, "bb_th": 2.5, "min_wick": 0.0, "min_vol": 0.0, "expiry_bars": 1},
+    "desc": "SOL 5m HTF_30m_EMA20_RSI5_BB2.5",
+    "wr": 96.43,
+    "trades": 113
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {"trend": "15m_EMA20", "rsi_period": 5, "rsi_th": 15.0, "bb_th": 2.0, "min_wick": 0.0, "min_vol": 0.0, "expiry_bars": 1},
+    "desc": "SOL 5m HTF_15m_EMA20_RSI5_BB2.0",
+    "wr": 91.30,
+    "trades": 134
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "HTF_PULLBACK",
+    "params": {"trend": "15m_EMA20", "rsi_period": 7, "rsi_th": 20.0, "bb_th": 2.0, "min_wick": 0.0, "min_vol": 1.5, "expiry_bars": 1},
+    "desc": "SOL 3m HTF_15m_EMA20_RSI7_BB2.0_VOL1.5",
+    "wr": 88.89,
+    "trades": 110
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "HTF_PULLBACK",
+    "params": {"trend": "15m_EMA20", "rsi_period": 5, "rsi_th": 15.0, "bb_th": 2.0, "min_wick": 0.0, "min_vol": 1.5, "expiry_bars": 1},
+    "desc": "SOL 3m HTF_15m_EMA20_RSI5_BB2.0_VOL1.5",
+    "wr": 85.71,
+    "trades": 142
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {"trend": "15m_EMA20", "rsi_period": 9, "rsi_th": 25.0, "bb_th": 2.5, "min_wick": 0.0, "min_vol": 0.0, "expiry_bars": 1},
+    "desc": "XRP 5m HTF_15m_EMA20_RSI9_BB2.5",
+    "wr": 81.0,
+    "trades": 85
+  }
+]
