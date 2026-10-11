@@ -1,9 +1,9 @@
 {
-  "balance": 20.0,
+  "balance": 60.67,
   "wins": 0,
   "losses": 0,
   "marts_since_loss": 0,
-  "baseline_balance": 20.0,
+  "baseline_balance": 60.67,
   "total_swept_profit": 0.0,
-  "last_sweep_ts": 0.0
+  "last_sweep_ts": 1791800000.0
 }

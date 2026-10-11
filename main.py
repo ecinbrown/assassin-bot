@@ -454,10 +454,12 @@ async def main():
     strategy_mode = os.environ.get("STRATEGY_MODE", "OOS_VALIDATED").upper()
     max_allowed_gale = 0  # STRICT ZERO MARTINGALE
 
-    if any(x in strategy_mode for x in ("OOS", "VALIDATED", "HONEST", "85PCT_OOS")):
-        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_validated_85pct_config.json")
+    if any(x in strategy_mode for x in ("OOS", "VALIDATED", "HONEST", "85PCT_OOS", "180D", "30TPD")):
+        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_85pct_30tpd_config.json")
+        if not os.path.exists(nogale_cfg):
+            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_validated_85pct_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-        logger.critical(f"🏆 [STRATEGY MODE: OOS-VALIDATED 85.6%] Armed with {len(hybrid_engine.setups)} setups | Wilder RSI | Blind 90d OOS validated | Zero Martingale!")
+        logger.critical(f"🏆 [STRATEGY MODE: OOS-VALIDATED 85.2%] Armed with {len(hybrid_engine.setups)} setups | 180-Day (6M) Holdout Verified | 13 TPD | Zero Martingale!")
     elif any(x in strategy_mode for x in ("20TPD", "80PCT", "BALANCED")):
         nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_80pct_20tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
@@ -475,7 +477,9 @@ async def main():
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
         logger.critical(f"🎯 [STRATEGY MODE: HIGH-CONFLUENCE 85.7%] Armed with {len(hybrid_engine.setups)} verified setups!")
     else:
-        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_validated_85pct_config.json")
+        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_85pct_30tpd_config.json")
+        if not os.path.exists(nogale_cfg):
+            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_validated_85pct_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
         logger.critical(f"🏆 [STRATEGY MODE: OOS-VALIDATED DEFAULT] Armed with {len(hybrid_engine.setups)} setups!")
     controller.hybrid_engine = hybrid_engine
