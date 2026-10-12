@@ -1,51 +1,55 @@
-import urllib.request
-import json
-import sys
+import urllib.request, json, sys
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 API_KEY = "rnd_RK9uAeVwLLn32mgrpbBJCVl9ouT5"
-OWNER_ID = "tea-d8204m7aqgkc738vou6g"
-SERVICE_ID = "srv-d820d5rtqb8s73c4t39g"
+BASE = "https://api.render.com/v1"
+SVC_ID = "srv-d820d5rtqb8s73c4t39g"
 
-sys.stdout.reconfigure(encoding='utf-8')
+def api_get(path):
+    req = urllib.request.Request(f"{BASE}{path}", headers={
+        "Authorization": f"Bearer {API_KEY}", "Accept": "application/json"
+    })
+    return json.loads(urllib.request.urlopen(req).read())
 
-limit = 100
-if len(sys.argv) > 1:
-    limit = int(sys.argv[1])
+# Deploy status
+deploys = api_get(f"/services/{SVC_ID}/deploys?limit=3")
+print("=== DEPLOY STATUS ===")
+for d in deploys:
+    dep = d["deploy"]
+    commit_msg = ""
+    if dep.get("commit"):
+        commit_msg = dep["commit"].get("message", "")[:70]
+    print(f"  Status: {dep['status']} | Created: {dep.get('createdAt','')[:19]}")
+    print(f"  Commit: {commit_msg}")
 
-url = f"https://api.render.com/v1/logs?ownerId={OWNER_ID}&resource={SERVICE_ID}&direction=backward&limit=100"
-headers = {
-    "Authorization": f"Bearer {API_KEY}",
-    "Accept": "application/json"
-}
+# Live logs
+print("\n=== LIVE LOGS (last 80 lines) ===")
+try:
+    # Render logs endpoint
+    log_req = urllib.request.Request(
+        f"{BASE}/services/{SVC_ID}/log-streams",
+        headers={"Authorization": f"Bearer {API_KEY}", "Accept": "application/json"}
+    )
+    logs_raw = urllib.request.urlopen(log_req).read()
+    print(f"Raw response: {logs_raw[:500]}")
+except Exception as e:
+    print(f"Log stream error: {e}")
 
-all_trade_logs = []
-seen_ids = set()
-
-for page in range(10): # up to 1000 lines
-    req = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(req) as resp:
-            data = json.loads(resp.read().decode())
-            logs = data.get("logs", [])
-            if not logs:
-                break
-            for item in logs:
-                msg = item.get("message", "")
-                ts = item.get("timestamp", "")
-                if any(k in msg for k in ["[TRADE]", "[SCORECARD]", "SEQ LOSS", "SEQ WIN", "Trade Executed", "SIMULATION TRADE", "TAKE_IT", "Active Strategy Mode", "Balance:"]):
-                    all_trade_logs.append(f"[{ts}] {msg.strip()}")
-            if not data.get("hasMore"):
-                break
-            next_start = data.get("nextStartTime")
-            if not next_start:
-                break
-            url = f"https://api.render.com/v1/logs?ownerId={OWNER_ID}&resource={SERVICE_ID}&direction=backward&limit=100&startTime={next_start}"
-    except Exception as e:
-        print(f"Error on page {page}: {e}")
-        break
-
-print(f"Found {len(all_trade_logs)} trade-related log entries:")
-for l in reversed(all_trade_logs):
-    print(l)
-
+# Try deploy logs instead
+try:
+    deploys2 = api_get(f"/services/{SVC_ID}/deploys?limit=1")
+    dep_id = deploys2[0]["deploy"]["id"]
+    log_req2 = urllib.request.Request(
+        f"{BASE}/services/{SVC_ID}/deploys/{dep_id}/logs",
+        headers={"Authorization": f"Bearer {API_KEY}", "Accept": "application/json"}
+    )
+    logs2 = json.loads(urllib.request.urlopen(log_req2).read())
+    print(f"\nDeploy logs ({len(logs2)} entries):")
+    for entry in logs2[-50:]:
+        msg = entry.get("message", entry.get("text", str(entry)))
+        ts = entry.get("timestamp", "")[:19]
+        safe_msg = str(msg).encode("ascii", "replace").decode("ascii")[:120]
+        print(f"[{ts}] {safe_msg}")
+except Exception as e:
+    print(f"Deploy log error: {e}")
 

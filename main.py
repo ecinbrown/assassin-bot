@@ -226,11 +226,11 @@ class AssassinController:
         # FIX 2: Per-pair cooldown to prevent correlated loss clusters (e.g. 4 BNB losses in 25 min)
         self.PAIR_COOLDOWN_SECONDS: int = int(os.environ.get("PAIR_COOLDOWN_SECONDS", "900"))  # 15 min default
 
-        # FIX 3: Minimum backtest trade count — reject overfit setups with tiny sample sizes
-        self.MIN_SETUP_TRADES: int = int(os.environ.get("MIN_SETUP_TRADES", "100"))
+        # FIX 3: Minimum backtest trade count — default 0 so verified OOS setups are not silently blocked
+        self.MIN_SETUP_TRADES: int = int(os.environ.get("MIN_SETUP_TRADES", "0"))
 
-        # FIX 4: 70%-payout pairs (XRP, SOL) need higher WR to be EV+; gate at 88% backtest WR minimum
-        self.LOW_PAYOUT_MIN_WR: float = float(os.environ.get("LOW_PAYOUT_MIN_WR", "88.0"))
+        # FIX 4: 70%-payout pairs (XRP, SOL) — gate at 80% OOS verified WR (break-even is 58.8%)
+        self.LOW_PAYOUT_MIN_WR: float = float(os.environ.get("LOW_PAYOUT_MIN_WR", "80.0"))
         self.LOW_PAYOUT_PAIRS: set = {"XRPUSDT", "SOLUSDT", "XRP-USD", "SOL-USD"}
 
         self.engine: Optional[AssassinSignalEngine] = None
@@ -334,10 +334,21 @@ class AssassinController:
     def calculate_dynamic_stake(self, balance: float, symbol: str = "BTCUSDT") -> float:
         """
         Dynamic Compounding Model:
-        - Scales base stake to 7.5% of active balance (compounds as account grows).
+        - Prioritizes BASE_STAKE env var if set (e.g. 1.0 for flat staking).
+        - Scales base stake to 7.5% of active balance if BASE_STAKE not set.
         - Enforces minimum stake of $1.00.
         - Enforces platform caps per symbol ($1,000 BTC, $250 ETH/BNB/SOL, $100 XRP).
         """
+        base_env = os.environ.get("BASE_STAKE")
+        if base_env:
+            try:
+                fixed_stake = float(base_env)
+                if fixed_stake > 0:
+                    max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(symbol, 250.0)
+                    return max(1.0, round(min(fixed_stake, max_pool_bet), 2))
+            except ValueError:
+                pass
+
         if balance <= 0:
             return max(1.0, self.stake_native)
 
@@ -509,7 +520,10 @@ async def main():
     if loaded_bal == 20.0 and env_bal > 0:
         # State file was wiped (default 20.0) but we have a known balance from env
         loaded_bal = env_bal
+        controller.baseline_balance = env_bal
         logger.info(f"📦 [STATE RECOVERY] Using INITIAL_BALANCE env var: ${loaded_bal:.4f}")
+    else:
+        controller.baseline_balance = loaded_bal
     prdt_agent.simulated_balance = 15.0 if loaded_bal <= 0 else loaded_bal
     controller.prdt_agent = prdt_agent
 

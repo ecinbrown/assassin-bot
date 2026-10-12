@@ -138,7 +138,7 @@ class HybridSignalEngine:
         """
         import asyncio, urllib.request, json
 
-        def fetch_sync(sym_str):
+        def fetch_sync(sym_str, iv="1m", lim=limit):
             REST_HOSTS = [
                 "https://api.binance.com/api/v3/klines",
                 "https://data-api.binance.vision/api/v3/klines",
@@ -147,19 +147,19 @@ class HybridSignalEngine:
                 "https://api3.binance.com/api/v3/klines",
             ]
             for host in REST_HOSTS:
-                url = f"{host}?symbol={sym_str}&interval=1m&limit={limit}"
+                url = f"{host}?symbol={sym_str}&interval={iv}&limit={lim}"
                 req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
                 try:
                     with urllib.request.urlopen(req, timeout=8) as resp:
                         if resp.status == 200:
                             return json.loads(resp.read().decode())
                 except Exception as e:
-                    logger.debug(f"Preload from {host} failed for {sym_str}: {e}")
+                    logger.debug(f"Preload from {host} failed for {sym_str} ({iv}): {e}")
             return []
 
         for sym in symbols:
             sym_upper = sym.upper()
-            data = await asyncio.to_thread(fetch_sync, sym_upper)
+            data = await asyncio.to_thread(fetch_sync, sym_upper, "1m", limit)
             if not data:
                 logger.warning(f"⚠️ Failed to preload candles for {sym_upper}")
                 continue
@@ -176,8 +176,27 @@ class HybridSignalEngine:
                 )
                 self.aggregator.update_1m_candle(sym_upper, c)
 
-            counts = [f"{tf}m:{len(self.aggregator.history.get((sym_upper, tf), []))}" for tf in [1, 5, 10, 15, 20, 30] if tf in self.aggregator.timeframes]
-            logger.critical(f"🚀 [PRELOAD COMPLETE] {sym_upper}: {len(data)} 1m candles processed -> Warmed up: {', '.join(counts)}")
+            # Direct HTF warmup so 15m, 30m, 1h (60m), and 4h (240m) EMA indicators have 200 bars immediately
+            htf_map = {"15m": 15, "30m": 30, "1h": 60, "4h": 240}
+            for iv_str, tf_min in htf_map.items():
+                htf_data = await asyncio.to_thread(fetch_sync, sym_upper, iv_str, 200)
+                if htf_data:
+                    candles = [
+                        Candle(
+                            timestamp=float(k[0]) / 1000.0,
+                            open=float(k[1]),
+                            high=float(k[2]),
+                            low=float(k[3]),
+                            close=float(k[4]),
+                            volume=float(k[5]),
+                            trades=float(k[8]) if len(k) > 8 else 1.0
+                        )
+                        for k in htf_data
+                    ]
+                    self.aggregator.history[(sym_upper, tf_min)] = candles[-200:]
+
+            counts = [f"{tf}m:{len(self.aggregator.history.get((sym_upper, tf), []))}" for tf in [1, 5, 10, 15, 30, 60, 240] if tf in self.aggregator.timeframes]
+            logger.critical(f"🚀 [PRELOAD COMPLETE] {sym_upper}: {len(data)} 1m + HTF klines processed -> Warmed up: {', '.join(counts)}")
 
     def load_config(self, path: str):
         with open(path, "r") as f:
@@ -296,7 +315,7 @@ class HybridSignalEngine:
                 e_val = c_vals[0]
                 for cv in c_vals[1:]:
                     e_val = a * cv + (1.0 - a) * e_val
-                return c_vals[-1] > e_val, c_vals[-1] < e_val, htf_s, e_val
+                return (c_vals[-1] > e_val and closes[-1] > e_val), (c_vals[-1] < e_val and closes[-1] < e_val), htf_s, e_val
             else:
                 return closes[-1] > ma20, closes[-1] < ma20, "1m", ma20
 
@@ -574,8 +593,8 @@ class HybridSignalEngine:
                         ema_htf = c_htf[0]
                         for c_val in c_htf[1:]:
                             ema_htf = alpha * c_val + (1.0 - alpha) * ema_htf
-                        is_bull = c_htf[-1] > ema_htf
-                        is_bear = c_htf[-1] < ema_htf
+                        is_bull = (c_htf[-1] > ema_htf) and (closes[-1] > ema_htf)
+                        is_bear = (c_htf[-1] < ema_htf) and (closes[-1] < ema_htf)
                     else:
                         is_bull = closes[-1] > ma20
                         is_bear = closes[-1] < ma20
