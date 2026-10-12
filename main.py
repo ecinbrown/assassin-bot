@@ -333,12 +333,20 @@ class AssassinController:
 
     def calculate_dynamic_stake(self, balance: float, symbol: str = "BTCUSDT") -> float:
         """
-        Dynamic Compounding Model:
-        - Prioritizes BASE_STAKE env var if set (e.g. 1.0 for flat staking).
-        - Scales base stake to 7.5% of active balance if BASE_STAKE not set.
+        Dynamic 7.5% Compounding Model (Strict Zero-Gale):
+        - Scales stake to 7.5% of active balance.
         - Enforces minimum stake of $1.00.
         - Enforces platform caps per symbol ($1,000 BTC, $250 ETH/BNB/SOL, $100 XRP).
         """
+        use_compounding = os.environ.get("COMPOUNDING", "true").lower() in ("true", "1", "yes")
+
+        if use_compounding and balance > 0:
+            raw_pct = float(os.environ.get("BASE_STAKE_PCT", "7.5"))
+            base_pct = raw_pct / 100.0 if raw_pct > 1.0 else raw_pct
+            base_stake = max(1.0, round(balance * base_pct, 2))
+            max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(symbol, 250.0)
+            return max(1.0, round(min(base_stake, max_pool_bet), 2))
+
         base_env = os.environ.get("BASE_STAKE")
         if base_env:
             try:
@@ -352,7 +360,7 @@ class AssassinController:
         if balance <= 0:
             return max(1.0, self.stake_native)
 
-        raw_pct = float(os.environ.get("BASE_STAKE_PCT", "0.075"))
+        raw_pct = float(os.environ.get("BASE_STAKE_PCT", "7.5"))
         base_pct = raw_pct / 100.0 if raw_pct > 1.0 else raw_pct
         base_stake = max(1.0, round(balance * base_pct, 2))
 
