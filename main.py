@@ -229,8 +229,8 @@ class AssassinController:
         # FIX 3: Minimum backtest trade count — default 0 so verified OOS setups are not silently blocked
         self.MIN_SETUP_TRADES: int = int(os.environ.get("MIN_SETUP_TRADES", "0"))
 
-        # FIX 4: 70%-payout pairs (XRP, SOL) — gate at 80% OOS verified WR (break-even is 58.8%)
-        self.LOW_PAYOUT_MIN_WR: float = float(os.environ.get("LOW_PAYOUT_MIN_WR", "80.0"))
+        # FIX 4: Low payout gate (break-even at 70% payout is 58.8%, so 65% is safely positive EV)
+        self.LOW_PAYOUT_MIN_WR: float = float(os.environ.get("LOW_PAYOUT_MIN_WR", "65.0"))
         self.LOW_PAYOUT_PAIRS: set = {"XRPUSDT", "SOLUSDT", "XRP-USD", "SOL-USD"}
 
         self.engine: Optional[AssassinSignalEngine] = None
@@ -734,10 +734,11 @@ async def main():
                 logger.info(f"🛡️ [MIN-TRADES] Skipping {sig.symbol} setup with only {setup_trades} backtest trades (min: {controller.MIN_SETUP_TRADES})")
                 continue
 
-            # FIX 4: Low-payout pairs need higher WR gate
+            # FIX 4: Low-payout pairs need higher WR gate (evaluated against OOS WR)
+            setup_effective_wr = getattr(setup_obj, 'oos_wr', setup_wr) if setup_obj else setup_wr
             if sig.symbol in controller.LOW_PAYOUT_PAIRS:
-                if setup_wr > 0 and setup_wr < controller.LOW_PAYOUT_MIN_WR:
-                    logger.info(f"🛡️ [LOW-PAYOUT GATE] Skipping {sig.symbol} — WR {setup_wr:.1f}% < {controller.LOW_PAYOUT_MIN_WR}% required for 70% payout pair")
+                if setup_effective_wr > 0 and setup_effective_wr < controller.LOW_PAYOUT_MIN_WR:
+                    logger.info(f"🛡️ [LOW-PAYOUT GATE] Skipping {sig.symbol} — WR {setup_effective_wr:.1f}% < {controller.LOW_PAYOUT_MIN_WR}% required")
                     continue
 
             logger.info(f"✅ [HYBRID|{tf_tag}] {sig.symbol} {sig.action.upper()} — Setup triggered!")
