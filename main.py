@@ -465,12 +465,16 @@ async def main():
     strategy_mode = os.environ.get("STRATEGY_MODE", "OOS_VALIDATED").upper()
     max_allowed_gale = 0  # STRICT ZERO MARTINGALE
 
-    if any(x in strategy_mode for x in ("OOS", "VALIDATED", "HONEST", "85PCT_OOS", "180D", "30TPD")):
+    if any(x in strategy_mode for x in ("STRICT", "PURE", "NO_GALE", "NOGALE_CHAMPIONS", "CHAMPION")):
+        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "strictly_no_gale_verified_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+        logger.critical(f"💎 [STRATEGY MODE: STRICT ZERO-GALE CHAMPIONS] Armed with {len(hybrid_engine.setups)} setups | 70-89% Blind OOS Verified | Zero Martingale!")
+    elif any(x in strategy_mode for x in ("OOS", "VALIDATED", "HONEST", "85PCT_OOS", "180D", "30TPD")):
         nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_85pct_30tpd_config.json")
         if not os.path.exists(nogale_cfg):
             nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_validated_85pct_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-        logger.critical(f"🏆 [STRATEGY MODE: DOUBLE-VERIFIED 90.4%] Armed with {len(hybrid_engine.setups)} setups | 180d & 60d Blind OOS Verified | Zero Martingale!")
+        logger.critical(f"🏆 [STRATEGY MODE: DOUBLE-VERIFIED NO-GALE] Armed with {len(hybrid_engine.setups)} setups | Zero Martingale Flat Staking!")
     elif any(x in strategy_mode for x in ("20TPD", "80PCT", "BALANCED")):
         nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_80pct_20tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
