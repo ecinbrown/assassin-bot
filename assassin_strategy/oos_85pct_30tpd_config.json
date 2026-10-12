@@ -1,6 +1,120 @@
 [
   {
     "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 30m RSI5_5_BB2.5_exp3",
+    "wr": 64.0,
+    "trades": 25,
+    "oos_wr": 100.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 30m RSI7_10_BB2.5_exp3",
+    "wr": 63.64,
+    "trades": 33,
+    "oos_wr": 100.0,
+    "oos_trades": 11,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 30m RSI14_15_BB2.0_exp2",
+    "wr": 74.07,
+    "trades": 27,
+    "oos_wr": 91.67,
+    "oos_trades": 12,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 30m RSI14_15_BB2.0_exp3",
+    "wr": 66.67,
+    "trades": 27,
+    "oos_wr": 91.67,
+    "oos_trades": 12,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 20.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 30m RSI14_20_BB2.5_exp3",
+    "wr": 61.76,
+    "trades": 34,
+    "oos_wr": 91.67,
+    "oos_trades": 12,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 10,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 10.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "XRPUSDT 10m RSI14_10_BB2.0_exp2",
+    "wr": 81.82,
+    "trades": 22,
+    "oos_wr": 90.91,
+    "oos_trades": 11,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
     "tf": 20,
     "type": "EXTREME_REVERSAL",
     "params": {
@@ -16,6 +130,63 @@
     "trades": 38,
     "oos_wr": 90.48,
     "oos_trades": 21,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 20m RSI7_10_BB3.0_exp3",
+    "wr": 66.67,
+    "trades": 24,
+    "oos_wr": 90.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 10.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "SOLUSDT 8m RSI14_10_BB2.0_exp1",
+    "wr": 65.38,
+    "trades": 26,
+    "oos_wr": 90.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 12,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 12m RSI7_5_BB2.5_exp2",
+    "wr": 61.9,
+    "trades": 21,
+    "oos_wr": 90.0,
+    "oos_trades": 10,
     "oos_days": 180
   },
   {
@@ -54,6 +225,44 @@
     "trades": 54,
     "oos_wr": 88.0,
     "oos_trades": 25,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 10m RSI7_5_BB2.5_exp3",
+    "wr": 61.76,
+    "trades": 34,
+    "oos_wr": 86.67,
+    "oos_trades": 15,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 20m RSI14_15_BB2.0_exp3",
+    "wr": 76.67,
+    "trades": 30,
+    "oos_wr": 84.62,
+    "oos_trades": 13,
     "oos_days": 180
   },
   {
@@ -156,6 +365,25 @@
     "tf": 30,
     "type": "EXTREME_REVERSAL",
     "params": {
+      "rsi_period": 14,
+      "rsi_th": 20.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 30m RSI14_20_BB2.5_exp2",
+    "wr": 64.71,
+    "trades": 34,
+    "oos_wr": 83.33,
+    "oos_trades": 12,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
       "rsi_period": 3,
       "rsi_th": 5.0,
       "bb_th": 3.0,
@@ -168,6 +396,25 @@
     "trades": 46,
     "oos_wr": 82.61,
     "oos_trades": 23,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 20m RSI5_5_BB2.5_exp3",
+    "wr": 73.33,
+    "trades": 30,
+    "oos_wr": 82.35,
+    "oos_trades": 17,
     "oos_days": 180
   },
   {
@@ -190,6 +437,82 @@
     "oos_days": 180
   },
   {
+    "pair": "XRPUSDT",
+    "tf": 5,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "XRPUSDT 5m RSI5_5_BB3.0_exp2",
+    "wr": 68.0,
+    "trades": 25,
+    "oos_wr": 81.82,
+    "oos_trades": 11,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 30m RSI7_10_BB2.5_exp2",
+    "wr": 66.67,
+    "trades": 33,
+    "oos_wr": 81.82,
+    "oos_trades": 11,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 5,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "XRPUSDT 5m RSI5_5_BB3.0_exp3",
+    "wr": 64.0,
+    "trades": 25,
+    "oos_wr": 81.82,
+    "oos_trades": 11,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 6,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 10.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 6m RSI14_10_BB2.0_exp3",
+    "wr": 68.18,
+    "trades": 22,
+    "oos_wr": 81.25,
+    "oos_trades": 16,
+    "oos_days": 180
+  },
+  {
     "pair": "SOLUSDT",
     "tf": 6,
     "type": "EXTREME_REVERSAL",
@@ -206,6 +529,101 @@
     "trades": 26,
     "oos_wr": 81.25,
     "oos_trades": 16,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 5,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "XRPUSDT 5m RSI7_10_BB3.0_exp3",
+    "wr": 63.16,
+    "trades": 38,
+    "oos_wr": 81.25,
+    "oos_trades": 16,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 30m RSI7_10_BB2.0_exp3",
+    "wr": 63.51,
+    "trades": 74,
+    "oos_wr": 80.65,
+    "oos_trades": 31,
+    "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 1,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 5.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "ETHUSDT 1m RSI14_5_BB2.0_exp3",
+    "wr": 77.27,
+    "trades": 22,
+    "oos_wr": 80.0,
+    "oos_trades": 15,
+    "oos_days": 180
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "SOLUSDT 20m RSI14_15_BB3.0_exp1",
+    "wr": 75.0,
+    "trades": 20,
+    "oos_wr": 80.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 30m RSI5_5_BB2.5_exp2",
+    "wr": 68.0,
+    "trades": 25,
+    "oos_wr": 80.0,
+    "oos_trades": 10,
     "oos_days": 180
   },
   {
@@ -228,6 +646,120 @@
     "oos_days": 180
   },
   {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 10.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "SOLUSDT 6m RSI14_10_BB2.0_exp1",
+    "wr": 66.67,
+    "trades": 21,
+    "oos_wr": 80.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "SOLUSDT 20m RSI14_15_BB3.0_exp3",
+    "wr": 65.0,
+    "trades": 20,
+    "oos_wr": 80.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 10.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "SOLUSDT 8m RSI14_10_BB2.0_exp2",
+    "wr": 61.54,
+    "trades": 26,
+    "oos_wr": 80.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "XRPUSDT 30m RSI7_15_BB3.0_exp2",
+    "wr": 61.54,
+    "trades": 26,
+    "oos_wr": 80.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "BTCUSDT 30m RSI7_15_BB3.0_exp1",
+    "wr": 60.61,
+    "trades": 33,
+    "oos_wr": 80.0,
+    "oos_trades": 15,
+    "oos_days": 180
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 12,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "BNBUSDT 12m RSI7_5_BB2.5_exp3",
+    "wr": 60.0,
+    "trades": 30,
+    "oos_wr": 80.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
     "pair": "BTCUSDT",
     "tf": 12,
     "type": "EXTREME_REVERSAL",
@@ -247,6 +779,44 @@
     "oos_days": 180
   },
   {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 10m RSI14_15_BB2.5_exp2",
+    "wr": 60.87,
+    "trades": 69,
+    "oos_wr": 78.12,
+    "oos_trades": 32,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 20m RSI7_10_BB2.5_exp3",
+    "wr": 69.09,
+    "trades": 55,
+    "oos_wr": 77.78,
+    "oos_trades": 27,
+    "oos_days": 180
+  },
+  {
     "pair": "BNBUSDT",
     "tf": 20,
     "type": "EXTREME_REVERSAL",
@@ -260,6 +830,63 @@
     },
     "desc": "BNBUSDT 20m RSI7_15_BB3.0_exp2",
     "wr": 65.79,
+    "trades": 38,
+    "oos_wr": 77.78,
+    "oos_trades": 18,
+    "oos_days": 180
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "SOLUSDT 20m RSI14_15_BB2.5_exp3",
+    "wr": 63.89,
+    "trades": 36,
+    "oos_wr": 77.78,
+    "oos_trades": 18,
+    "oos_days": 180
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 10.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BNBUSDT 20m RSI5_10_BB3.0_exp3",
+    "wr": 63.16,
+    "trades": 38,
+    "oos_wr": 77.78,
+    "oos_trades": 18,
+    "oos_days": 180
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BNBUSDT 20m RSI7_15_BB3.0_exp3",
+    "wr": 63.16,
     "trades": 38,
     "oos_wr": 77.78,
     "oos_trades": 18,
@@ -301,6 +928,25 @@
     "trades": 70,
     "oos_wr": 77.14,
     "oos_trades": 35,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 10,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "XRPUSDT 10m RSI14_15_BB3.0_exp2",
+    "wr": 77.27,
+    "trades": 22,
+    "oos_wr": 76.92,
+    "oos_trades": 13,
     "oos_days": 180
   },
   {
@@ -358,6 +1004,101 @@
     "trades": 89,
     "oos_wr": 76.92,
     "oos_trades": 39,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 15m RSI14_15_BB2.0_exp2",
+    "wr": 63.64,
+    "trades": 33,
+    "oos_wr": 76.92,
+    "oos_trades": 13,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 8,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 8m RSI14_15_BB2.5_exp3",
+    "wr": 60.0,
+    "trades": 35,
+    "oos_wr": 76.92,
+    "oos_trades": 13,
+    "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "ETHUSDT 30m RSI7_10_BB2.0_exp2",
+    "wr": 62.77,
+    "trades": 94,
+    "oos_wr": 76.74,
+    "oos_trades": 43,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 10m RSI14_15_BB2.0_exp2",
+    "wr": 64.04,
+    "trades": 114,
+    "oos_wr": 76.6,
+    "oos_trades": 47,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 10m RSI14_15_BB2.0_exp3",
+    "wr": 62.28,
+    "trades": 114,
+    "oos_wr": 76.6,
+    "oos_trades": 47,
     "oos_days": 180
   },
   {
@@ -422,6 +1163,44 @@
     "tf": 20,
     "type": "EXTREME_REVERSAL",
     "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "BTCUSDT 20m RSI5_5_BB2.5_exp1",
+    "wr": 63.33,
+    "trades": 30,
+    "oos_wr": 76.47,
+    "oos_trades": 17,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 10.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "BTCUSDT 30m RSI5_10_BB3.0_exp1",
+    "wr": 60.0,
+    "trades": 35,
+    "oos_wr": 76.47,
+    "oos_trades": 17,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
       "rsi_period": 7,
       "rsi_th": 10.0,
       "bb_th": 2.5,
@@ -475,6 +1254,44 @@
     "oos_days": 180
   },
   {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "ETHUSDT 2m RSI7_5_BB3.0_exp1",
+    "wr": 64.62,
+    "trades": 65,
+    "oos_wr": 75.76,
+    "oos_trades": 33,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 20m RSI7_10_BB2.0_exp3",
+    "wr": 63.95,
+    "trades": 172,
+    "oos_wr": 75.68,
+    "oos_trades": 74,
+    "oos_days": 180
+  },
+  {
     "pair": "BTCUSDT",
     "tf": 30,
     "type": "EXTREME_REVERSAL",
@@ -489,6 +1306,139 @@
     "desc": "BTCUSDT 30m RSI14_15_BB2.0_exp1",
     "wr": 70.37,
     "trades": 27,
+    "oos_wr": 75.0,
+    "oos_trades": 12,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 3,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 15m RSI3_5_BB3.0_exp2",
+    "wr": 64.2,
+    "trades": 81,
+    "oos_wr": 75.0,
+    "oos_trades": 36,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 20m RSI5_5_BB2.0_exp3",
+    "wr": 63.37,
+    "trades": 101,
+    "oos_wr": 75.0,
+    "oos_trades": 44,
+    "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "ETHUSDT 30m RSI5_5_BB2.0_exp2",
+    "wr": 61.82,
+    "trades": 55,
+    "oos_wr": 75.0,
+    "oos_trades": 24,
+    "oos_days": 180
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "SOLUSDT 8m RSI7_5_BB2.0_exp2",
+    "wr": 60.94,
+    "trades": 64,
+    "oos_wr": 75.0,
+    "oos_trades": 32,
+    "oos_days": 180
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "SOLUSDT 8m RSI7_5_BB2.0_exp3",
+    "wr": 60.94,
+    "trades": 64,
+    "oos_wr": 75.0,
+    "oos_trades": 32,
+    "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "ETHUSDT 2m RSI7_5_BB3.0_exp1",
+    "wr": 60.87,
+    "trades": 23,
+    "oos_wr": 75.0,
+    "oos_trades": 12,
+    "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "ETHUSDT 2m RSI7_5_BB3.0_exp3",
+    "wr": 60.87,
+    "trades": 23,
     "oos_wr": 75.0,
     "oos_trades": 12,
     "oos_days": 180
@@ -513,6 +1463,25 @@
     "oos_days": 180
   },
   {
+    "pair": "ETHUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "ETHUSDT 30m RSI7_10_BB2.5_exp2",
+    "wr": 60.87,
+    "trades": 46,
+    "oos_wr": 74.07,
+    "oos_trades": 27,
+    "oos_days": 180
+  },
+  {
     "pair": "BTCUSDT",
     "tf": 6,
     "type": "EXTREME_REVERSAL",
@@ -526,6 +1495,25 @@
     },
     "desc": "BTCUSDT 6m RSI7_10_BB3.0_exp3",
     "wr": 67.39,
+    "trades": 46,
+    "oos_wr": 73.91,
+    "oos_trades": 23,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 3,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 30m RSI3_5_BB3.0_exp2",
+    "wr": 60.87,
     "trades": 46,
     "oos_wr": 73.91,
     "oos_trades": 23,
@@ -570,6 +1558,101 @@
     "oos_days": 180
   },
   {
+    "pair": "XRPUSDT",
+    "tf": 1,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "XRPUSDT 1m RSI14_15_BB3.0_exp3",
+    "wr": 61.9,
+    "trades": 42,
+    "oos_wr": 73.68,
+    "oos_trades": 19,
+    "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 1,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 5.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "ETHUSDT 1m RSI14_5_BB2.0_exp2",
+    "wr": 72.73,
+    "trades": 22,
+    "oos_wr": 73.33,
+    "oos_trades": 15,
+    "oos_days": 180
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "BNBUSDT 20m RSI14_15_BB2.5_exp2",
+    "wr": 61.76,
+    "trades": 34,
+    "oos_wr": 73.33,
+    "oos_trades": 15,
+    "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "ETHUSDT 2m RSI7_5_BB2.5_exp3",
+    "wr": 61.11,
+    "trades": 54,
+    "oos_wr": 73.33,
+    "oos_trades": 30,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 30m RSI7_15_BB3.0_exp2",
+    "wr": 60.61,
+    "trades": 33,
+    "oos_wr": 73.33,
+    "oos_trades": 15,
+    "oos_days": 180
+  },
+  {
     "pair": "BTCUSDT",
     "tf": 1,
     "type": "EXTREME_REVERSAL",
@@ -609,6 +1692,44 @@
   },
   {
     "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 30m RSI5_15_BB3.0_exp2",
+    "wr": 60.27,
+    "trades": 73,
+    "oos_wr": 72.97,
+    "oos_trades": 37,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 10,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 10.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "XRPUSDT 10m RSI14_10_BB2.0_exp3",
+    "wr": 77.27,
+    "trades": 22,
+    "oos_wr": 72.73,
+    "oos_trades": 11,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
     "tf": 2,
     "type": "EXTREME_REVERSAL",
     "params": {
@@ -624,6 +1745,25 @@
     "trades": 50,
     "oos_wr": 72.73,
     "oos_trades": 33,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 10,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 10.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "XRPUSDT 10m RSI14_10_BB2.0_exp1",
+    "wr": 72.73,
+    "trades": 22,
+    "oos_wr": 72.73,
+    "oos_trades": 11,
     "oos_days": 180
   },
   {
@@ -647,6 +1787,44 @@
   },
   {
     "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 30m RSI5_5_BB3.0_exp2",
+    "wr": 66.67,
+    "trades": 21,
+    "oos_wr": 72.73,
+    "oos_trades": 11,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 12,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "XRPUSDT 12m RSI7_10_BB3.0_exp3",
+    "wr": 66.67,
+    "trades": 21,
+    "oos_wr": 72.73,
+    "oos_trades": 11,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
     "tf": 3,
     "type": "EXTREME_REVERSAL",
     "params": {
@@ -662,6 +1840,139 @@
     "trades": 46,
     "oos_wr": 72.73,
     "oos_trades": 22,
+    "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "ETHUSDT 2m RSI7_5_BB3.0_exp3",
+    "wr": 64.62,
+    "trades": 65,
+    "oos_wr": 72.73,
+    "oos_trades": 33,
+    "oos_days": 180
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 12,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "SOLUSDT 12m RSI7_5_BB2.0_exp3",
+    "wr": 61.9,
+    "trades": 21,
+    "oos_wr": 72.73,
+    "oos_trades": 11,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 12,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "XRPUSDT 12m RSI7_10_BB3.0_exp1",
+    "wr": 61.9,
+    "trades": 21,
+    "oos_wr": 72.73,
+    "oos_trades": 11,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 12,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "XRPUSDT 12m RSI7_10_BB3.0_exp2",
+    "wr": 61.9,
+    "trades": 21,
+    "oos_wr": 72.73,
+    "oos_trades": 11,
+    "oos_days": 180
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 10,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BNBUSDT 10m RSI5_5_BB3.0_exp3",
+    "wr": 60.87,
+    "trades": 23,
+    "oos_wr": 72.73,
+    "oos_trades": 11,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 5,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "XRPUSDT 5m RSI5_5_BB3.0_exp1",
+    "wr": 60.0,
+    "trades": 25,
+    "oos_wr": 72.73,
+    "oos_trades": 11,
+    "oos_days": 180
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 12,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 10.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BNBUSDT 12m RSI5_10_BB3.0_exp3",
+    "wr": 60.87,
+    "trades": 69,
+    "oos_wr": 72.41,
+    "oos_trades": 29,
     "oos_days": 180
   },
   {
@@ -703,6 +2014,120 @@
     "oos_days": 180
   },
   {
+    "pair": "SOLUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "SOLUSDT 20m RSI14_15_BB2.5_exp2",
+    "wr": 63.89,
+    "trades": 36,
+    "oos_wr": 72.22,
+    "oos_trades": 18,
+    "oos_days": 180
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 10.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BNBUSDT 20m RSI5_10_BB3.0_exp2",
+    "wr": 63.16,
+    "trades": 38,
+    "oos_wr": 72.22,
+    "oos_trades": 18,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 15m RSI5_15_BB3.0_exp2",
+    "wr": 63.03,
+    "trades": 119,
+    "oos_wr": 72.22,
+    "oos_trades": 54,
+    "oos_days": 180
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 12,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "SOLUSDT 12m RSI7_5_BB2.0_exp3",
+    "wr": 61.76,
+    "trades": 34,
+    "oos_wr": 72.22,
+    "oos_trades": 18,
+    "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 10.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "ETHUSDT 20m RSI5_10_BB3.0_exp1",
+    "wr": 62.03,
+    "trades": 79,
+    "oos_wr": 72.09,
+    "oos_trades": 43,
+    "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "ETHUSDT 30m RSI7_10_BB2.0_exp3",
+    "wr": 60.64,
+    "trades": 94,
+    "oos_wr": 72.09,
+    "oos_trades": 43,
+    "oos_days": 180
+  },
+  {
     "pair": "XRPUSDT",
     "tf": 6,
     "type": "EXTREME_REVERSAL",
@@ -719,6 +2144,63 @@
     "trades": 92,
     "oos_wr": 72.0,
     "oos_trades": 50,
+    "oos_days": 180
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "SOLUSDT 8m RSI7_5_BB2.0_exp1",
+    "wr": 62.5,
+    "trades": 64,
+    "oos_wr": 71.88,
+    "oos_trades": 32,
+    "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "ETHUSDT 20m RSI7_15_BB3.0_exp1",
+    "wr": 61.33,
+    "trades": 75,
+    "oos_wr": 71.79,
+    "oos_trades": 39,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "XRPUSDT 20m RSI7_5_BB2.0_exp2",
+    "wr": 75.0,
+    "trades": 24,
+    "oos_wr": 71.43,
+    "oos_trades": 14,
     "oos_days": 180
   },
   {
@@ -798,6 +2280,101 @@
     "oos_days": 180
   },
   {
+    "pair": "BNBUSDT",
+    "tf": 12,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "BNBUSDT 12m RSI7_15_BB3.0_exp3",
+    "wr": 61.76,
+    "trades": 68,
+    "oos_wr": 71.43,
+    "oos_trades": 28,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "BTCUSDT 20m RSI5_5_BB2.5_exp1",
+    "wr": 61.43,
+    "trades": 70,
+    "oos_wr": 71.43,
+    "oos_trades": 35,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "BTCUSDT 20m RSI5_5_BB3.0_exp1",
+    "wr": 60.53,
+    "trades": 38,
+    "oos_wr": 71.43,
+    "oos_trades": 21,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 20m RSI5_5_BB3.0_exp2",
+    "wr": 60.53,
+    "trades": 38,
+    "oos_wr": 71.43,
+    "oos_trades": 21,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 6,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 6m RSI5_5_BB3.0_exp2",
+    "wr": 60.0,
+    "trades": 80,
+    "oos_wr": 71.43,
+    "oos_trades": 42,
+    "oos_days": 180
+  },
+  {
     "pair": "BTCUSDT",
     "tf": 30,
     "type": "EXTREME_REVERSAL",
@@ -817,6 +2394,25 @@
     "oos_days": 180
   },
   {
+    "pair": "XRPUSDT",
+    "tf": 12,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 10.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "XRPUSDT 12m RSI5_10_BB3.0_exp1",
+    "wr": 64.18,
+    "trades": 67,
+    "oos_wr": 71.05,
+    "oos_trades": 38,
+    "oos_days": 180
+  },
+  {
     "pair": "ETHUSDT",
     "tf": 1,
     "type": "EXTREME_REVERSAL",
@@ -833,6 +2429,25 @@
     "trades": 89,
     "oos_wr": 70.91,
     "oos_trades": 55,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 8,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 8m RSI14_15_BB2.0_exp2",
+    "wr": 61.54,
+    "trades": 65,
+    "oos_wr": 70.83,
+    "oos_trades": 24,
     "oos_days": 180
   },
   {
@@ -893,25 +2508,6 @@
     "oos_days": 180
   },
   {
-    "pair": "BNBUSDT",
-    "tf": 30,
-    "type": "EXTREME_REVERSAL",
-    "params": {
-      "rsi_period": 3,
-      "rsi_th": 5.0,
-      "bb_th": 3.0,
-      "min_vol": 1.2,
-      "min_wick": 0.2,
-      "expiry_bars": 2
-    },
-    "desc": "BNBUSDT 30m RSI3_5_BB3.0_exp2",
-    "wr": 65.71,
-    "trades": 35,
-    "oos_wr": 70.59,
-    "oos_trades": 17,
-    "oos_days": 180
-  },
-  {
     "pair": "XRPUSDT",
     "tf": 20,
     "type": "EXTREME_REVERSAL",
@@ -931,22 +2527,364 @@
     "oos_days": 180
   },
   {
+    "pair": "ETHUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "ETHUSDT 30m RSI14_15_BB2.0_exp2",
+    "wr": 61.76,
+    "trades": 34,
+    "oos_wr": 70.59,
+    "oos_trades": 17,
+    "oos_days": 180
+  },
+  {
     "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 30m RSI5_5_BB2.5_exp2",
+    "wr": 61.36,
+    "trades": 44,
+    "oos_wr": 70.59,
+    "oos_trades": 17,
+    "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "ETHUSDT 30m RSI5_5_BB2.5_exp3",
+    "wr": 60.71,
+    "trades": 28,
+    "oos_wr": 70.59,
+    "oos_trades": 17,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 10.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 30m RSI5_10_BB3.0_exp2",
+    "wr": 60.0,
+    "trades": 35,
+    "oos_wr": 70.59,
+    "oos_trades": 17,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "BTCUSDT 20m RSI7_10_BB2.5_exp1",
+    "wr": 63.64,
+    "trades": 55,
+    "oos_wr": 70.37,
+    "oos_trades": 27,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 20.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 15m RSI7_20_BB3.0_exp2",
+    "wr": 62.07,
+    "trades": 116,
+    "oos_wr": 70.37,
+    "oos_trades": 54,
+    "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "ETHUSDT 30m RSI7_10_BB2.5_exp3",
+    "wr": 60.87,
+    "trades": 46,
+    "oos_wr": 70.37,
+    "oos_trades": 27,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "BTCUSDT 30m RSI5_15_BB3.0_exp1",
+    "wr": 64.38,
+    "trades": 73,
+    "oos_wr": 70.27,
+    "oos_trades": 37,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 12,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "XRPUSDT 12m RSI7_15_BB3.0_exp1",
+    "wr": 64.18,
+    "trades": 67,
+    "oos_wr": 70.27,
+    "oos_trades": 37,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 10.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 30m RSI5_10_BB2.5_exp2",
+    "wr": 64.76,
+    "trades": 105,
+    "oos_wr": 70.21,
+    "oos_trades": 47,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
     "tf": 1,
     "type": "EXTREME_REVERSAL",
     "params": {
       "rsi_period": 14,
       "rsi_th": 10.0,
       "bb_th": 2.5,
-      "min_vol": 1.2,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 3
+    },
+    "desc": "XRPUSDT 1m RSI14_10_BB2.5_exp3",
+    "wr": 79.17,
+    "trades": 24,
+    "oos_wr": 70.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 1,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 10.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 1
+    },
+    "desc": "XRPUSDT 1m RSI14_10_BB2.5_exp1",
+    "wr": 75.0,
+    "trades": 24,
+    "oos_wr": 70.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
       "min_wick": 0.2,
       "expiry_bars": 2
     },
-    "desc": "BTCUSDT 1m RSI14_10_BB2.5_exp2",
-    "wr": 70.21,
-    "trades": 47,
+    "desc": "BTCUSDT 4m RSI14_15_BB3.0_exp2",
+    "wr": 72.73,
+    "trades": 22,
     "oos_wr": 70.0,
-    "oos_trades": 20,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 20,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 2
+    },
+    "desc": "SOLUSDT 20m RSI14_15_BB3.0_exp2",
+    "wr": 70.0,
+    "trades": 20,
+    "oos_wr": 70.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 12,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "XRPUSDT 12m RSI7_5_BB2.0_exp2",
+    "wr": 70.0,
+    "trades": 20,
+    "oos_wr": 70.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15.0,
+      "bb_th": 2.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "BNBUSDT 30m RSI14_15_BB2.0_exp1",
+    "wr": 67.86,
+    "trades": 28,
+    "oos_wr": 70.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 10.0,
+      "bb_th": 3.0,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 3
+    },
+    "desc": "BTCUSDT 3m RSI14_10_BB3.0_exp3",
+    "wr": 66.67,
+    "trades": 21,
+    "oos_wr": 70.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 12,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "BTCUSDT 12m RSI7_5_BB2.5_exp1",
+    "wr": 66.67,
+    "trades": 21,
+    "oos_wr": 70.0,
+    "oos_trades": 10,
+    "oos_days": 180
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "SOLUSDT 8m RSI7_5_BB2.5_exp2",
+    "wr": 66.67,
+    "trades": 21,
+    "oos_wr": 70.0,
+    "oos_trades": 10,
     "oos_days": 180
   },
   {
@@ -1007,179 +2945,65 @@
     "oos_days": 180
   },
   {
-    "pair": "SOLUSDT",
-    "tf": 30,
-    "type": "EXTREME_REVERSAL",
-    "params": {
-      "rsi_period": 5,
-      "rsi_th": 10.0,
-      "bb_th": 3.0,
-      "min_vol": 1.2,
-      "min_wick": 0.2,
-      "expiry_bars": 1
-    },
-    "desc": "SOLUSDT 30m RSI5_10_BB3.0_exp1",
-    "wr": 65.71,
-    "trades": 35,
-    "oos_wr": 70.0,
-    "oos_trades": 20,
-    "oos_days": 180
-  },
-  {
     "pair": "XRPUSDT",
     "tf": 1,
     "type": "EXTREME_REVERSAL",
     "params": {
-      "rsi_period": 7,
-      "rsi_th": 5.0,
+      "rsi_period": 14,
+      "rsi_th": 15.0,
       "bb_th": 3.0,
       "min_vol": 0.0,
       "min_wick": 0.0,
       "expiry_bars": 1
     },
-    "desc": "XRPUSDT 1m RSI7_5_BB3.0_exp1",
-    "wr": 73.53,
-    "trades": 68,
-    "oos_wr": 69.7,
-    "oos_trades": 33,
+    "desc": "XRPUSDT 1m RSI14_15_BB3.0_exp1",
+    "wr": 64.74,
+    "trades": 156,
+    "oos_wr": 70.0,
+    "oos_trades": 80,
     "oos_days": 180
   },
   {
     "pair": "BTCUSDT",
-    "tf": 20,
-    "type": "EXTREME_REVERSAL",
-    "params": {
-      "rsi_period": 14,
-      "rsi_th": 15.0,
-      "bb_th": 2.0,
-      "min_vol": 0.0,
-      "min_wick": 0.2,
-      "expiry_bars": 2
-    },
-    "desc": "BTCUSDT 20m RSI14_15_BB2.0_exp2",
-    "wr": 66.67,
-    "trades": 30,
-    "oos_wr": 69.23,
-    "oos_trades": 13,
-    "oos_days": 180
-  },
-  {
-    "pair": "XRPUSDT",
-    "tf": 10,
-    "type": "EXTREME_REVERSAL",
-    "params": {
-      "rsi_period": 14,
-      "rsi_th": 20.0,
-      "bb_th": 3.0,
-      "min_vol": 0.0,
-      "min_wick": 0.2,
-      "expiry_bars": 2
-    },
-    "desc": "XRPUSDT 10m RSI14_20_BB3.0_exp2",
-    "wr": 73.08,
-    "trades": 26,
-    "oos_wr": 68.75,
-    "oos_trades": 16,
-    "oos_days": 180
-  },
-  {
-    "pair": "XRPUSDT",
-    "tf": 10,
-    "type": "EXTREME_REVERSAL",
-    "params": {
-      "rsi_period": 14,
-      "rsi_th": 20.0,
-      "bb_th": 3.0,
-      "min_vol": 0.0,
-      "min_wick": 0.2,
-      "expiry_bars": 1
-    },
-    "desc": "XRPUSDT 10m RSI14_20_BB3.0_exp1",
-    "wr": 69.23,
-    "trades": 26,
-    "oos_wr": 68.75,
-    "oos_trades": 16,
-    "oos_days": 180
-  },
-  {
-    "pair": "XRPUSDT",
-    "tf": 10,
-    "type": "EXTREME_REVERSAL",
-    "params": {
-      "rsi_period": 14,
-      "rsi_th": 20.0,
-      "bb_th": 3.0,
-      "min_vol": 0.0,
-      "min_wick": 0.2,
-      "expiry_bars": 3
-    },
-    "desc": "XRPUSDT 10m RSI14_20_BB3.0_exp3",
-    "wr": 69.23,
-    "trades": 26,
-    "oos_wr": 68.75,
-    "oos_trades": 16,
-    "oos_days": 180
-  },
-  {
-    "pair": "XRPUSDT",
-    "tf": 10,
+    "tf": 3,
     "type": "EXTREME_REVERSAL",
     "params": {
       "rsi_period": 7,
       "rsi_th": 5.0,
       "bb_th": 2.5,
       "min_vol": 0.0,
-      "min_wick": 0.0,
-      "expiry_bars": 2
+      "min_wick": 0.2,
+      "expiry_bars": 3
     },
-    "desc": "XRPUSDT 10m RSI7_5_BB2.5_exp2",
-    "wr": 65.52,
-    "trades": 29,
-    "oos_wr": 68.75,
-    "oos_trades": 16,
+    "desc": "BTCUSDT 3m RSI7_5_BB2.5_exp3",
+    "wr": 62.16,
+    "trades": 37,
+    "oos_wr": 70.0,
+    "oos_trades": 20,
     "oos_days": 180
   },
   {
     "pair": "SOLUSDT",
-    "tf": 1,
+    "tf": 8,
     "type": "EXTREME_REVERSAL",
     "params": {
       "rsi_period": 7,
       "rsi_th": 5.0,
-      "bb_th": 3.0,
+      "bb_th": 2.5,
       "min_vol": 0.0,
       "min_wick": 0.2,
-      "expiry_bars": 2
+      "expiry_bars": 1
     },
-    "desc": "SOLUSDT 1m RSI7_5_BB3.0_exp2",
-    "wr": 67.74,
-    "trades": 31,
-    "oos_wr": 68.42,
-    "oos_trades": 19,
+    "desc": "SOLUSDT 8m RSI7_5_BB2.5_exp1",
+    "wr": 61.9,
+    "trades": 21,
+    "oos_wr": 70.0,
+    "oos_trades": 10,
     "oos_days": 180
   },
   {
-    "pair": "SOLUSDT",
-    "tf": 1,
-    "type": "EXTREME_REVERSAL",
-    "params": {
-      "rsi_period": 14,
-      "rsi_th": 15.0,
-      "bb_th": 3.0,
-      "min_vol": 0.0,
-      "min_wick": 0.2,
-      "expiry_bars": 3
-    },
-    "desc": "SOLUSDT 1m RSI14_15_BB3.0_exp3",
-    "wr": 68.12,
-    "trades": 69,
-    "oos_wr": 68.29,
-    "oos_trades": 41,
-    "oos_days": 180
-  },
-  {
-    "pair": "SOLUSDT",
-    "tf": 30,
+    "pair": "BTCUSDT",
+    "tf": 15,
     "type": "EXTREME_REVERSAL",
     "params": {
       "rsi_period": 7,
@@ -1187,13 +3011,32 @@
       "bb_th": 3.0,
       "min_vol": 0.0,
       "min_wick": 0.2,
+      "expiry_bars": 2
+    },
+    "desc": "BTCUSDT 15m RSI7_15_BB3.0_exp2",
+    "wr": 60.0,
+    "trades": 65,
+    "oos_wr": 70.0,
+    "oos_trades": 30,
+    "oos_days": 180
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 30,
+    "type": "EXTREME_REVERSAL",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 5.0,
+      "bb_th": 2.5,
+      "min_vol": 0.0,
+      "min_wick": 0.2,
       "expiry_bars": 1
     },
-    "desc": "SOLUSDT 30m RSI7_15_BB3.0_exp1",
-    "wr": 67.44,
-    "trades": 43,
-    "oos_wr": 68.0,
-    "oos_trades": 25,
+    "desc": "BTCUSDT 30m RSI5_5_BB2.5_exp1",
+    "wr": 60.0,
+    "trades": 25,
+    "oos_wr": 70.0,
+    "oos_trades": 10,
     "oos_days": 180
   }
 ]

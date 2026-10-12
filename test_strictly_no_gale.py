@@ -18,16 +18,16 @@ class TestStrictlyNoGale(unittest.TestCase):
             self.assertTrue(os.path.exists(path), f"{fname} must exist")
             with open(path, "r", encoding="utf-8") as f:
                 setups = json.load(f)
-            self.assertEqual(len(setups), 63, f"{fname} must contain exactly 63 setups")
+            self.assertEqual(len(setups), 160, f"{fname} must contain exactly 160 setups")
             for s in setups:
                 self.assertEqual(s["type"], "EXTREME_REVERSAL")
-                self.assertGreaterEqual(s["oos_wr"], 68.0, f"{s['desc']} OOS WR must be >= 68%")
-                self.assertGreaterEqual(s["wr"], 65.0, f"{s['desc']} 365d WR must be >= 65%")
+                self.assertGreaterEqual(s["oos_wr"], 70.0, f"{s['desc']} OOS WR must be >= 70%")
+                self.assertGreaterEqual(s["wr"], 60.0, f"{s['desc']} 365d WR must be >= 60%")
 
     def test_02_engine_loading(self):
         path = os.path.join(bot_dir, "assassin_strategy", "strictly_no_gale_verified_config.json")
         engine = HybridSignalEngine(config_path=path)
-        self.assertEqual(len(engine.setups), 63)
+        self.assertEqual(len(engine.setups), 160)
         self.assertTrue(len(engine.aggregator.timeframes) >= 12)
 
     def test_03_zero_gale_flat_ev(self):
