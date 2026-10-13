@@ -130,7 +130,8 @@ def save_state(
                     "expiry_bar_count": getattr(t, 'expiry_bar_count', 1),
                     "entry_candle_ts": getattr(t, 'entry_candle_ts', 0.0),
                     "candles_elapsed": getattr(t, 'candles_elapsed', 0),
-                    "tf_minutes": getattr(t, 'tf_minutes', 1)
+                    "tf_minutes": getattr(t, 'tf_minutes', 1),
+                    "last_closed_candle_price": getattr(t, 'last_closed_candle_price', 0.0)
                 })
         with open(STATE_FILE, "w") as f:
             json.dump({
@@ -185,6 +186,7 @@ class ActiveTrade:
     entry_candle_ts: float = 0.0    # Timestamp of the candle that triggered entry
     candles_elapsed: int = 0        # How many candles have closed since entry
     tf_minutes: int = 1             # Timeframe in minutes for this trade
+    last_closed_candle_price: float = 0.0  # Last closed candle price for exact settlement
 
 class AssassinController:
     """Master controller managing runtime state, mode toggling, and services."""
@@ -462,7 +464,8 @@ async def main():
                     expiry_bar_count=td.get("expiry_bar_count", 1),
                     entry_candle_ts=td.get("entry_candle_ts", 0.0),
                     candles_elapsed=td.get("candles_elapsed", 0),
-                    tf_minutes=td.get("tf_minutes", 1)
+                    tf_minutes=td.get("tf_minutes", 1),
+                    last_closed_candle_price=td.get("last_closed_candle_price", 0.0)
                 ))
             except Exception:
                 pass
@@ -576,19 +579,25 @@ async def main():
                 now = time.time()
                 remaining = []
                 for t in controller.active_trades:
-                    # FIX 1: Primary path — wait for candle-close count
-                    #   candles_elapsed is incremented by on_candle_closed callback
+                    # FIX 1: Accurate settlement matching trade timeframe
+                    # Trade settles when required number of candles of ITS OWN timeframe have closed
                     ready_to_settle = t.candles_elapsed >= t.expiry_bar_count
 
-                    # Fallback: force-settle if stuck for 2x expected duration (zombie protection)
+                    # Secondary path: if wall-clock expiry_time has passed, settle
+                    if not ready_to_settle and (now >= t.expiry_time):
+                        ready_to_settle = True
+
+                    # Fallback zombie protection: 2x expected duration + 120s
                     max_wait = t.tf_minutes * 60 * t.expiry_bar_count * 2 + 120
                     if not ready_to_settle and (now - t.entry_time) > max_wait:
                         logger.warning(f"[BG-SETTLER] ⚠️ Force-settling zombie trade {t.symbol} after {now - t.entry_time:.0f}s")
                         ready_to_settle = True
 
                     if ready_to_settle:
-                        # FIX 1: Use the CANDLE CLOSE price, not a random spot price
-                        exit_price = controller.latest_prices.get(t.symbol, t.entry_price)
+                        # Use the candle close price of the trade's timeframe, fallback to latest price
+                        exit_price = getattr(t, 'last_closed_candle_price', 0.0) or controller.latest_prices.get(t.symbol, t.entry_price)
+                        if exit_price <= 0:
+                            exit_price = controller.latest_prices.get(t.symbol, t.entry_price)
                         is_win = (exit_price > t.entry_price) if t.action == 'call' else (exit_price < t.entry_price)
                         step_name = "BASE" if t.gale_level == 0 else f"GALE {t.gale_level}"
 
@@ -640,12 +649,6 @@ async def main():
         controller.latest_prices[symbol] = candle.close
         now = time.time()
 
-        # FIX 1: Increment candle-close counter on active trades for this symbol
-        #   This ensures settlement happens at actual candle closes, matching the backtest.
-        for t in controller.active_trades:
-            if t.symbol == symbol:
-                t.candles_elapsed += 1
-
         # Route candle to the correct engine's history buffer
         engine = engines.get(interval)
         if not engine:
@@ -666,6 +669,12 @@ async def main():
         closed_tf_candles = hybrid_engine.aggregator.update_1m_candle(symbol, candle)
 
         for tf, tf_candle in closed_tf_candles:
+            # FIX: Increment candle counter ONLY for active trades of this exact timeframe and symbol
+            for t in controller.active_trades:
+                if t.symbol == symbol and t.tf_minutes == tf:
+                    t.candles_elapsed += 1
+                    t.last_closed_candle_price = tf_candle.close
+
             tf_sigs = hybrid_engine.evaluate_setups(symbol, tf, tf_candle)
             for s in tf_sigs:
                 setup_desc = s["setup"].desc if hasattr(s["setup"], "desc") else s.get("trigger", "")
@@ -791,7 +800,8 @@ async def main():
                     expiry_bar_count=expiry_bars,
                     entry_candle_ts=candle.timestamp,
                     candles_elapsed=0,
-                    tf_minutes=tf_minutes
+                    tf_minutes=tf_minutes,
+                    last_closed_candle_price=0.0
                 ))
                 controller.last_trade_time = time.time()
                 controller.last_pair_trade_time[sig.symbol] = time.time()

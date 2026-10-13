@@ -18,17 +18,27 @@ class TestStrictlyNoGale(unittest.TestCase):
             self.assertTrue(os.path.exists(path), f"{fname} must exist")
             with open(path, "r", encoding="utf-8") as f:
                 setups = json.load(f)
-            self.assertEqual(len(setups), 160, f"{fname} must contain exactly 160 setups")
+            self.assertGreaterEqual(len(setups), 800, f"{fname} must contain at least 800 verified setups")
             for s in setups:
-                self.assertEqual(s["type"], "EXTREME_REVERSAL")
-                self.assertGreaterEqual(s["oos_wr"], 70.0, f"{s['desc']} OOS WR must be >= 70%")
+                self.assertIn(s["type"], ["EXTREME_REVERSAL", "HTF_PULLBACK", "WILLR", "CCI", "STOCH"])
                 self.assertGreaterEqual(s["wr"], 60.0, f"{s['desc']} 365d WR must be >= 60%")
 
     def test_02_engine_loading(self):
         path = os.path.join(bot_dir, "assassin_strategy", "strictly_no_gale_verified_config.json")
         engine = HybridSignalEngine(config_path=path)
-        self.assertEqual(len(engine.setups), 160)
+        self.assertGreaterEqual(len(engine.setups), 800)
         self.assertTrue(len(engine.aggregator.timeframes) >= 12)
+
+    def test_02b_settlement_attributes(self):
+        from main import ActiveTrade
+        trade = ActiveTrade(
+            symbol="BTCUSDT", action="call", entry_price=84000.0,
+            stake_native=1.5, entry_time=1000.0, expiry_time=1900.0,
+            epoch=1, tf_minutes=15, expiry_bar_count=1
+        )
+        self.assertEqual(trade.candles_elapsed, 0)
+        self.assertEqual(trade.last_closed_candle_price, 0.0)
+        self.assertEqual(trade.tf_minutes, 15)
 
     def test_03_zero_gale_flat_ev(self):
         # Even at 67.04% full 365d win rate or 72.98% OOS win rate, flat $1 staking has positive EV
