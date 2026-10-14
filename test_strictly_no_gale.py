@@ -20,7 +20,10 @@ class TestStrictlyNoGale(unittest.TestCase):
                 setups = json.load(f)
             self.assertGreaterEqual(len(setups), 800, f"{fname} must contain at least 800 verified setups")
             for s in setups:
-                self.assertIn(s["type"], ["EXTREME_REVERSAL", "HTF_PULLBACK", "WILLR", "CCI", "STOCH"])
+                self.assertIn(s["type"], [
+                    "EXTREME_REVERSAL", "HTF_PULLBACK", "WILLR", "CCI", "STOCH",
+                    "BB_RSI_REV", "BB_STREAK", "WICK_REJ", "RSI_ONLY", "MFI_RSI"
+                ])
                 self.assertGreaterEqual(s["wr"], 60.0, f"{s['desc']} 365d WR must be >= 60%")
 
     def test_02_engine_loading(self):

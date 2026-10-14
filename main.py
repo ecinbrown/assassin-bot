@@ -714,16 +714,16 @@ async def main():
             tf_tag = sig.metadata.get('tf', '1m') if hasattr(sig, 'metadata') and sig.metadata else '1m'
             tf_minutes = int(tf_tag) if str(tf_tag).isdigit() else 1
 
-            # FIX 2: SMART CONCURRENCY GUARD (replaces time cooldown)
-            #   Max 1 active trade per pair+direction — prevents the 12x BTC CALL disaster
-            #   Max 2 active trades per pair total — allows CALL + PUT if genuinely different setups
-            #   NO time cooldown — new trade is allowed immediately after previous one settles
-            active_same_dir = sum(1 for t in controller.active_trades if t.symbol == sig.symbol and t.action == sig.action.lower())
+            # FIX 2: SMART MULTI-TIMEFRAME CONCURRENCY GUARD
+            #   Max 1 active trade per (pair, timeframe, direction) — prevents duplicate bets on same candle
+            #   Max 3 active trades per pair total across distinct timeframes (e.g. 1m scalp + 5m trend)
+            #   Allows fast 1m/2m/3m scalps to run independently without being blocked by 5m/10m trades
+            active_same_tf_dir = sum(1 for t in controller.active_trades if t.symbol == sig.symbol and t.tf_minutes == tf_minutes and t.action == sig.action.lower())
             active_same_pair = sum(1 for t in controller.active_trades if t.symbol == sig.symbol)
-            if active_same_dir >= 1:
-                logger.info(f"🛡️ [CONCURRENCY] Skipping {sig.symbol} {sig.action.upper()} — already have {active_same_dir} active {sig.action.upper()} trade(s)")
+            if active_same_tf_dir >= 1:
+                logger.info(f"🛡️ [CONCURRENCY] Skipping {sig.symbol} {sig.action.upper()} on {tf_tag}m — already have active trade on this timeframe")
                 continue
-            if active_same_pair >= 2:
+            if active_same_pair >= 3:
                 logger.info(f"🛡️ [CONCURRENCY] Skipping {sig.symbol} — already have {active_same_pair} active trades on this pair")
                 continue
 

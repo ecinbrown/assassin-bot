@@ -13954,5 +13954,3874 @@
     "oos_wr": 70.0,
     "oos_trades": 10,
     "oos_days": 180
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 6,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 2m | BB3.5_Run>=6_V>=1.5",
+    "wr": 100.0,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": 100.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 1.2
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=1_BB3.5_V>=1.2",
+    "wr": 100.0,
+    "trades": 11,
+    "expiry_bars": 3,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 6,
+      "min_vol": 2.0
+    },
+    "desc": "ETH 2m | BB3.5_Run>=6_V>=2.0",
+    "wr": 100.0,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": 100.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=1_BB3.5_V>=1.0",
+    "wr": 100.0,
+    "trades": 11,
+    "expiry_bars": 3,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 1,
+      "bb_th": 3.5
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=1_BB3.5",
+    "wr": 100.0,
+    "trades": 12,
+    "expiry_bars": 5,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 6
+    },
+    "desc": "ETH 2m | BB3.5_Run>=6",
+    "wr": 100.0,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": 100.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=1_BB3.5_V>=1.5",
+    "wr": 100.0,
+    "trades": 11,
+    "expiry_bars": 3,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 6,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 2m | BB3.5_Run>=6_V>=1.0",
+    "wr": 100.0,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": 100.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 2.0
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=1_BB3.5_V>=2.0",
+    "wr": 100.0,
+    "trades": 11,
+    "expiry_bars": 3,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "RSI_ONLY",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 1,
+      "min_vol": 1.0
+    },
+    "desc": "BTC 4m | RSI14<=1_V>=1.0",
+    "wr": 100.0,
+    "trades": 10,
+    "expiry_bars": 3,
+    "holdout_wr": 35.71,
+    "holdout_trades": 14,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 1,
+      "bb_th": 3.0
+    },
+    "desc": "BNB 6m | BBRev_RSI7<=1_BB3.0",
+    "wr": 92.86,
+    "trades": 14,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 1,
+      "bb_th": 3.0,
+      "min_vol": 1.2
+    },
+    "desc": "BNB 6m | BBRev_RSI7<=1_BB3.0_V>=1.2",
+    "wr": 92.86,
+    "trades": 14,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 1,
+      "bb_th": 3.0,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 6m | BBRev_RSI7<=1_BB3.0_V>=1.0",
+    "wr": 92.86,
+    "trades": 14,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 4m | BBRev_RSI14<=3_BB2.0_V>=1.0",
+    "wr": 92.31,
+    "trades": 13,
+    "expiry_bars": 2,
+    "holdout_wr": 66.67,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 1,
+      "bb_th": 3.0,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 6m | BBRev_RSI7<=1_BB3.0_V>=1.5",
+    "wr": 92.31,
+    "trades": 13,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 1,
+      "bb_th": 3.0,
+      "min_vol": 2.0
+    },
+    "desc": "BNB 6m | BBRev_RSI7<=1_BB3.0_V>=2.0",
+    "wr": 92.31,
+    "trades": 13,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0
+    },
+    "desc": "BNB 4m | BBRev_RSI14<=3_BB2.0",
+    "wr": 92.31,
+    "trades": 13,
+    "expiry_bars": 3,
+    "holdout_wr": 66.67,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "RSI_ONLY",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3
+    },
+    "desc": "BTC 10m | RSI14<=3",
+    "wr": 91.67,
+    "trades": 12,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 0,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 4m | BBRev_RSI14<=3_BB2.0_V>=1.5",
+    "wr": 91.67,
+    "trades": 12,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 5m | BB3.5_Run>=5_V>=1.0",
+    "wr": 91.67,
+    "trades": 12,
+    "expiry_bars": 1,
+    "holdout_wr": 100.0,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 2.0
+    },
+    "desc": "ETH 5m | BB3.5_Run>=5_V>=2.0",
+    "wr": 91.67,
+    "trades": 12,
+    "expiry_bars": 1,
+    "holdout_wr": 100.0,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 5m | BB3.5_Run>=5_V>=1.5",
+    "wr": 91.67,
+    "trades": 12,
+    "expiry_bars": 1,
+    "holdout_wr": 100.0,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5
+    },
+    "desc": "ETH 5m | BB3.5_Run>=5",
+    "wr": 91.67,
+    "trades": 12,
+    "expiry_bars": 1,
+    "holdout_wr": 100.0,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0,
+      "min_vol": 1.2
+    },
+    "desc": "BNB 4m | BBRev_RSI14<=3_BB2.0_V>=1.2",
+    "wr": 91.67,
+    "trades": 12,
+    "expiry_bars": 3,
+    "holdout_wr": 66.67,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.3,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 3m | Wick>=0.3_Body<=0.15_BB2.5_V>=1.5",
+    "wr": 91.67,
+    "trades": 12,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0,
+      "min_vol": 2.0
+    },
+    "desc": "BNB 4m | BBRev_RSI14<=3_BB2.0_V>=2.0",
+    "wr": 90.91,
+    "trades": 11,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 1,
+      "bb_th": 1.5
+    },
+    "desc": "BTC 4m | BBRev_RSI14<=1_BB1.5",
+    "wr": 90.91,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": 45.45,
+    "holdout_trades": 11,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 1,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 2.5
+    },
+    "desc": "ETH 1m | BBRev_RSI14<=2_BB2.5",
+    "wr": 90.91,
+    "trades": 11,
+    "expiry_bars": 3,
+    "holdout_wr": 40.0,
+    "holdout_trades": 10,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.3,
+      "max_body": 0.2,
+      "bb_th": 2.5
+    },
+    "desc": "BNB 15m | Wick>=0.3_Body<=0.2_BB2.5",
+    "wr": 90.91,
+    "trades": 11,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 1,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 1m | BBRev_RSI14<=2_BB2.5_V>=1.5",
+    "wr": 90.0,
+    "trades": 10,
+    "expiry_bars": 3,
+    "holdout_wr": 50.0,
+    "holdout_trades": 8,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 1,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 2.5,
+      "min_vol": 1.2
+    },
+    "desc": "ETH 1m | BBRev_RSI14<=2_BB2.5_V>=1.2",
+    "wr": 90.0,
+    "trades": 10,
+    "expiry_bars": 3,
+    "holdout_wr": 50.0,
+    "holdout_trades": 8,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.5,
+      "max_body": 0.2,
+      "bb_th": 2.5
+    },
+    "desc": "BNB 15m | Wick>=0.5_Body<=0.2_BB2.5",
+    "wr": 90.0,
+    "trades": 10,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.4,
+      "max_body": 0.2,
+      "bb_th": 2.5
+    },
+    "desc": "BNB 15m | Wick>=0.4_Body<=0.2_BB2.5",
+    "wr": 90.0,
+    "trades": 10,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.3,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 15m | Wick>=0.3_Body<=0.2_BB2.5_V>=1.0",
+    "wr": 90.0,
+    "trades": 10,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.4,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 3m | Wick>=0.4_Body<=0.15_BB2.5_V>=1.5",
+    "wr": 90.0,
+    "trades": 10,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 1,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 1m | BBRev_RSI14<=2_BB2.5_V>=1.0",
+    "wr": 90.0,
+    "trades": 10,
+    "expiry_bars": 3,
+    "holdout_wr": 50.0,
+    "holdout_trades": 8,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 10,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4
+    },
+    "desc": "ETH 10m | BB3.5_Run>=4",
+    "wr": 90.0,
+    "trades": 10,
+    "expiry_bars": 3,
+    "holdout_wr": 33.33,
+    "holdout_trades": 3,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 1.5,
+      "min_vol": 1.5
+    },
+    "desc": "BTC 4m | BBRev_RSI14<=2_BB1.5_V>=1.5",
+    "wr": 90.0,
+    "trades": 10,
+    "expiry_bars": 2,
+    "holdout_wr": 55.56,
+    "holdout_trades": 9,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 1,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 2.5,
+      "min_vol": 2.0
+    },
+    "desc": "ETH 1m | BBRev_RSI14<=2_BB2.5_V>=2.0",
+    "wr": 90.0,
+    "trades": 10,
+    "expiry_bars": 3,
+    "holdout_wr": 57.14,
+    "holdout_trades": 7,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 1,
+      "bb_th": 1.5
+    },
+    "desc": "ETH 2m | BBRev_RSI14<=1_BB1.5",
+    "wr": 90.0,
+    "trades": 10,
+    "expiry_bars": 5,
+    "holdout_wr": 0.0,
+    "holdout_trades": 3,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.5
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=2_BB3.5",
+    "wr": 89.47,
+    "trades": 19,
+    "expiry_bars": 1,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=2_BB3.5_V>=1.0",
+    "wr": 88.89,
+    "trades": 18,
+    "expiry_bars": 5,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.5,
+      "min_vol": 2.0
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=2_BB3.5_V>=2.0",
+    "wr": 88.89,
+    "trades": 18,
+    "expiry_bars": 1,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.5,
+      "min_vol": 1.2
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=2_BB3.5_V>=1.2",
+    "wr": 88.89,
+    "trades": 18,
+    "expiry_bars": 5,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=2_BB3.5_V>=1.5",
+    "wr": 88.89,
+    "trades": 18,
+    "expiry_bars": 1,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "RSI_ONLY",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 1
+    },
+    "desc": "BTC 4m | RSI14<=1",
+    "wr": 88.24,
+    "trades": 17,
+    "expiry_bars": 5,
+    "holdout_wr": 37.5,
+    "holdout_trades": 16,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0
+    },
+    "desc": "SOL 6m | BBRev_RSI7<=2_BB3.0",
+    "wr": 86.67,
+    "trades": 15,
+    "expiry_bars": 5,
+    "holdout_wr": 14.29,
+    "holdout_trades": 7,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 2m | Wick>=0.7_Body<=0.15_BB2.5_V>=1.5",
+    "wr": 86.67,
+    "trades": 15,
+    "expiry_bars": 5,
+    "holdout_wr": 60.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.4,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 4m | Wick>=0.7_Body<=0.4_BB2.5_V>=1.5",
+    "wr": 86.67,
+    "trades": 15,
+    "expiry_bars": 2,
+    "holdout_wr": 71.43,
+    "holdout_trades": 7,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.3,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 4m | Wick>=0.7_Body<=0.3_BB2.5_V>=1.5",
+    "wr": 86.67,
+    "trades": 15,
+    "expiry_bars": 2,
+    "holdout_wr": 71.43,
+    "holdout_trades": 7,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.5
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=3_BB3.5",
+    "wr": 86.36,
+    "trades": 22,
+    "expiry_bars": 5,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.08
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "RSI_ONLY",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "min_vol": 1.5
+    },
+    "desc": "BTC 4m | RSI14<=2_V>=1.5",
+    "wr": 85.71,
+    "trades": 14,
+    "expiry_bars": 3,
+    "holdout_wr": 50.0,
+    "holdout_trades": 10,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 3m | BB3.5_Run>=5_V>=2.0",
+    "wr": 85.71,
+    "trades": 14,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 3m | BB3.5_Run>=4_V>=2.0",
+    "wr": 85.71,
+    "trades": 28,
+    "expiry_bars": 5,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 6m | BBRev_RSI7<=2_BB3.0_V>=1.5",
+    "wr": 85.71,
+    "trades": 14,
+    "expiry_bars": 5,
+    "holdout_wr": 28.57,
+    "holdout_trades": 7,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 6m | BBRev_RSI7<=2_BB3.0_V>=1.0",
+    "wr": 85.71,
+    "trades": 14,
+    "expiry_bars": 5,
+    "holdout_wr": 14.29,
+    "holdout_trades": 7,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 1.2
+    },
+    "desc": "SOL 6m | BBRev_RSI7<=2_BB3.0_V>=1.2",
+    "wr": 85.71,
+    "trades": 14,
+    "expiry_bars": 5,
+    "holdout_wr": 28.57,
+    "holdout_trades": 7,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=3_BB3.5_V>=1.0",
+    "wr": 85.71,
+    "trades": 21,
+    "expiry_bars": 5,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.5,
+      "min_vol": 2.0
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=3_BB3.5_V>=2.0",
+    "wr": 85.71,
+    "trades": 21,
+    "expiry_bars": 5,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.5,
+      "min_vol": 1.2
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=3_BB3.5_V>=1.2",
+    "wr": 85.71,
+    "trades": 21,
+    "expiry_bars": 1,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=3_BB3.5_V>=1.5",
+    "wr": 85.71,
+    "trades": 21,
+    "expiry_bars": 5,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 2m | Wick>=0.7_Body<=0.2_BB2.5_V>=1.5",
+    "wr": 85.0,
+    "trades": 20,
+    "expiry_bars": 5,
+    "holdout_wr": 60.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5
+    },
+    "desc": "ETH 2m | BBRev_RSI5<=1_BB3.5",
+    "wr": 84.78,
+    "trades": 46,
+    "expiry_bars": 1,
+    "holdout_wr": 58.33,
+    "holdout_trades": 12,
+    "train_tpd": 0.16
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5
+    },
+    "desc": "BNB 4m | BBRev_RSI5<=1_BB3.5",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 4m | BBRev_RSI5<=1_BB3.5_V>=1.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 4m | BBRev_RSI5<=1_BB3.5_V>=1.5",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 1.2
+    },
+    "desc": "BNB 4m | BBRev_RSI5<=1_BB3.5_V>=1.2",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 2,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 2m | Wick>=0.7_Body<=0.2_BB2.5_V>=1.5",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 5,
+    "holdout_wr": 100.0,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0,
+      "min_vol": 1.2
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0_V>=1.2",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 1,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0_V>=1.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 2,
+    "holdout_wr": 60.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0,
+      "min_vol": 2.0
+    },
+    "desc": "BTC 3m | BBRev_RSI14<=3_BB2.0_V>=2.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 1,
+    "holdout_wr": 50.0,
+    "holdout_trades": 8,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.3,
+      "min_vol": 1.2
+    },
+    "desc": "BNB 2m | BBRev_RSI14<=3_BB2.3_V>=1.2",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 3,
+    "holdout_wr": 33.33,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.3,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 2m | BBRev_RSI14<=3_BB2.3_V>=1.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 3,
+    "holdout_wr": 33.33,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.3
+    },
+    "desc": "BNB 2m | BBRev_RSI14<=3_BB2.3",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 3,
+    "holdout_wr": 33.33,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.3,
+      "min_vol": 2.0
+    },
+    "desc": "BNB 2m | BBRev_RSI14<=3_BB2.3_V>=2.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 3,
+    "holdout_wr": 33.33,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.3,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 2m | BBRev_RSI14<=3_BB2.3_V>=1.5",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 3,
+    "holdout_wr": 33.33,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 2,
+    "holdout_wr": 60.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0
+    },
+    "desc": "BTC 3m | BBRev_RSI14<=3_BB2.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 1,
+    "holdout_wr": 25.0,
+    "holdout_trades": 12,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0,
+      "min_vol": 1.0
+    },
+    "desc": "BTC 3m | BBRev_RSI14<=3_BB2.0_V>=1.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 1,
+    "holdout_wr": 33.33,
+    "holdout_trades": 9,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0,
+      "min_vol": 1.2
+    },
+    "desc": "BTC 3m | BBRev_RSI14<=3_BB2.0_V>=1.2",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 1,
+    "holdout_wr": 33.33,
+    "holdout_trades": 9,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0,
+      "min_vol": 1.5
+    },
+    "desc": "BTC 3m | BBRev_RSI14<=3_BB2.0_V>=1.5",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 1,
+    "holdout_wr": 44.44,
+    "holdout_trades": 9,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 10,
+      "bb_th": 3.5,
+      "min_vol": 2.0
+    },
+    "desc": "BTC 10m | BBRev_RSI7<=10_BB3.5_V>=2.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 5,
+    "holdout_wr": 60.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 6m | BBRev_RSI7<=2_BB3.0_V>=2.0",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 5,
+    "holdout_wr": 28.57,
+    "holdout_trades": 7,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "RSI_ONLY",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2
+    },
+    "desc": "ETH 4m | RSI14<=2",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 5,
+    "holdout_wr": 66.67,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.5,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 5m | Wick>=0.5_Body<=0.2_BB2.5_V>=1.5",
+    "wr": 84.62,
+    "trades": 13,
+    "expiry_bars": 2,
+    "holdout_wr": 75.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4
+    },
+    "desc": "SOL 3m | BB3.5_Run>=4",
+    "wr": 84.38,
+    "trades": 32,
+    "expiry_bars": 5,
+    "holdout_wr": 66.67,
+    "holdout_trades": 6,
+    "train_tpd": 0.11
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "RSI_ONLY",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "min_vol": 2.0
+    },
+    "desc": "BNB 4m | RSI14<=3_V>=2.0",
+    "wr": 84.21,
+    "trades": 19,
+    "expiry_bars": 3,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.5,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 5m | Wick>=0.5_Body<=0.2_BB2.5_V>=1.0",
+    "wr": 84.21,
+    "trades": 19,
+    "expiry_bars": 2,
+    "holdout_wr": 75.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 2m | BBRev_RSI5<=1_BB3.5_V>=1.0",
+    "wr": 84.09,
+    "trades": 44,
+    "expiry_bars": 1,
+    "holdout_wr": 54.55,
+    "holdout_trades": 11,
+    "train_tpd": 0.15
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 1.2
+    },
+    "desc": "ETH 2m | BBRev_RSI5<=1_BB3.5_V>=1.2",
+    "wr": 83.72,
+    "trades": 43,
+    "expiry_bars": 1,
+    "holdout_wr": 54.55,
+    "holdout_trades": 11,
+    "train_tpd": 0.15
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 3m | BBRev_RSI14<=3_BB2.0_V>=1.0",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 5,
+    "holdout_wr": 33.33,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0,
+      "min_vol": 1.2
+    },
+    "desc": "BNB 3m | BBRev_RSI14<=3_BB2.0_V>=1.2",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 5,
+    "holdout_wr": 33.33,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0
+    },
+    "desc": "BNB 3m | BBRev_RSI14<=3_BB2.0",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 3,
+    "holdout_wr": 50.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 2m | BBRev_RSI5<=1_BB3.5_V>=1.5",
+    "wr": 83.33,
+    "trades": 42,
+    "expiry_bars": 1,
+    "holdout_wr": 54.55,
+    "holdout_trades": 11,
+    "train_tpd": 0.14
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 1.5,
+      "min_vol": 1.2
+    },
+    "desc": "BTC 4m | BBRev_RSI14<=2_BB1.5_V>=1.2",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 2,
+    "holdout_wr": 55.56,
+    "holdout_trades": 9,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 1.5,
+      "min_vol": 1.0
+    },
+    "desc": "BTC 4m | BBRev_RSI14<=2_BB1.5_V>=1.0",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 3,
+    "holdout_wr": 63.64,
+    "holdout_trades": 11,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0,
+      "min_vol": 2.0
+    },
+    "desc": "BNB 3m | BBRev_RSI14<=3_BB2.0_V>=2.0",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 5,
+    "holdout_wr": 33.33,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0_V>=2.0",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 1,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 2.0,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 3m | BBRev_RSI14<=3_BB2.0_V>=1.5",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 5,
+    "holdout_wr": 33.33,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 3,
+      "bb_th": 3.0,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 10m | BBRev_RSI7<=3_BB3.0_V>=1.5",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 1,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 1.5,
+      "min_vol": 2.0
+    },
+    "desc": "BNB 4m | BBRev_RSI14<=3_BB1.5_V>=2.0",
+    "wr": 83.33,
+    "trades": 18,
+    "expiry_bars": 3,
+    "holdout_wr": 66.67,
+    "holdout_trades": 3,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5,
+      "bb_th": 3.5
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=5_BB3.5",
+    "wr": 83.33,
+    "trades": 42,
+    "expiry_bars": 1,
+    "holdout_wr": 71.43,
+    "holdout_trades": 14,
+    "train_tpd": 0.14
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "RSI_ONLY",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 4m | RSI14<=2_V>=1.5",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 3,
+    "holdout_wr": 60.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "RSI_ONLY",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "min_vol": 1.0
+    },
+    "desc": "BTC 4m | RSI14<=2_V>=1.0",
+    "wr": 83.33,
+    "trades": 18,
+    "expiry_bars": 3,
+    "holdout_wr": 43.75,
+    "holdout_trades": 16,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.5,
+      "max_body": 0.15,
+      "bb_th": 2.5
+    },
+    "desc": "BNB 3m | Wick>=0.5_Body<=0.15_BB2.5",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 5,
+    "holdout_wr": 33.33,
+    "holdout_trades": 6,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 2.0
+    },
+    "desc": "BNB 4m | BBRev_RSI5<=1_BB3.5_V>=2.0",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 2,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 2m | Wick>=0.7_Body<=0.15_BB2.5_V>=1.5",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 8m | BBRev_RSI7<=2_BB3.0_V>=2.0",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 3,
+    "holdout_wr": 25.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 8m | BBRev_RSI7<=2_BB3.0_V>=1.0",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 3,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 8m | BBRev_RSI7<=2_BB3.0_V>=1.5",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 3,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 2,
+      "bb_th": 3.0,
+      "min_vol": 1.2
+    },
+    "desc": "SOL 8m | BBRev_RSI7<=2_BB3.0_V>=1.2",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 3,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 4m | BB3.5_Run>=4_V>=1.5",
+    "wr": 83.33,
+    "trades": 18,
+    "expiry_bars": 5,
+    "holdout_wr": 50.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 3m | BB3.5_Run>=4_V>=1.5",
+    "wr": 83.33,
+    "trades": 30,
+    "expiry_bars": 5,
+    "holdout_wr": 66.67,
+    "holdout_trades": 6,
+    "train_tpd": 0.1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 3m | BB3.5_Run>=4_V>=1.0",
+    "wr": 83.33,
+    "trades": 30,
+    "expiry_bars": 5,
+    "holdout_wr": 66.67,
+    "holdout_trades": 6,
+    "train_tpd": 0.1
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 4m | BB3.5_Run>=4_V>=1.0",
+    "wr": 83.33,
+    "trades": 18,
+    "expiry_bars": 5,
+    "holdout_wr": 50.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 6,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 6m | Wick>=0.7_Body<=0.15_BB2.5_V>=1.0",
+    "wr": 83.33,
+    "trades": 12,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5,
+      "bb_th": 3.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=5_BB3.5_V>=1.0",
+    "wr": 82.93,
+    "trades": 41,
+    "expiry_bars": 1,
+    "holdout_wr": 71.43,
+    "holdout_trades": 14,
+    "train_tpd": 0.14
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 2.0
+    },
+    "desc": "ETH 2m | BBRev_RSI5<=1_BB3.5_V>=2.0",
+    "wr": 82.93,
+    "trades": 41,
+    "expiry_bars": 5,
+    "holdout_wr": 72.73,
+    "holdout_trades": 11,
+    "train_tpd": 0.14
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5,
+      "bb_th": 3.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=5_BB3.5_V>=1.5",
+    "wr": 82.93,
+    "trades": 41,
+    "expiry_bars": 1,
+    "holdout_wr": 71.43,
+    "holdout_trades": 14,
+    "train_tpd": 0.14
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5,
+      "bb_th": 3.5,
+      "min_vol": 1.2
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=5_BB3.5_V>=1.2",
+    "wr": 82.93,
+    "trades": 41,
+    "expiry_bars": 1,
+    "holdout_wr": 71.43,
+    "holdout_trades": 14,
+    "train_tpd": 0.14
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 7,
+      "rsi_th": 5,
+      "bb_th": 3.5,
+      "min_vol": 2.0
+    },
+    "desc": "ETH 2m | BBRev_RSI7<=5_BB3.5_V>=2.0",
+    "wr": 82.93,
+    "trades": 41,
+    "expiry_bars": 1,
+    "holdout_wr": 71.43,
+    "holdout_trades": 14,
+    "train_tpd": 0.14
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5
+    },
+    "desc": "ETH 2m | BB3.5_Run>=5",
+    "wr": 82.76,
+    "trades": 29,
+    "expiry_bars": 1,
+    "holdout_wr": 71.43,
+    "holdout_trades": 7,
+    "train_tpd": 0.1
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 1,
+      "bb_th": 2.0,
+      "min_vol": 1.5
+    },
+    "desc": "BTC 2m | BBRev_RSI14<=1_BB2.0_V>=1.5",
+    "wr": 82.35,
+    "trades": 17,
+    "expiry_bars": 3,
+    "holdout_wr": 35.71,
+    "holdout_trades": 14,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5
+    },
+    "desc": "SOL 3m | BB3.5_Run>=5",
+    "wr": 82.35,
+    "trades": 17,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 1.5
+    },
+    "desc": "BNB 4m | BBRev_RSI14<=2_BB1.5",
+    "wr": 82.35,
+    "trades": 17,
+    "expiry_bars": 2,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 4,
+      "min_vol": 2.0
+    },
+    "desc": "BNB 4m | BB3.5_Run>=4_V>=2.0",
+    "wr": 82.35,
+    "trades": 17,
+    "expiry_bars": 5,
+    "holdout_wr": 66.67,
+    "holdout_trades": 3,
+    "train_tpd": 0.06
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 2m | BB3.5_Run>=5_V>=1.0",
+    "wr": 82.14,
+    "trades": 28,
+    "expiry_bars": 5,
+    "holdout_wr": 66.67,
+    "holdout_trades": 6,
+    "train_tpd": 0.1
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.4,
+      "bb_th": 2.5
+    },
+    "desc": "SOL 8m | Wick>=0.7_Body<=0.4_BB2.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.4,
+      "bb_th": 2.5
+    },
+    "desc": "BNB 15m | Wick>=0.7_Body<=0.4_BB2.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.3,
+      "bb_th": 2.5
+    },
+    "desc": "BNB 15m | Wick>=0.7_Body<=0.3_BB2.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15,
+      "bb_th": 3.5,
+      "min_vol": 2.0
+    },
+    "desc": "ETH 10m | BBRev_RSI14<=15_BB3.5_V>=2.0",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15,
+      "bb_th": 3.5,
+      "min_vol": 1.2
+    },
+    "desc": "ETH 10m | BBRev_RSI14<=15_BB3.5_V>=1.2",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 1.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 4m | BBRev_RSI14<=2_BB1.5_V>=1.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 3,
+    "holdout_wr": 33.33,
+    "holdout_trades": 3,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.3,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 2m | Wick>=0.7_Body<=0.3_BB2.5_V>=1.5",
+    "wr": 81.82,
+    "trades": 33,
+    "expiry_bars": 5,
+    "holdout_wr": 54.55,
+    "holdout_trades": 11,
+    "train_tpd": 0.11
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.4,
+      "bb_th": 2.5
+    },
+    "desc": "SOL 10m | Wick>=0.7_Body<=0.4_BB2.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 2,
+    "holdout_wr": 50.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.3,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 8m | Wick>=0.7_Body<=0.3_BB2.5_V>=1.0",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.3,
+      "bb_th": 2.5
+    },
+    "desc": "SOL 8m | Wick>=0.7_Body<=0.3_BB2.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.3,
+      "bb_th": 2.5
+    },
+    "desc": "SOL 10m | Wick>=0.7_Body<=0.3_BB2.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 2,
+    "holdout_wr": 50.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15,
+      "bb_th": 3.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 10m | BBRev_RSI14<=15_BB3.5_V>=1.0",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15,
+      "bb_th": 3.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 10m | BBRev_RSI14<=15_BB3.5_V>=1.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 10,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 15,
+      "bb_th": 3.5
+    },
+    "desc": "ETH 10m | BBRev_RSI14<=15_BB3.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 15,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.4,
+      "max_body": 0.15,
+      "bb_th": 2.5
+    },
+    "desc": "SOL 15m | Wick>=0.4_Body<=0.15_BB2.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "MFI_RSI",
+    "params": {
+      "mfi_th": 5,
+      "rsi_period": 5,
+      "rsi_th": 5
+    },
+    "desc": "BTC 15m | MFI<=5_RSI5<=5",
+    "wr": 81.82,
+    "trades": 22,
+    "expiry_bars": 3,
+    "holdout_wr": 33.33,
+    "holdout_trades": 6,
+    "train_tpd": 0.08
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.6,
+      "max_body": 0.3,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 15m | Wick>=0.6_Body<=0.3_BB2.5_V>=1.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 8,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.4,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 8m | Wick>=0.7_Body<=0.4_BB2.5_V>=1.0",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 3m | Wick>=0.7_Body<=0.15_BB2.5_V>=1.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 10,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.6,
+      "max_body": 0.2,
+      "bb_th": 2.5
+    },
+    "desc": "ETH 10m | Wick>=0.6_Body<=0.2_BB2.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.5,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 3m | Wick>=0.5_Body<=0.2_BB2.5_V>=1.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 6,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 6m | Wick>=0.7_Body<=0.15_BB2.5_V>=1.5",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.4,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 2m | Wick>=0.7_Body<=0.4_BB2.5_V>=1.5",
+    "wr": 81.82,
+    "trades": 33,
+    "expiry_bars": 5,
+    "holdout_wr": 54.55,
+    "holdout_trades": 11,
+    "train_tpd": 0.11
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 3m | Wick>=0.7_Body<=0.15_BB2.5_V>=1.0",
+    "wr": 81.82,
+    "trades": 11,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.04
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 2m | BB3.5_Run>=5_V>=1.5",
+    "wr": 81.48,
+    "trades": 27,
+    "expiry_bars": 5,
+    "holdout_wr": 66.67,
+    "holdout_trades": 6,
+    "train_tpd": 0.09
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 1.5,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 4m | BBRev_RSI14<=2_BB1.5_V>=1.0",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 2,
+    "holdout_wr": 75.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 2,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 1,
+      "bb_th": 2.0,
+      "min_vol": 2.0
+    },
+    "desc": "BTC 2m | BBRev_RSI14<=1_BB2.0_V>=2.0",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 3,
+    "holdout_wr": 33.33,
+    "holdout_trades": 12,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 3m | BB3.5_Run>=5_V>=1.5",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 3m | BB3.5_Run>=5_V>=1.0",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.3,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 3m | Wick>=0.3_Body<=0.2_BB2.5_V>=1.5",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 5,
+    "holdout_wr": 25.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 2,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.6,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 2m | Wick>=0.6_Body<=0.2_BB2.5_V>=1.5",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 5,
+    "holdout_wr": 100.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 2m | Wick>=0.7_Body<=0.15_BB2.5_V>=1.0",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 5,
+    "holdout_wr": 60.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 5,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 3m | BBRev_RSI14<=5_BB2.5_V>=1.0",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 1,
+    "holdout_wr": 0.0,
+    "holdout_trades": 3,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 5,
+      "bb_th": 2.5,
+      "min_vol": 1.2
+    },
+    "desc": "BNB 3m | BBRev_RSI14<=5_BB2.5_V>=1.2",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 1,
+    "holdout_wr": 0.0,
+    "holdout_trades": 3,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 5,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 3m | BBRev_RSI14<=5_BB2.5_V>=1.5",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 1,
+    "holdout_wr": 0.0,
+    "holdout_trades": 3,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 5,
+      "bb_th": 2.5
+    },
+    "desc": "BNB 3m | BBRev_RSI14<=5_BB2.5",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 1,
+    "holdout_wr": 0.0,
+    "holdout_trades": 3,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 5,
+      "bb_th": 2.5,
+      "min_vol": 2.0
+    },
+    "desc": "BNB 3m | BBRev_RSI14<=5_BB2.5_V>=2.0",
+    "wr": 81.25,
+    "trades": 16,
+    "expiry_bars": 1,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 1.2
+    },
+    "desc": "ETH 5m | BBRev_RSI5<=1_BB3.5_V>=1.2",
+    "wr": 80.95,
+    "trades": 21,
+    "expiry_bars": 1,
+    "holdout_wr": 100.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 2m | Wick>=0.7_Body<=0.2_BB2.5_V>=1.0",
+    "wr": 80.95,
+    "trades": 21,
+    "expiry_bars": 5,
+    "holdout_wr": 66.67,
+    "holdout_trades": 6,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 2.0
+    },
+    "desc": "ETH 5m | BBRev_RSI5<=1_BB3.5_V>=2.0",
+    "wr": 80.95,
+    "trades": 21,
+    "expiry_bars": 1,
+    "holdout_wr": 100.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "MFI_RSI",
+    "params": {
+      "mfi_th": 5,
+      "rsi_period": 2,
+      "rsi_th": 5,
+      "min_vol": 1.5
+    },
+    "desc": "BTC 15m | MFI<=5_RSI2<=5_V>=1.5",
+    "wr": 80.95,
+    "trades": 21,
+    "expiry_bars": 3,
+    "holdout_wr": 28.57,
+    "holdout_trades": 7,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.4,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 5m | Wick>=0.4_Body<=0.2_BB2.5_V>=1.0",
+    "wr": 80.95,
+    "trades": 21,
+    "expiry_bars": 2,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "MFI_RSI",
+    "params": {
+      "mfi_th": 5,
+      "rsi_period": 5,
+      "rsi_th": 5,
+      "min_vol": 1.5
+    },
+    "desc": "BTC 15m | MFI<=5_RSI5<=5_V>=1.5",
+    "wr": 80.95,
+    "trades": 21,
+    "expiry_bars": 3,
+    "holdout_wr": 33.33,
+    "holdout_trades": 6,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "MFI_RSI",
+    "params": {
+      "mfi_th": 5,
+      "rsi_period": 5,
+      "rsi_th": 5,
+      "min_vol": 1.0
+    },
+    "desc": "BTC 15m | MFI<=5_RSI5<=5_V>=1.0",
+    "wr": 80.95,
+    "trades": 21,
+    "expiry_bars": 3,
+    "holdout_wr": 33.33,
+    "holdout_trades": 6,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 1.5,
+      "min_vol": 1.2
+    },
+    "desc": "BTC 4m | BBRev_RSI14<=3_BB1.5_V>=1.2",
+    "wr": 80.95,
+    "trades": 21,
+    "expiry_bars": 3,
+    "holdout_wr": 58.33,
+    "holdout_trades": 12,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 1.5,
+      "min_vol": 1.0
+    },
+    "desc": "BTC 4m | BBRev_RSI14<=3_BB1.5_V>=1.0",
+    "wr": 80.95,
+    "trades": 21,
+    "expiry_bars": 3,
+    "holdout_wr": 64.29,
+    "holdout_trades": 14,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 5m | BBRev_RSI5<=1_BB3.5_V>=1.0",
+    "wr": 80.95,
+    "trades": 21,
+    "expiry_bars": 1,
+    "holdout_wr": 100.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5
+    },
+    "desc": "ETH 5m | BBRev_RSI5<=1_BB3.5",
+    "wr": 80.95,
+    "trades": 21,
+    "expiry_bars": 1,
+    "holdout_wr": 100.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 1,
+      "bb_th": 3.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 5m | BBRev_RSI5<=1_BB3.5_V>=1.5",
+    "wr": 80.95,
+    "trades": 21,
+    "expiry_bars": 1,
+    "holdout_wr": 100.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 2.0
+    },
+    "desc": "ETH 2m | BB3.5_Run>=5_V>=2.0",
+    "wr": 80.77,
+    "trades": 26,
+    "expiry_bars": 1,
+    "holdout_wr": 66.67,
+    "holdout_trades": 6,
+    "train_tpd": 0.09
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 2,
+      "bb_th": 3.5,
+      "min_vol": 2.0
+    },
+    "desc": "ETH 5m | BBRev_RSI5<=2_BB3.5_V>=2.0",
+    "wr": 80.77,
+    "trades": 26,
+    "expiry_bars": 1,
+    "holdout_wr": 83.33,
+    "holdout_trades": 6,
+    "train_tpd": 0.09
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 2,
+      "bb_th": 3.5,
+      "min_vol": 1.5
+    },
+    "desc": "ETH 5m | BBRev_RSI5<=2_BB3.5_V>=1.5",
+    "wr": 80.77,
+    "trades": 26,
+    "expiry_bars": 1,
+    "holdout_wr": 83.33,
+    "holdout_trades": 6,
+    "train_tpd": 0.09
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 2,
+      "bb_th": 3.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 5m | BBRev_RSI5<=2_BB3.5_V>=1.0",
+    "wr": 80.77,
+    "trades": 26,
+    "expiry_bars": 1,
+    "holdout_wr": 83.33,
+    "holdout_trades": 6,
+    "train_tpd": 0.09
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 2,
+      "bb_th": 3.5
+    },
+    "desc": "ETH 5m | BBRev_RSI5<=2_BB3.5",
+    "wr": 80.77,
+    "trades": 26,
+    "expiry_bars": 1,
+    "holdout_wr": 83.33,
+    "holdout_trades": 6,
+    "train_tpd": 0.09
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 2,
+      "bb_th": 3.5,
+      "min_vol": 1.2
+    },
+    "desc": "ETH 5m | BBRev_RSI5<=2_BB3.5_V>=1.2",
+    "wr": 80.77,
+    "trades": 26,
+    "expiry_bars": 1,
+    "holdout_wr": 83.33,
+    "holdout_trades": 6,
+    "train_tpd": 0.09
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "MFI_RSI",
+    "params": {
+      "mfi_th": 5,
+      "rsi_period": 5,
+      "rsi_th": 10
+    },
+    "desc": "BTC 15m | MFI<=5_RSI5<=10",
+    "wr": 80.77,
+    "trades": 26,
+    "expiry_bars": 3,
+    "holdout_wr": 33.33,
+    "holdout_trades": 9,
+    "train_tpd": 0.09
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 1.5,
+      "min_vol": 2.0
+    },
+    "desc": "BTC 4m | BBRev_RSI14<=3_BB1.5_V>=2.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 3,
+    "holdout_wr": 50.0,
+    "holdout_trades": 10,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "bb_th": 1.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 5m | BBRev_RSI14<=3_BB1.5_V>=1.5",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 2,
+    "holdout_wr": 50.0,
+    "holdout_trades": 8,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 1.5
+    },
+    "desc": "ETH 4m | BBRev_RSI14<=2_BB1.5",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.3,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 10m | Wick>=0.7_Body<=0.3_BB2.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 2,
+    "holdout_wr": 50.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.3,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 15m | Wick>=0.7_Body<=0.3_BB2.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 1.5,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 5m | BBRev_RSI14<=2_BB1.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 1,
+    "holdout_wr": 57.14,
+    "holdout_trades": 7,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.3,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 2m | Wick>=0.7_Body<=0.3_BB2.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 35,
+    "expiry_bars": 5,
+    "holdout_wr": 58.33,
+    "holdout_trades": 12,
+    "train_tpd": 0.12
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 1.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 3m | BBRev_RSI14<=2_BB1.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 3,
+    "holdout_wr": 75.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 5,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "bb_th": 1.5
+    },
+    "desc": "BNB 5m | BBRev_RSI14<=2_BB1.5",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 1,
+    "holdout_wr": 42.86,
+    "holdout_trades": 7,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 4,
+    "type": "RSI_ONLY",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 4m | RSI14<=2_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 8,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.0,
+      "min_run": 6,
+      "min_vol": 2.0
+    },
+    "desc": "BTC 8m | BB3.0_Run>=6_V>=2.0",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 2,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "RSI_ONLY",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "min_vol": 2.0
+    },
+    "desc": "SOL 5m | RSI14<=2_V>=2.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 4,
+    "type": "RSI_ONLY",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 3,
+      "min_vol": 2.0
+    },
+    "desc": "BTC 4m | RSI14<=3_V>=2.0",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 3,
+    "holdout_wr": 45.45,
+    "holdout_trades": 11,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 5,
+    "type": "RSI_ONLY",
+    "params": {
+      "rsi_period": 14,
+      "rsi_th": 2,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 5m | RSI14<=2_V>=1.0",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 1,
+    "holdout_wr": 62.5,
+    "holdout_trades": 8,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 4m | BB3.5_Run>=5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 4m | BB3.5_Run>=5_V>=1.5",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_STREAK",
+    "params": {
+      "bb_th": 3.5,
+      "min_run": 5
+    },
+    "desc": "BNB 4m | BB3.5_Run>=5",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.5,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 5m | Wick>=0.5_Body<=0.15_BB2.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.4,
+      "max_body": 0.3,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "BTC 10m | Wick>=0.4_Body<=0.3_BB2.5_V>=1.5",
+    "wr": 80.0,
+    "trades": 20,
+    "expiry_bars": 1,
+    "holdout_wr": 66.67,
+    "holdout_trades": 6,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 10,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.4,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "BTC 10m | Wick>=0.4_Body<=0.2_BB2.5_V>=1.5",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 1,
+    "holdout_wr": 66.67,
+    "holdout_trades": 3,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 6,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.3,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 6m | Wick>=0.3_Body<=0.15_BB2.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 1,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.3,
+      "max_body": 0.15,
+      "bb_th": 2.5
+    },
+    "desc": "BNB 3m | Wick>=0.3_Body<=0.15_BB2.5",
+    "wr": 80.0,
+    "trades": 20,
+    "expiry_bars": 5,
+    "holdout_wr": 33.33,
+    "holdout_trades": 6,
+    "train_tpd": 0.07
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "MFI_RSI",
+    "params": {
+      "mfi_th": 5,
+      "rsi_period": 5,
+      "rsi_th": 10,
+      "min_vol": 1.0
+    },
+    "desc": "BTC 15m | MFI<=5_RSI5<=10_V>=1.0",
+    "wr": 80.0,
+    "trades": 25,
+    "expiry_bars": 3,
+    "holdout_wr": 25.0,
+    "holdout_trades": 8,
+    "train_tpd": 0.09
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.5,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 3m | Wick>=0.5_Body<=0.15_BB2.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 5,
+    "holdout_wr": 25.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 15,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.5,
+      "max_body": 0.3,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "BTC 15m | Wick>=0.5_Body<=0.3_BB2.5_V>=1.5",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 1,
+    "holdout_wr": 40.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 2,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.6,
+      "max_body": 0.15,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 2m | Wick>=0.6_Body<=0.15_BB2.5_V>=1.5",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 5,
+    "holdout_wr": 100.0,
+    "holdout_trades": 3,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.4,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.5
+    },
+    "desc": "SOL 5m | Wick>=0.4_Body<=0.2_BB2.5_V>=1.5",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 2,
+    "holdout_wr": 80.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 2,
+      "bb_th": 3.5,
+      "min_vol": 1.5
+    },
+    "desc": "BNB 4m | BBRev_RSI5<=2_BB3.5_V>=1.5",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 2,
+      "bb_th": 3.5
+    },
+    "desc": "BNB 4m | BBRev_RSI5<=2_BB3.5",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 10,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.6,
+      "max_body": 0.2,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 10m | Wick>=0.6_Body<=0.2_BB2.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 3,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 2,
+      "bb_th": 3.5,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 4m | BBRev_RSI5<=2_BB3.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 4,
+    "type": "BB_RSI_REV",
+    "params": {
+      "rsi_period": 5,
+      "rsi_th": 2,
+      "bb_th": 3.5,
+      "min_vol": 1.2
+    },
+    "desc": "BNB 4m | BBRev_RSI5<=2_BB3.5_V>=1.2",
+    "wr": 80.0,
+    "trades": 15,
+    "expiry_bars": 5,
+    "holdout_wr": null,
+    "holdout_trades": 2,
+    "train_tpd": 0.05
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.2,
+      "bb_th": 2.5
+    },
+    "desc": "ETH 5m | Wick>=0.7_Body<=0.2_BB2.5",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 2,
+    "holdout_wr": 60.0,
+    "holdout_trades": 5,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.2,
+      "bb_th": 2.5
+    },
+    "desc": "ETH 2m | Wick>=0.7_Body<=0.2_BB2.5",
+    "wr": 80.0,
+    "trades": 25,
+    "expiry_bars": 5,
+    "holdout_wr": 77.78,
+    "holdout_trades": 9,
+    "train_tpd": 0.09
+  },
+  {
+    "pair": "ETHUSDT",
+    "tf": 2,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.4,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "ETH 2m | Wick>=0.7_Body<=0.4_BB2.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 35,
+    "expiry_bars": 5,
+    "holdout_wr": 58.33,
+    "holdout_trades": 12,
+    "train_tpd": 0.12
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 15,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.4,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "BNB 15m | Wick>=0.7_Body<=0.4_BB2.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 2,
+    "holdout_wr": null,
+    "holdout_trades": 1,
+    "train_tpd": 0.03
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 10,
+    "type": "WICK_REJ",
+    "params": {
+      "min_wick": 0.7,
+      "max_body": 0.4,
+      "bb_th": 2.5,
+      "min_vol": 1.0
+    },
+    "desc": "SOL 10m | Wick>=0.7_Body<=0.4_BB2.5_V>=1.0",
+    "wr": 80.0,
+    "trades": 10,
+    "expiry_bars": 2,
+    "holdout_wr": 50.0,
+    "holdout_trades": 4,
+    "train_tpd": 0.03
   }
 ]
