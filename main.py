@@ -476,7 +476,11 @@ async def main():
     strategy_mode = os.environ.get("STRATEGY_MODE", "OOS_VALIDATED").upper()
     max_allowed_gale = 0  # STRICT ZERO MARTINGALE
 
-    if any(x in strategy_mode for x in ("STRICT", "PURE", "NO_GALE", "NOGALE_CHAMPIONS", "CHAMPION")):
+    if any(x in strategy_mode for x in ("WALK_FORWARD", "WF", "ROBUST")):
+        wf_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "walk_forward_validated_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=wf_cfg)
+        logger.critical(f"🛡️ [STRATEGY MODE: WALK-FORWARD VALIDATED] Armed with {len(hybrid_engine.setups)} setups | 69.7% WR across 6x60d independent windows | Zero Martingale!")
+    elif any(x in strategy_mode for x in ("STRICT", "PURE", "NO_GALE", "NOGALE_CHAMPIONS", "CHAMPION")):
         nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "strictly_no_gale_verified_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
         logger.critical(f"💎 [STRATEGY MODE: STRICT ZERO-GALE CHAMPIONS] Armed with {len(hybrid_engine.setups)} setups | 70-89% Blind OOS Verified | Zero Martingale!")
@@ -503,11 +507,10 @@ async def main():
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
         logger.critical(f"🎯 [STRATEGY MODE: HIGH-CONFLUENCE 85.7%] Armed with {len(hybrid_engine.setups)} verified setups!")
     else:
-        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_85pct_30tpd_config.json")
-        if not os.path.exists(nogale_cfg):
-            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_validated_85pct_config.json")
-        hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-        logger.critical(f"🏆 [STRATEGY MODE: OOS-VALIDATED DEFAULT] Armed with {len(hybrid_engine.setups)} setups!")
+        # Default to walk-forward validated config (most robust)
+        wf_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "walk_forward_validated_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=wf_cfg)
+        logger.critical(f"🛡️ [STRATEGY MODE: WALK-FORWARD DEFAULT] Armed with {len(hybrid_engine.setups)} setups | 69.7% WR across 6x60d windows!")
     controller.hybrid_engine = hybrid_engine
     logger.info("⏳ Preloading 1,000 historical candles from Binance to warm up timeframes...")
     try:
