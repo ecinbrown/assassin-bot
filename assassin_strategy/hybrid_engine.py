@@ -315,7 +315,7 @@ class HybridSignalEngine:
                 e_val = c_vals[0]
                 for cv in c_vals[1:]:
                     e_val = a * cv + (1.0 - a) * e_val
-                return (c_vals[-1] > e_val and closes[-1] > e_val), (c_vals[-1] < e_val and closes[-1] < e_val), htf_s, e_val
+                return (c_vals[-1] > e_val), (c_vals[-1] < e_val), htf_s, e_val
             else:
                 return closes[-1] > ma20, closes[-1] < ma20, "1m", ma20
 
@@ -618,8 +618,8 @@ class HybridSignalEngine:
                         ema_htf = c_htf[0]
                         for c_val in c_htf[1:]:
                             ema_htf = alpha * c_val + (1.0 - alpha) * ema_htf
-                        is_bull = (c_htf[-1] > ema_htf) and (closes[-1] > ema_htf)
-                        is_bear = (c_htf[-1] < ema_htf) and (closes[-1] < ema_htf)
+                        is_bull = c_htf[-1] > ema_htf
+                        is_bear = c_htf[-1] < ema_htf
                     else:
                         is_bull = closes[-1] > ma20
                         is_bear = closes[-1] < ma20
