@@ -225,8 +225,8 @@ class AssassinController:
         self.last_pair_strategy: Dict[str, str] = {}
         self.last_strategy_time: Dict[str, float] = {}
 
-        # FIX 2: Per-pair cooldown to prevent correlated loss clusters (e.g. 4 BNB losses in 25 min)
-        self.PAIR_COOLDOWN_SECONDS: int = int(os.environ.get("PAIR_COOLDOWN_SECONDS", "900"))  # 15 min default
+        # FIX 2: Per-pair cooldown — 3 min (max-1-concurrent already prevents correlated losses)\r
+        self.PAIR_COOLDOWN_SECONDS: int = int(os.environ.get("PAIR_COOLDOWN_SECONDS", "180"))
 
         # FIX 2b: MAX CONCURRENT TRADES — prevents correlated losses across pairs
         # When bot takes BTC+ETH+SOL CALL on same candle & all lose, it's 3 losses at once
