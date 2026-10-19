@@ -228,6 +228,10 @@ class AssassinController:
         # FIX 2: Per-pair cooldown to prevent correlated loss clusters (e.g. 4 BNB losses in 25 min)
         self.PAIR_COOLDOWN_SECONDS: int = int(os.environ.get("PAIR_COOLDOWN_SECONDS", "900"))  # 15 min default
 
+        # FIX 2b: MAX CONCURRENT TRADES — prevents correlated losses across pairs
+        # When bot takes BTC+ETH+SOL CALL on same candle & all lose, it's 3 losses at once
+        self.MAX_CONCURRENT_TRADES: int = int(os.environ.get("MAX_CONCURRENT_TRADES", "1"))
+
         # FIX 3: Minimum backtest trade count — default 0 so verified OOS setups are not silently blocked
         self.MIN_SETUP_TRADES: int = int(os.environ.get("MIN_SETUP_TRADES", "0"))
 
@@ -533,13 +537,12 @@ async def main():
     # Restore saved simulated balance if available (auto-heal corrupted negative balance)
     saved_state = load_saved_state()
     loaded_bal = saved_state.get("balance", 20.0)
-    # Use INITIAL_BALANCE env var as fallback when Render wipes bot_state.json on redeploy
-    env_bal = float(os.environ.get("INITIAL_BALANCE", "0"))
-    if loaded_bal == 20.0 and env_bal > 0:
-        # State file was wiped (default 20.0) but we have a known balance from env
+    # ALWAYS use INITIAL_BALANCE env var — prevents stale bot_state.json from carrying forward wrong balances
+    env_bal = float(os.environ.get("INITIAL_BALANCE", "15"))
+    if env_bal > 0:
         loaded_bal = env_bal
         controller.baseline_balance = env_bal
-        logger.info(f"📦 [STATE RECOVERY] Using INITIAL_BALANCE env var: ${loaded_bal:.4f}")
+        logger.info(f"📦 [STATE] Starting balance from INITIAL_BALANCE env: ${loaded_bal:.4f}")
     else:
         controller.baseline_balance = loaded_bal
     prdt_agent.simulated_balance = 15.0 if loaded_bal <= 0 else loaded_bal
@@ -717,17 +720,12 @@ async def main():
             tf_tag = sig.metadata.get('tf', '1m') if hasattr(sig, 'metadata') and sig.metadata else '1m'
             tf_minutes = int(tf_tag) if str(tf_tag).isdigit() else 1
 
-            # FIX 2: SMART MULTI-TIMEFRAME CONCURRENCY GUARD
-            #   Max 1 active trade per (pair, timeframe, direction) — prevents duplicate bets on same candle
-            #   Max 3 active trades per pair total across distinct timeframes (e.g. 1m scalp + 5m trend)
-            #   Allows fast 1m/2m/3m scalps to run independently without being blocked by 5m/10m trades
-            active_same_tf_dir = sum(1 for t in controller.active_trades if t.symbol == sig.symbol and t.tf_minutes == tf_minutes and t.action == sig.action.lower())
-            active_same_pair = sum(1 for t in controller.active_trades if t.symbol == sig.symbol)
-            if active_same_tf_dir >= 1:
-                logger.info(f"🛡️ [CONCURRENCY] Skipping {sig.symbol} {sig.action.upper()} on {tf_tag}m — already have active trade on this timeframe")
-                continue
-            if active_same_pair >= 3:
-                logger.info(f"🛡️ [CONCURRENCY] Skipping {sig.symbol} — already have {active_same_pair} active trades on this pair")
+            # FIX 2: GLOBAL CONCURRENCY GUARD — MAX 1 TRADE AT A TIME
+            #   Prevents correlated loss clusters where BTC+ETH+SOL all fire CALL on same candle
+            #   and all lose together (3x loss). Only 1 trade open at any time.
+            total_active = len(controller.active_trades)
+            if total_active >= controller.MAX_CONCURRENT_TRADES:
+                logger.info(f"🛡️ [CONCURRENCY] Skipping {sig.symbol} {sig.action.upper()} — already {total_active} active trade(s) (max: {controller.MAX_CONCURRENT_TRADES})")
                 continue
 
             # FIX 3: Minimum backtest trade count — reject overfit setups
