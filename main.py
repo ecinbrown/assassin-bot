@@ -230,7 +230,7 @@ class AssassinController:
 
         # FIX 2b: MAX CONCURRENT TRADES — prevents correlated losses across pairs
         # When bot takes BTC+ETH+SOL CALL on same candle & all lose, it's 3 losses at once
-        self.MAX_CONCURRENT_TRADES: int = int(os.environ.get("MAX_CONCURRENT_TRADES", "1"))
+        self.MAX_CONCURRENT_TRADES: int = int(os.environ.get("MAX_CONCURRENT_TRADES", "2"))
 
         # FIX 3: Minimum backtest trade count — default 0 so verified OOS setups are not silently blocked
         self.MIN_SETUP_TRADES: int = int(os.environ.get("MIN_SETUP_TRADES", "0"))
