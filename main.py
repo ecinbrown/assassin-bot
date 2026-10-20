@@ -728,6 +728,11 @@ async def main():
                 logger.info(f"🛡️ [CONCURRENCY] Skipping {sig.symbol} {sig.action.upper()} — already {total_active} active trade(s) (max: {controller.MAX_CONCURRENT_TRADES})")
                 continue
 
+            # STRICT PER-PAIR LOCK — NEVER open 2 trades on the same pair at the same time
+            if any(t.symbol == sig.symbol for t in controller.active_trades):
+                logger.info(f"🛡️ [PAIR-LOCK] Skipping {sig.symbol} {sig.action.upper()} — active trade already open for {sig.symbol}")
+                continue
+
             # FIX 3: Minimum backtest trade count — reject overfit setups
             setup_obj = sig.metadata.get("setup_obj", None)
             setup_trades = 0
