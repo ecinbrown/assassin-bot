@@ -434,8 +434,8 @@ async def main():
     stake_native = float(os.environ.get("PRDT_STAKE_NATIVE", "0.01"))
     simulation_mode = os.environ.get("SIMULATION_MODE", "true").lower() in ("true", "1", "yes")
 
-    # Telegram Credentials (supports ASSASSIN_TG_TOKEN & TELEGRAM_BOT_TOKEN)
-    tg_token = os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("BOT_TOKEN", "")
+    # Telegram Credentials (supports ASSASSIN_TG_TOKEN & TELEGRAM_BOT_TOKEN with fallback)
+    tg_token = os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("BOT_TOKEN") or "8295109367:AAFfu6KTgm1HrO_hIG2g5elDoy9953tbywg"
     tg_chat_id = os.environ.get("ASSASSIN_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID") or "6363315804"
 
     # Optional Webhook fallback URL

@@ -31,7 +31,7 @@ class AssassinTelegramBot:
     """Interactive Telegram interface for Assassin Bot."""
 
     def __init__(self, token: Optional[str] = None, chat_id: Optional[str] = None, main_controller=None):
-        self.token = token or os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN", "")
+        self.token = token or os.environ.get("ASSASSIN_TG_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("BOT_TOKEN") or "8295109367:AAFfu6KTgm1HrO_hIG2g5elDoy9953tbywg"
         chat_id_val = chat_id or os.environ.get("ASSASSIN_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID") or "6363315804"
         self.chat_id = int(chat_id_val) if str(chat_id_val).lstrip('-').isdigit() else 6363315804
         
@@ -109,22 +109,29 @@ class AssassinTelegramBot:
             return False
 
     async def start(self):
-        """Start polling in async background loop."""
+        """Start polling in async background loop with resilient auto-reconnect."""
         if not self.app:
             return
         self.is_running = True
         logger.info("🤖 Starting Assassin Telegram polling loop...")
-        await self.app.initialize()
-        await self.app.start()
-        await self.app.updater.start_polling(drop_pending_updates=True)
-        
-        # Send startup greeting
-        await self.send_message(
-            "🦅 <b>ASSASSIN BOT v2 ONLINE</b> 🦅\n\n"
-            "Ready for high-probability crypto price-action sniper trades.\n"
-            "Type /help or use the menu below to control the bot.",
-            reply_markup=self._get_keyboard()
-        )
+        while self.is_running:
+            try:
+                await self.app.initialize()
+                await self.app.start()
+                await self.app.updater.start_polling(drop_pending_updates=True)
+                
+                # Send startup greeting
+                await self.send_message(
+                    "🦅 <b>ASSASSIN BOT v2 ONLINE</b> 🦅\n\n"
+                    "Ready for high-probability crypto price-action sniper trades.\n"
+                    "Type /help or use the menu below to control the bot.",
+                    reply_markup=self._get_keyboard()
+                )
+                logger.info("✅ Assassin Telegram polling loop active.")
+                break
+            except Exception as e:
+                logger.warning(f"⚠️ Telegram start conflict/error (old container may still be shutting down): {e}. Retrying in 12s...")
+                await asyncio.sleep(12)
 
     async def stop(self):
         """Gracefully shut down Telegram bot."""
