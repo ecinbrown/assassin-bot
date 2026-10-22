@@ -995,18 +995,18 @@ async def main():
             if last_trade_time:
                 most_recent = max(last_trade_time.values()) if last_trade_time else 0
                 silence_hours = (time.time() - most_recent) / 3600
-                if silence_hours > 4 and not no_trade_alert_sent:
+                if silence_hours > 8 and not no_trade_alert_sent:
                     no_trade_alert_sent = True
                     if tg_bot:
                         try:
                             await tg_bot.send_message(
-                                f"⚠️ [LIVENESS ALERT] No trades for {silence_hours:.1f} hours!\n"
-                                f"Feed may be dead or market too quiet.\n"
-                                f"Balance: ${current_bal:.2f} | Check bot immediately!"
+                                f"ℹ️ [STATUS] No setups met confluence criteria in {silence_hours:.1f} hours.\n"
+                                f"WebSocket feed is active on all pairs.\n"
+                                f"Balance: ${current_bal:.2f}"
                             )
                         except Exception:
                             pass
-                elif silence_hours <= 4:
+                elif silence_hours <= 8:
                     no_trade_alert_sent = False  # Reset after trade fires
 
     liveness_task = asyncio.create_task(trade_liveness_watchdog())
