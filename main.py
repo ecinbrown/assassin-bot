@@ -494,14 +494,18 @@ async def main():
             nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_validated_85pct_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
         logger.critical(f"🏆 [STRATEGY MODE: DOUBLE-VERIFIED NO-GALE] Armed with {len(hybrid_engine.setups)} setups | Zero Martingale Flat Staking!")
+    elif any(x in strategy_mode for x in ("SNIPER", "10TPD", "12TPD", "CLEAN", "HIGH_ACCURACY", "84PCT")):
+        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_sniper_clean_config.json")
+        if not os.path.exists(nogale_cfg):
+            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_84pct_12tpd_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
+        logger.critical(f"🎯 [STRATEGY MODE: CLEAN SNIPER 10-12 TPD (85.7% WR)] Armed with {len(hybrid_engine.setups)} verified setups | Zero Martingale | Pure HTF Trend Exhaustion!")
     elif any(x in strategy_mode for x in ("20TPD", "80PCT", "BALANCED")):
-        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_80pct_20tpd_config.json")
+        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_sniper_clean_config.json")
+        if not os.path.exists(nogale_cfg):
+            nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_80pct_20tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-        logger.critical(f"🚀 [STRATEGY MODE: NO-GALE 80% @ 20 TPD] Armed with {len(hybrid_engine.setups)} verified setups!")
-    elif any(x in strategy_mode for x in ("12TPD", "10TPD", "84PCT")):
-        nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_84pct_12tpd_config.json")
-        hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
-        logger.critical(f"🎯 [STRATEGY MODE: NO-GALE 84% @ 12 TPD] Armed with {len(hybrid_engine.setups)} verified setups!")
+        logger.critical(f"🚀 [STRATEGY MODE: CLEAN SNIPER (85.7% WR)] Armed with {len(hybrid_engine.setups)} verified setups | Purged WILLR & Low BB!")
     elif any(x in strategy_mode for x in ("88PCT", "89PCT", "ULTRA", "ELITE", "92PCT")):
         nogale_cfg = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_88pct_elite_config.json")
         hybrid_engine = HybridSignalEngine(config_path=nogale_cfg)
