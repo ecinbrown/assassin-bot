@@ -222,7 +222,7 @@ class AssassinController:
         self.last_sweep_ts: float = saved.get("last_sweep_ts", time.time())
         self.is_in_mart_recovery: bool = saved.get("is_in_mart_recovery", False)
         self.lost_mart_amount: float = saved.get("lost_mart_amount", 0.0)
-        self.max_allowed_gale: int = 2  # 2-Gale Mode: Base -> Gale 1 -> Gale 2
+        self.max_allowed_gale: int = 0  # Strict Zero-Gale: Flat single-candle expiry, zero martingale
         self.sweep_profit_ratio: float = float(os.environ.get("SWEEP_PROFIT_RATIO", "0.30"))
         self.sweep_interval_hours: float = float(os.environ.get("SWEEP_INTERVAL_HOURS", "168.0"))
         self.safe_vault_address: str = os.environ.get("SAFE_VAULT_ADDRESS", "")
@@ -351,19 +351,17 @@ class AssassinController:
 
     def calculate_dynamic_stake(self, balance: float, symbol: str = "BTCUSDT", signal: Optional[Any] = None) -> float:
         """
-        Dynamic 4.0% Compounding Model with High-Conviction Smart Recovery:
-        - Scales base stake to 4% of active balance (min $1.00).
-        - Smart Recovery: When sequence losses occur, standard signals trade normal 4% stake,
-          but whenever a high-conviction signal triggers (confidence >= 0.90 or solid_count >= 3),
-          it mathematically scales the recovery stake to clear the lost debt + profit in 1 trade,
-          strictly capped at 20% of account balance / platform bet limit for absolute safety.
+        Pure 4.0% Compounding Model (Strict Zero-Gale):
+        - Scales trade stake organically to 4% of active balance (min $1.00).
+        - No Martingale multipliers or recovery debt escalation.
+        - Accounts grow when winning and self-contract during drawdowns to safeguard equity.
         """
         if balance <= 0:
             return max(1.0, self.stake_native)
 
         max_pool_bet = AssassinController.SYMBOL_MAX_BETS.get(symbol, 250.0)
 
-        # 1. Base 4% Compounding Stake
+        # Base Compounding Stake (4.0% default)
         use_compounding = os.environ.get("COMPOUNDING", "true").lower() in ("true", "1", "yes")
         base_env = os.environ.get("BASE_STAKE")
         if not use_compounding and base_env:
@@ -377,28 +375,6 @@ class AssassinController:
             base_stake = max(1.0, round(balance * base_pct, 2))
 
         base_stake = min(base_stake, max_pool_bet)
-
-        # 2. Smart Recovery Check: Only trigger recovery size on high-probability setups!
-        if self.is_in_mart_recovery and self.lost_mart_amount > 0 and signal:
-            conf = getattr(signal, 'confidence', 0.0)
-            solid = getattr(signal, 'solid_count', 0)
-            verdict = getattr(signal, 'verdict', '')
-            is_high_conviction = (conf >= 0.90) or (solid >= 3 and conf >= 0.88) or (verdict == "TAKE_IT" and conf >= 0.88)
-
-            if is_high_conviction:
-                pair_payout = AssassinController.PAIR_PAYOUTS.get(symbol, 0.70)
-                # Mathematical recovery sizing: (debt + base profit) / payout
-                needed_stake = round((self.lost_mart_amount + (base_stake * pair_payout)) / pair_payout, 2)
-                # Strict safety ceiling: never risk more than 20% of balance on a recovery trade
-                max_rec_stake = round(balance * 0.20, 2)
-                rec_stake = min(needed_stake, max_rec_stake, max_pool_bet)
-                rec_stake = max(base_stake, rec_stake)
-                logger.info(
-                    f"⚡ [SMART RECOVERY ARMED] High-conviction signal ({conf*100:.0f}%, Solid={solid}) on {symbol}. "
-                    f"Sized recovery stake: ${rec_stake:.2f} to recover ${self.lost_mart_amount:.2f} debt."
-                )
-                return rec_stake
-
         return max(1.0, round(base_stake, 2))
 
     def check_risk_limits(self, current_balance: float) -> tuple:
@@ -432,12 +408,12 @@ class AssassinController:
 
 async def main():
     logger.info("=" * 65)
-    logger.info("  ASSASSIN BOT v7.0 — 88% 1-Gale | 30+ TPD Engine")
+    logger.info("  ASSASSIN BOT v8.0 — Strict Zero-Gale 75%+ (10 TPD) Engine")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: 1-Gale 88% SeqWR | 30+ TPD (RSI Pullback + BB + 15m Trend)")
+    logger.info("  Strategy: 47 Walk-Forward Validated Setups (Mean WR: 81.2%, Min: 75.3%)")
     logger.info("  Pairs: BTC (90%), ETH (90%), BNB (90%), XRP (70%), SOL (70%)")
     logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 | SOL $250 | XRP $100")
-    logger.info("  Staking: Dynamic Compounding (6.1% base, 2.22x gale)")
+    logger.info("  Staking: 4% Dynamic Compounding | Flat Expiry | ZERO Martingale")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent) + Webhook")
     logger.info("  Feeder: Binance Live WebSocket (Multi-TF synthesis from 1m)")
     logger.info("  Telegram: Interactive Control + Real/Demo Mode Switcher")
@@ -503,18 +479,23 @@ async def main():
             logger.info(f"🔄 [STATE RESTORED] {len(controller.active_trades)} active trades recovered from last session")
 
     # 3. Instantiate Signal Engine & Configure Strategy / Gale Mode
-    strategy_mode = os.environ.get("STRATEGY_MODE", "30TPD_GALE2").upper()
+    strategy_mode = os.environ.get("STRATEGY_MODE", "10TPD").upper()
     
     # Configure max_allowed_gale:
-    if any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NO_GALE")):
+    if any(x in strategy_mode for x in ("ZERO_GALE", "FLAT", "0GALE", "NO_GALE", "10TPD", "75PCT")):
         controller.max_allowed_gale = 0
     elif any(x in strategy_mode for x in ("GALE1", "1GALE")):
         controller.max_allowed_gale = 1
-    else:
-        # Default to 2-GALE for high accuracy as requested
+    elif any(x in strategy_mode for x in ("GALE2", "2GALE")):
         controller.max_allowed_gale = 2
+    else:
+        controller.max_allowed_gale = 0
 
-    if any(x in strategy_mode for x in ("30TPD", "GALE2", "2GALE")):
+    if any(x in strategy_mode for x in ("10TPD", "ZERO_GALE", "75PCT", "NOGALE_75PCT")):
+        cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_75pct_10tpd_config.json")
+        hybrid_engine = HybridSignalEngine(config_path=cfg_path)
+        logger.critical(f"🎯 [STRATEGY MODE: ZERO-GALE 75%+ (10 TPD)] Armed with {len(hybrid_engine.setups)} setups | Mean WR: 81.2% (Min: 75.3%) | Zero Martingale Flat Staking!")
+    elif any(x in strategy_mode for x in ("30TPD", "GALE2", "2GALE")):
         cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_85pct_30tpd_config.json")
         if not os.path.exists(cfg_path):
             cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "gale1_88pct_30tpd_config.json")
@@ -658,32 +639,22 @@ async def main():
                             gross_payout = round(t.stake_native * (1.0 + pair_payout), 4)
                             seq_profit = round(gross_payout - t.total_sequence_stake, 4)
                             prdt_agent.simulated_balance = round(prdt_agent.simulated_balance + gross_payout, 4)
-                            
-                            # Smart Recovery credit if active:
-                            if controller.is_in_mart_recovery and controller.lost_mart_amount > 0:
-                                controller.lost_mart_amount = max(0.0, round(controller.lost_mart_amount - seq_profit, 4))
-                                if controller.lost_mart_amount <= 0.05:
-                                    controller.is_in_mart_recovery = False
-                                    controller.lost_mart_amount = 0.0
-                                    logger.critical("🎯 [SMART RECOVERY COMPLETE] Loss debt 100% erased! Resuming standard 4% compounding.")
-                                else:
-                                    logger.critical(f"⚡ [SMART RECOVERY PARTIAL] Profit +{seq_profit:.2f} credited. Remaining debt: ${controller.lost_mart_amount:.2f}")
 
                             controller.save_current_state()
-                            logger.critical(f"[BG-SETTLER] WIN {t.symbol} {t.action.upper()} {step_name} | Profit: {seq_profit:+.4f} | Bal: {prdt_agent.simulated_balance:.4f}")
+                            logger.critical(f"[BG-SETTLER] WIN {t.symbol} {t.action.upper()} | Profit: {seq_profit:+.4f} | Bal: {prdt_agent.simulated_balance:.4f}")
                             if tg_bot:
                                 await tg_bot.send_settlement_alert(
                                     symbol=t.symbol, action=t.action,
                                     entry_price=t.entry_price, exit_price=exit_price,
                                     is_win=True, profit_loss=seq_profit,
                                     new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
-                                    wins=controller.wins, losses=controller.losses, step_info=f"WIN {step_name}"
+                                    wins=controller.wins, losses=controller.losses, step_info="ZERO-GALE WIN"
                                 )
                         else:
                             pair_payout = AssassinController.PAIR_PAYOUTS.get(t.symbol, 0.70)
-                            max_allowed_gale = getattr(controller, 'max_allowed_gale', 2)
+                            max_allowed_gale = getattr(controller, 'max_allowed_gale', 0)
 
-                            if t.gale_level < max_allowed_gale:
+                            if max_allowed_gale > 0 and t.gale_level < max_allowed_gale:
                                 next_gale = t.gale_level + 1
                                 # Sizing next Gale step: multiplier is 2.22x for 90% payout, ~2.45x for 70% payout
                                 gale_mult = 2.22 if pair_payout >= 0.85 else round(1.0 + 1.0 / pair_payout, 2)
@@ -721,20 +692,21 @@ async def main():
                             else:
                                 controller.losses += 1
                                 controller.marts_since_loss = 0
-                                controller.is_in_mart_recovery = True
-                                controller.lost_mart_amount = round(controller.lost_mart_amount + t.total_sequence_stake, 4)
+                                controller.is_in_mart_recovery = False
+                                controller.lost_mart_amount = 0.0
                                 controller.save_current_state()
                                 logger.warning(
-                                    f"[BG-SETTLER] SEQUENCE LOSS {t.symbol} {t.action.upper()} (All {max_allowed_gale} Gales Failed) | "
-                                    f"Lost: {t.total_sequence_stake:.2f} | Armed Smart Recovery Debt: ${controller.lost_mart_amount:.2f}"
+                                    f"[BG-SETTLER] LOSS {t.symbol} {t.action.upper()} | "
+                                    f"Lost: -${t.total_sequence_stake:.2f} | Bal: {prdt_agent.simulated_balance:.4f}"
                                 )
                                 if tg_bot:
+                                    step_desc = "ZERO-GALE LOSS" if max_allowed_gale == 0 else f"SEQUENCE LOSS (GALE {t.gale_level})"
                                     await tg_bot.send_settlement_alert(
                                         symbol=t.symbol, action=t.action,
                                         entry_price=t.entry_price, exit_price=exit_price,
                                         is_win=False, profit_loss=-t.total_sequence_stake,
                                         new_balance=prdt_agent.simulated_balance if controller.simulation_mode else 0.0,
-                                        wins=controller.wins, losses=controller.losses, step_info=f"SEQUENCE LOSS (GALE {t.gale_level})"
+                                        wins=controller.wins, losses=controller.losses, step_info=step_desc
                                     )
                     else:
                         remaining.append(t)

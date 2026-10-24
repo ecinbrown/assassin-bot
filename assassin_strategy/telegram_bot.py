@@ -254,7 +254,7 @@ class AssassinTelegramBot:
         total = wins + losses
         win_rate = (wins / total * 100.0) if total > 0 else 0.0
         icon = "🏆" if is_win else "❌"
-        outcome = "WIN ✅" if is_win else "SEQUENCE LOSS ❌"
+        outcome = "WIN ✅" if is_win else "LOSS ❌"
         outcome_tag = f"{outcome} [{step_info}]" if step_info else outcome
         pnl_str = f"+${profit_loss:.2f}" if profit_loss >= 0 else f"-${abs(profit_loss):.2f}"
         open_count = len(getattr(self.controller, 'active_trades', []))
