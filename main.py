@@ -408,10 +408,10 @@ class AssassinController:
 
 async def main():
     logger.info("=" * 65)
-    logger.info("  ASSASSIN BOT v8.0 — Strict Zero-Gale 75%+ (10 TPD) Engine")
+    logger.info("  ASSASSIN BOT v9.0 — Honest Zero-Lookahead Engine")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: 47 Walk-Forward Validated Setups (Mean WR: 81.2%, Min: 75.3%)")
-    logger.info("  Pairs: BTC (90%), ETH (90%), BNB (90%), XRP (70%), SOL (70%)")
+    logger.info("  Strategy: 21 Verified Non-Lookahead Setups (60-72% Blind OOS WR)")
+    logger.info("  Pairs: BTC (90%), ETH (90%), BNB (90%), SOL (70%), XRP (70%)")
     logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 | SOL $250 | XRP $100")
     logger.info("  Staking: 4% Dynamic Compounding | Flat Expiry | ZERO Martingale")
     logger.info("  Execution: Web3 Smart Contract (PRDTAgent) + Webhook")
@@ -491,10 +491,12 @@ async def main():
     else:
         controller.max_allowed_gale = 0
 
-    if any(x in strategy_mode for x in ("10TPD", "ZERO_GALE", "75PCT", "NOGALE_75PCT")):
-        cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_75pct_10tpd_config.json")
+    if any(x in strategy_mode for x in ("HONEST", "REAL", "TRUE", "10TPD", "ZERO_GALE", "75PCT", "NOGALE_75PCT")):
+        cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "honest_zero_lookahead_config.json")
+        if not os.path.exists(cfg_path):
+            cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_75pct_10tpd_config.json")
         hybrid_engine = HybridSignalEngine(config_path=cfg_path)
-        logger.critical(f"🎯 [STRATEGY MODE: ZERO-GALE 75%+ (10 TPD)] Armed with {len(hybrid_engine.setups)} setups | Mean WR: 81.2% (Min: 75.3%) | Zero Martingale Flat Staking!")
+        logger.critical(f"🎯 [STRATEGY MODE: HONEST ZERO-LOOKAHEAD] Armed with {len(hybrid_engine.setups)} verified setups | Mean WR: 64.2% (Max: 72.5%) | 0% Future Leak | Zero Martingale Flat Staking!")
     elif any(x in strategy_mode for x in ("30TPD", "GALE2", "2GALE")):
         cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_85pct_30tpd_config.json")
         if not os.path.exists(cfg_path):
