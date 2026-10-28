@@ -1,0 +1,236 @@
+[
+  {
+    "pair": "ETHUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 9,
+      "rsi_th": 25.0,
+      "bb_th": 2.0,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "ETHUSDT 5m HTF_15m_EMA20_RSI9_BB2.0",
+    "wr": 91.89,
+    "trades": 37,
+    "walk_forward_min_wr": 80.0
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 6,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "30m_EMA20",
+      "rsi_period": 14,
+      "rsi_th": 30.0,
+      "bb_th": 2.0,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "BNBUSDT 6m HTF_30m_EMA20_RSI14_BB2.0",
+    "wr": 90.0,
+    "trades": 30,
+    "walk_forward_min_wr": 80.0
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 7,
+      "rsi_th": 25.0,
+      "bb_th": 2.5,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "BTCUSDT 5m HTF_15m_EMA20_RSI7_BB2.5",
+    "wr": 86.36,
+    "trades": 66,
+    "walk_forward_min_wr": 80.0
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 5,
+      "rsi_th": 15.0,
+      "bb_th": 2.0,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "SOLUSDT 5m HTF_15m_EMA20_RSI5_BB2.0",
+    "wr": 86.02,
+    "trades": 93,
+    "walk_forward_min_wr": 80.0
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 9,
+      "rsi_th": 25.0,
+      "bb_th": 1.5,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "BTCUSDT 5m HTF_15m_EMA20_RSI9_BB1.5",
+    "wr": 84.44,
+    "trades": 45,
+    "walk_forward_min_wr": 80.0
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 6,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "30m_EMA20",
+      "rsi_period": 14,
+      "rsi_th": 30.0,
+      "bb_th": 2.0,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "BTCUSDT 6m HTF_30m_EMA20_RSI14_BB2.0",
+    "wr": 86.96,
+    "trades": 46,
+    "walk_forward_min_wr": 77.8
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 6,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "30m_EMA20",
+      "rsi_period": 9,
+      "rsi_th": 25.0,
+      "bb_th": 2.5,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "SOLUSDT 6m HTF_30m_EMA20_RSI9_BB2.5",
+    "wr": 87.5,
+    "trades": 64,
+    "walk_forward_min_wr": 76.9
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "30m_EMA20",
+      "rsi_period": 14,
+      "rsi_th": 25.0,
+      "bb_th": 2.5,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "SOLUSDT 3m HTF_30m_EMA20_RSI14_BB2.5",
+    "wr": 88.24,
+    "trades": 34,
+    "walk_forward_min_wr": 75.0
+  },
+  {
+    "pair": "XRPUSDT",
+    "tf": 3,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 14,
+      "rsi_th": 30.0,
+      "bb_th": 1.5,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "XRPUSDT 3m HTF_15m_EMA20_RSI14_BB1.5",
+    "wr": 86.89,
+    "trades": 61,
+    "walk_forward_min_wr": 75.0
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "30m_EMA20",
+      "rsi_period": 9,
+      "rsi_th": 30.0,
+      "bb_th": 3.0,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "BTCUSDT 5m HTF_30m_EMA20_RSI9_BB3.0",
+    "wr": 84.85,
+    "trades": 66,
+    "walk_forward_min_wr": 75.0
+  },
+  {
+    "pair": "SOLUSDT",
+    "tf": 3,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 14,
+      "rsi_th": 30.0,
+      "bb_th": 2.0,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "SOLUSDT 3m HTF_15m_EMA20_RSI14_BB2.0",
+    "wr": 84.62,
+    "trades": 65,
+    "walk_forward_min_wr": 75.0
+  },
+  {
+    "pair": "BTCUSDT",
+    "tf": 5,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "30m_EMA20",
+      "rsi_period": 7,
+      "rsi_th": 25.0,
+      "bb_th": 3.0,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "BTCUSDT 5m HTF_30m_EMA20_RSI7_BB3.0",
+    "wr": 83.58,
+    "trades": 67,
+    "walk_forward_min_wr": 75.0
+  },
+  {
+    "pair": "BNBUSDT",
+    "tf": 3,
+    "type": "HTF_PULLBACK",
+    "params": {
+      "trend": "15m_EMA20",
+      "rsi_period": 14,
+      "rsi_th": 30.0,
+      "bb_th": 2.0,
+      "min_wick": 0.0,
+      "min_vol": 0.0,
+      "expiry_bars": 1
+    },
+    "desc": "BNBUSDT 3m HTF_15m_EMA20_RSI14_BB2.0",
+    "wr": 80.3,
+    "trades": 66,
+    "walk_forward_min_wr": 75.0
+  }
+]

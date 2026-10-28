@@ -1,65 +1,65 @@
-[2026-10-10T00:14:00] 2026-10-10 00:14:00,140 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.40 H:1.40 L:1.40 C:1.40 V:163919.7
-[2026-10-10T00:14:00] 2026-10-10 00:14:00,217 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:109.10 H:109.23 L:109.08 C:109.23 V:2163.6
-[2026-10-10T00:14:54] 2026-10-10 00:14:54,092 [INFO] AssassinBot: 💓 [KEEP-ALIVE] Pinged https://assassin-sniper.onrender.com/health | Status: 200 (anti-sleep active)
-[2026-10-10T00:15:00] 2026-10-10 00:15:00,124 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:743.11 H:743.18 L:743.05 C:743.18 V:28.9
-[2026-10-10T00:15:00] 2026-10-10 00:15:00,169 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:82638.01 H:82638.01 L:82609.99 C:82638.00 V:97.5
-[2026-10-10T00:15:00] 2026-10-10 00:15:00,173 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2489.21 H:2489.21 L:2488.77 C:2489.04 V:100.7
-[2026-10-10T00:15:00] 2026-10-10 00:15:00,176 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.40 H:1.40 L:1.40 C:1.40 V:21895.0
-[2026-10-10T00:15:00] 2026-10-10 00:15:00,218 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:109.23 H:109.27 L:109.20 C:109.22 V:1677.6
-[2026-10-10T00:16:00] 2026-10-10 00:16:00,126 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:743.18 H:743.18 L:742.64 C:742.98 V:244.8
-[2026-10-10T00:16:00] 2026-10-10 00:16:00,130 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:82638.01 H:82638.01 L:82598.01 C:82608.34 V:2.8
-[2026-10-10T00:16:00] 2026-10-10 00:16:00,133 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2489.03 H:2489.36 L:2488.62 C:2489.36 V:25.9
-[2026-10-10T00:16:00] 2026-10-10 00:16:00,134 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.40 H:1.40 L:1.40 C:1.40 V:8959.5
-[2026-10-10T00:16:00] 2026-10-10 00:16:00,215 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:109.22 H:109.22 L:109.16 C:109.20 V:829.4
-[2026-10-10T00:17:00] 2026-10-10 00:17:00,123 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:743.01 H:743.29 L:743.01 C:743.29 V:77.4
-[2026-10-10T00:17:00] 2026-10-10 00:17:00,148 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:82608.34 H:82629.25 L:82608.34 C:82629.25 V:1.4
-[2026-10-10T00:17:00] 2026-10-10 00:17:00,149 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2489.35 H:2490.52 L:2489.35 C:2490.51 V:71.9
-[2026-10-10T00:17:00] 2026-10-10 00:17:00,149 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.40 H:1.40 L:1.40 C:1.40 V:57345.1
-[2026-10-10T00:17:00] 2026-10-10 00:17:00,209 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:109.20 H:109.28 L:109.20 C:109.24 V:429.0
-[2026-10-10T00:18:00] 2026-10-10 00:18:00,129 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:743.29 H:743.29 L:743.28 C:743.29 V:22.6
-[2026-10-10T00:18:00] 2026-10-10 00:18:00,135 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:82629.25 H:82629.25 L:82629.24 C:82629.25 V:0.6
-[2026-10-10T00:18:00] 2026-10-10 00:18:00,140 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2490.51 H:2490.51 L:2489.99 C:2490.02 V:22.4
-[2026-10-10T00:18:00] 2026-10-10 00:18:00,143 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.40 H:1.40 L:1.40 C:1.40 V:64608.7
-[2026-10-10T00:18:00] 2026-10-10 00:18:00,253 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:109.24 H:109.24 L:109.20 C:109.20 V:150.3
-[2026-10-10T00:18:54] 2026-10-10 00:18:54,152 [INFO] AssassinBot: 💓 [KEEP-ALIVE] Pinged https://assassin-sniper.onrender.com/health | Status: 200 (anti-sleep active)
-[2026-10-10T00:19:00] 2026-10-10 00:19:00,131 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:743.28 H:743.29 L:742.95 C:742.99 V:94.1
-[2026-10-10T00:19:00] 2026-10-10 00:19:00,133 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:82629.25 H:82629.25 L:82592.16 C:82592.16 V:6.1
-[2026-10-10T00:19:00] 2026-10-10 00:19:00,134 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2490.03 H:2490.03 L:2488.91 C:2488.91 V:46.6
-[2026-10-10T00:19:00] 2026-10-10 00:19:00,134 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.40 H:1.40 L:1.40 C:1.40 V:80052.2
-[2026-10-10T00:19:00] 2026-10-10 00:19:00,211 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:109.21 H:109.23 L:109.12 C:109.13 V:513.7
-[2026-10-10T00:20:00] 2026-10-10 00:20:00,135 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:743.00 H:743.56 L:743.00 C:743.56 V:44.3
-[2026-10-10T00:20:00] 2026-10-10 00:20:00,137 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:82592.16 H:82620.59 L:82586.63 C:82620.59 V:3.3
-[2026-10-10T00:20:00] 2026-10-10 00:20:00,139 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2488.92 H:2490.73 L:2488.91 C:2490.73 V:38.2
-[2026-10-10T00:20:00] 2026-10-10 00:20:00,142 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.40 H:1.40 L:1.40 C:1.40 V:21614.6
-[2026-10-10T00:20:00] 2026-10-10 00:20:00,211 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:109.13 H:109.28 L:109.13 C:109.28 V:544.7
-[2026-10-10T00:21:00] 2026-10-10 00:21:00,166 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:743.56 H:743.83 L:743.56 C:743.83 V:59.3
-[2026-10-10T00:21:00] 2026-10-10 00:21:00,168 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:82620.59 H:82625.09 L:82617.72 C:82617.73 V:2.4
-[2026-10-10T00:21:00] 2026-10-10 00:21:00,170 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2490.72 H:2491.37 L:2489.94 C:2490.00 V:158.4
-[2026-10-10T00:21:00] 2026-10-10 00:21:00,170 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.40 H:1.40 L:1.40 C:1.40 V:22594.9
-[2026-10-10T00:21:00] 2026-10-10 00:21:00,235 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:109.28 H:109.31 L:109.24 C:109.26 V:199.5
-[2026-10-10T00:22:00] 2026-10-10 00:22:00,135 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:743.83 H:743.97 L:743.83 C:743.93 V:27.2
-[2026-10-10T00:22:00] 2026-10-10 00:22:00,137 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:82617.73 H:82620.00 L:82617.72 C:82620.00 V:1.2
-[2026-10-10T00:22:00] 2026-10-10 00:22:00,138 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2490.01 H:2491.00 L:2490.00 C:2491.00 V:53.0
-[2026-10-10T00:22:00] 2026-10-10 00:22:00,139 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.40 H:1.40 L:1.40 C:1.40 V:85888.9
-[2026-10-10T00:22:00] 2026-10-10 00:22:00,215 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:109.25 H:109.34 L:109.25 C:109.34 V:478.8
-[2026-10-10T00:22:54] 2026-10-10 00:22:54,201 [INFO] AssassinBot: 💓 [KEEP-ALIVE] Pinged https://assassin-sniper.onrender.com/health | Status: 200 (anti-sleep active)
-[2026-10-10T00:23:00] 2026-10-10 00:23:00,139 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:743.93 H:743.93 L:743.58 C:743.60 V:24.0
-[2026-10-10T00:23:00] 2026-10-10 00:23:00,140 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:82620.01 H:82622.01 L:82617.73 C:82617.73 V:1.6
-[2026-10-10T00:23:00] 2026-10-10 00:23:00,141 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2491.01 H:2491.01 L:2490.55 C:2490.56 V:17.5
-[2026-10-10T00:23:00] 2026-10-10 00:23:00,141 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.40 H:1.40 L:1.40 C:1.40 V:17319.0
-[2026-10-10T00:23:00] 2026-10-10 00:23:00,227 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:109.33 H:109.33 L:109.29 C:109.30 V:691.0
-[2026-10-10T00:24:00] 2026-10-10 00:24:00,140 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:743.60 H:743.66 L:743.60 C:743.61 V:18.5
-[2026-10-10T00:24:00] 2026-10-10 00:24:00,145 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:82617.73 H:82617.74 L:82605.67 C:82605.68 V:1.5
-[2026-10-10T00:24:00] 2026-10-10 00:24:00,150 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2490.56 H:2490.56 L:2490.12 C:2490.12 V:61.0
-[2026-10-10T00:24:00] 2026-10-10 00:24:00,153 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.40 H:1.40 L:1.40 C:1.40 V:28123.9
-[2026-10-10T00:24:00] 2026-10-10 00:24:00,218 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:109.30 H:109.31 L:109.29 C:109.31 V:235.0
-[2026-10-10T00:25:00] 2026-10-10 00:25:00,128 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:743.60 H:743.70 L:743.60 C:743.70 V:10.4
-[2026-10-10T00:25:00] 2026-10-10 00:25:00,130 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:82605.68 H:82605.68 L:82605.00 C:82605.01 V:2.7
-[2026-10-10T00:25:00] 2026-10-10 00:25:00,142 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2490.12 H:2490.13 L:2490.12 C:2490.12 V:12.8
-[2026-10-10T00:25:00] 2026-10-10 00:25:00,143 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.40 H:1.40 L:1.40 C:1.40 V:5220.7
-[2026-10-10T00:25:00] 2026-10-10 00:25:00,210 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:109.31 H:109.31 L:109.24 C:109.25 V:396.5
+[2026-10-17T11:37:00] 2026-10-17 11:37:00,136 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2435.77 H:2436.08 L:2435.76 C:2436.08 V:62.1
+[2026-10-17T11:37:00] 2026-10-17 11:37:00,138 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.31 H:1.31 L:1.31 C:1.31 V:1426.7
+[2026-10-17T11:37:00] 2026-10-17 11:37:00,217 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:104.69 H:104.71 L:104.68 C:104.71 V:151.8
+[2026-10-17T11:38:00] 2026-10-17 11:38:00,121 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:721.17 H:721.34 L:721.17 C:721.33 V:14.8
+[2026-10-17T11:38:00] 2026-10-17 11:38:00,132 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:81589.69 H:81589.70 L:81584.82 C:81587.61 V:1.0
+[2026-10-17T11:38:00] 2026-10-17 11:38:00,136 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2436.07 H:2436.08 L:2435.83 C:2435.97 V:29.8
+[2026-10-17T11:38:00] 2026-10-17 11:38:00,141 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.31 H:1.31 L:1.31 C:1.31 V:13469.0
+[2026-10-17T11:38:00] 2026-10-17 11:38:00,214 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:104.70 H:104.71 L:104.67 C:104.71 V:266.1
+[2026-10-17T11:39:00] 2026-10-17 11:39:00,123 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:721.34 H:721.54 L:721.33 C:721.53 V:50.8
+[2026-10-17T11:39:00] 2026-10-17 11:39:00,135 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:81587.61 H:81587.62 L:81587.61 C:81587.61 V:1.1
+[2026-10-17T11:39:00] 2026-10-17 11:39:00,138 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2435.97 H:2436.17 L:2435.97 C:2436.16 V:56.7
+[2026-10-17T11:39:00] 2026-10-17 11:39:00,140 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.31 H:1.31 L:1.31 C:1.31 V:8504.8
+[2026-10-17T11:39:00] 2026-10-17 11:39:00,244 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:104.70 H:104.74 L:104.70 C:104.74 V:204.3
+[2026-10-17T11:40:00] 2026-10-17 11:40:00,144 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:721.53 H:721.54 L:721.53 C:721.53 V:9.8
+[2026-10-17T11:40:00] 2026-10-17 11:40:00,151 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:81587.61 H:81587.62 L:81587.61 C:81587.62 V:0.8
+[2026-10-17T11:40:00] 2026-10-17 11:40:00,237 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2436.16 H:2436.21 L:2436.16 C:2436.21 V:24.7
+[2026-10-17T11:40:00] 2026-10-17 11:40:00,332 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.31 H:1.31 L:1.31 C:1.31 V:7574.0
+[2026-10-17T11:40:00] 2026-10-17 11:40:00,427 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:104.73 H:104.75 L:104.73 C:104.74 V:108.3
+[2026-10-17T11:40:35] 2026-10-17 11:40:35,397 [INFO] AssassinBot: 💓 [KEEP-ALIVE] Pinged https://assassin-sniper.onrender.com/health | Status: 200 (anti-sleep active)
+[2026-10-17T11:41:00] 2026-10-17 11:41:00,121 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:721.53 H:721.54 L:721.33 C:721.47 V:42.6
+[2026-10-17T11:41:00] 2026-10-17 11:41:00,132 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:81587.62 H:81587.62 L:81558.00 C:81571.40 V:4.7
+[2026-10-17T11:41:00] 2026-10-17 11:41:00,133 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2436.20 H:2436.21 L:2435.20 C:2435.35 V:110.9
+[2026-10-17T11:41:00] 2026-10-17 11:41:00,134 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.31 H:1.31 L:1.31 C:1.31 V:21945.5
+[2026-10-17T11:41:00] 2026-10-17 11:41:00,214 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:104.75 H:104.76 L:104.70 C:104.71 V:302.5
+[2026-10-17T11:42:00] 2026-10-17 11:42:00,129 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:721.47 H:721.48 L:721.36 C:721.36 V:22.7
+[2026-10-17T11:42:00] 2026-10-17 11:42:00,136 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:81571.40 H:81571.44 L:81571.40 C:81571.44 V:1.7
+[2026-10-17T11:42:00] 2026-10-17 11:42:00,140 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2435.36 H:2435.53 L:2435.13 C:2435.13 V:112.6
+[2026-10-17T11:42:00] 2026-10-17 11:42:00,145 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.31 H:1.31 L:1.31 C:1.31 V:4736.7
+[2026-10-17T11:42:00] 2026-10-17 11:42:00,237 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:104.72 H:104.72 L:104.70 C:104.71 V:119.4
+[2026-10-17T11:43:00] 2026-10-17 11:43:00,135 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:721.36 H:721.54 L:721.36 C:721.53 V:30.9
+[2026-10-17T11:43:00] 2026-10-17 11:43:00,135 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:81571.44 H:81581.16 L:81571.43 C:81580.53 V:1.7
+[2026-10-17T11:43:00] 2026-10-17 11:43:00,136 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2435.13 H:2435.14 L:2435.13 C:2435.14 V:8.2
+[2026-10-17T11:43:00] 2026-10-17 11:43:00,137 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.31 H:1.31 L:1.31 C:1.31 V:25581.5
+[2026-10-17T11:43:00] 2026-10-17 11:43:00,216 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:104.71 H:104.74 L:104.70 C:104.74 V:131.6
+[2026-10-17T11:44:00] 2026-10-17 11:44:00,123 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:721.53 H:721.58 L:721.53 C:721.57 V:11.9
+[2026-10-17T11:44:00] 2026-10-17 11:44:00,130 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:81580.53 H:81585.77 L:81580.53 C:81585.77 V:1.4
+[2026-10-17T11:44:00] 2026-10-17 11:44:00,137 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2435.13 H:2435.14 L:2435.13 C:2435.13 V:20.3
+[2026-10-17T11:44:00] 2026-10-17 11:44:00,143 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.31 H:1.31 L:1.31 C:1.31 V:3105.0
+[2026-10-17T11:44:00] 2026-10-17 11:44:00,209 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:104.73 H:104.76 L:104.73 C:104.74 V:135.9
+[2026-10-17T11:44:35] 2026-10-17 11:44:35,444 [INFO] AssassinBot: 💓 [KEEP-ALIVE] Pinged https://assassin-sniper.onrender.com/health | Status: 200 (anti-sleep active)
+[2026-10-17T11:45:00] 2026-10-17 11:45:00,138 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:721.57 H:721.58 L:721.54 C:721.54 V:28.5
+[2026-10-17T11:45:00] 2026-10-17 11:45:00,144 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:81585.77 H:81593.86 L:81585.76 C:81593.86 V:1.9
+[2026-10-17T11:45:00] 2026-10-17 11:45:00,227 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2435.14 H:2435.20 L:2435.13 C:2435.19 V:17.7
+[2026-10-17T11:45:00] 2026-10-17 11:45:00,231 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.31 H:1.31 L:1.31 C:1.31 V:13277.0
+[2026-10-17T11:45:00] 2026-10-17 11:45:00,235 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:104.75 H:104.75 L:104.72 C:104.74 V:79.4
+[2026-10-17T11:46:00] 2026-10-17 11:46:00,125 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:721.54 H:721.55 L:721.54 C:721.55 V:8.3
+[2026-10-17T11:46:00] 2026-10-17 11:46:00,144 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:81593.85 H:81593.86 L:81593.85 C:81593.85 V:0.5
+[2026-10-17T11:46:00] 2026-10-17 11:46:00,147 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2435.20 H:2435.55 L:2435.19 C:2435.55 V:178.8
+[2026-10-17T11:46:00] 2026-10-17 11:46:00,152 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.31 H:1.31 L:1.31 C:1.31 V:5441.1
+[2026-10-17T11:46:00] 2026-10-17 11:46:00,213 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:104.73 H:104.74 L:104.72 C:104.72 V:129.3
+[2026-10-17T11:47:00] 2026-10-17 11:47:00,182 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:721.54 H:721.59 L:721.54 C:721.58 V:16.6
+[2026-10-17T11:47:00] 2026-10-17 11:47:00,182 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:81593.86 H:81593.86 L:81593.85 C:81593.86 V:0.3
+[2026-10-17T11:47:00] 2026-10-17 11:47:00,183 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2435.54 H:2435.54 L:2435.00 C:2435.43 V:63.7
+[2026-10-17T11:47:00] 2026-10-17 11:47:00,185 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.31 H:1.31 L:1.31 C:1.31 V:20462.8
+[2026-10-17T11:47:00] 2026-10-17 11:47:00,216 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:104.73 H:104.74 L:104.71 C:104.73 V:510.5
+[2026-10-17T11:48:00] 2026-10-17 11:48:00,134 [INFO] assassin_strategy.binance_feed: 📊 [BNBUSDT|1m] Candle Closed | O:721.58 H:721.59 L:721.58 C:721.58 V:17.0
+[2026-10-17T11:48:00] 2026-10-17 11:48:00,155 [INFO] assassin_strategy.binance_feed: 📊 [BTCUSDT|1m] Candle Closed | O:81593.86 H:81593.86 L:81593.85 C:81593.85 V:0.4
+[2026-10-17T11:48:00] 2026-10-17 11:48:00,231 [INFO] assassin_strategy.binance_feed: 📊 [ETHUSDT|1m] Candle Closed | O:2435.43 H:2435.43 L:2434.72 C:2434.72 V:195.3
+[2026-10-17T11:48:00] 2026-10-17 11:48:00,239 [INFO] assassin_strategy.binance_feed: 📊 [XRPUSDT|1m] Candle Closed | O:1.31 H:1.31 L:1.31 C:1.31 V:3855.3
+[2026-10-17T11:48:00] 2026-10-17 11:48:00,332 [INFO] assassin_strategy.binance_feed: 📊 [SOLUSDT|1m] Candle Closed | O:104.73 H:104.73 L:104.71 C:104.71 V:92.5
 
-Total relevant lines found: 841
+Total relevant lines found: 899
 
 Last signal: NONE FOUND
 Last settlement: NONE FOUND

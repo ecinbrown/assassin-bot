@@ -1,16 +1,19 @@
 """
-Assassin Bot - Telegram Controller & Live Alert Engine
-======================================================
+Assassin Bot - Telegram Controller & Live Alert Engine (v9.0 Bulletproof)
+=========================================================================
 Provides interactive Telegram control for Assassin Bot:
 - Real-time trade and signal alerts with full price-action breakdown.
 - Dynamic mode switching between DEMO (Simulation) and REAL (Live Web3).
 - Stake adjustment, symbol management, status dashboard, and auto-claim triggers.
+- Auto-recovery: polling supervisor restarts on any crash.
+- Deploy-safe: handles container-swap conflicts gracefully.
 """
 import html
 import asyncio
 import logging
 import os
 import time
+import traceback
 from typing import Optional, List, Dict
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import (
@@ -43,6 +46,8 @@ class AssassinTelegramBot:
         self.controller = main_controller  # Reference to main context (engine, prdt_agent, feed)
         self.app: Optional[Application] = None
         self.is_running = False
+        self._app_initialized = False
+        self._polling_active = False
 
     def _get_keyboard(self) -> ReplyKeyboardMarkup:
         """Create persistent quick-action keyboard."""
@@ -102,52 +107,139 @@ class AssassinTelegramBot:
             # Universal Fallback Message Handler
             self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_unknown_or_text))
 
+            # Global error handler — catches unhandled exceptions in any handler
+            # so they don't silently kill the polling loop
+            self.app.add_error_handler(self._global_error_handler)
+
             logger.info("✅ Assassin Telegram Bot handlers registered successfully.")
             return True
         except Exception as e:
             logger.error(f"❌ Failed to initialize Telegram Bot: {e}")
             return False
 
+    async def _global_error_handler(self, update: object, context: ContextTypes.DEFAULT_TYPE):
+        """Catch-all error handler so that a crash in any command handler
+        never kills the polling loop."""
+        logger.error(f"❌ [TG-ERROR-HANDLER] Exception in handler: {context.error}")
+        try:
+            tb = traceback.format_exception(type(context.error), context.error, context.error.__traceback__)
+            logger.error(f"❌ [TG-ERROR-HANDLER] Traceback:\n{''.join(tb[-3:])}")
+        except Exception:
+            pass
+        # Try to notify the user that something went wrong
+        if isinstance(update, Update) and update.effective_chat:
+            try:
+                await update.effective_chat.send_message(
+                    "⚠️ An internal error occurred processing your request. The bot is still running."
+                )
+            except Exception:
+                pass
+
+    async def _cleanup_polling(self):
+        """Safely tear down a running polling session (updater + app)."""
+        try:
+            if self.app and self.app.updater and self.app.updater.running:
+                await self.app.updater.stop()
+        except Exception:
+            pass
+        try:
+            if self.app and self.app.running:
+                await self.app.stop()
+        except Exception:
+            pass
+        try:
+            if self._app_initialized:
+                await self.app.shutdown()
+                self._app_initialized = False
+        except Exception:
+            pass
+        self._polling_active = False
+
     async def start(self):
-        """Start polling in async background loop with resilient auto-reconnect."""
+        """Start polling with auto-recovery supervisor.
+        
+        If polling crashes for ANY reason (network, Telegram conflict, bug),
+        it tears down cleanly and restarts after a cooldown. This makes the
+        bot survive container swaps, network blips, and transient errors.
+        """
         if not self.app:
             return
         self.is_running = True
-        logger.info("🤖 Starting Assassin Telegram polling loop...")
+        logger.info("🤖 Starting Assassin Telegram polling supervisor...")
+
+        attempt = 0
         while self.is_running:
+            attempt += 1
             try:
+                # Clean up any previous failed session
+                await self._cleanup_polling()
+
+                # Delete any stale webhook before polling (prevents webhook/polling conflict)
+                try:
+                    import httpx
+                    async with httpx.AsyncClient(timeout=10) as client:
+                        await client.post(
+                            f"https://api.telegram.org/bot{self.token}/deleteWebhook",
+                            json={"drop_pending_updates": True}
+                        )
+                except Exception:
+                    pass  # Non-critical — polling will still work
+
                 await self.app.initialize()
+                self._app_initialized = True
                 await self.app.start()
-                await self.app.updater.start_polling(drop_pending_updates=True)
+                await self.app.updater.start_polling(
+                    drop_pending_updates=True,
+                    allowed_updates=Update.ALL_TYPES
+                )
+                self._polling_active = True
                 
                 # Send startup greeting
                 await self.send_message(
-                    "🦅 <b>ASSASSIN BOT v2 ONLINE</b> 🦅\n\n"
-                    "Ready for high-probability crypto price-action sniper trades.\n"
-                    "Type /help or use the menu below to control the bot.",
+                    "🦅 <b>ASSASSIN BOT v9.0 ONLINE</b> 🦅\n\n"
+                    "Honest Zero-Lookahead Engine active.\n"
+                    "Type /help or use the menu below.",
                     reply_markup=self._get_keyboard()
                 )
-                logger.info("✅ Assassin Telegram polling loop active.")
+                logger.info(f"✅ Assassin Telegram polling active (attempt #{attempt}).")
+                attempt = 0  # Reset on success
+
+                # Supervisor: keep checking that polling is still alive
+                while self.is_running:
+                    await asyncio.sleep(30)
+                    if not self.app.updater.running:
+                        logger.warning("⚠️ Telegram updater stopped unexpectedly — restarting...")
+                        break  # Break inner loop to trigger outer restart
+
+            except asyncio.CancelledError:
+                logger.info("🛑 Telegram polling task cancelled.")
                 break
             except Exception as e:
-                logger.warning(f"⚠️ Telegram start conflict/error (old container may still be shutting down): {e}. Retrying in 12s...")
-                await asyncio.sleep(12)
+                cooldown = min(12 * attempt, 120)  # Exponential backoff, max 2 min
+                logger.warning(
+                    f"⚠️ Telegram polling error (attempt #{attempt}): {e}. "
+                    f"Restarting in {cooldown}s..."
+                )
+                await self._cleanup_polling()
+                await asyncio.sleep(cooldown)
+
+        # Final cleanup on exit
+        await self._cleanup_polling()
+        logger.info("🛑 Telegram polling supervisor exited.")
 
     async def stop(self):
         """Gracefully shut down Telegram bot."""
-        if self.app and self.is_running:
-            self.is_running = False
-            await self.app.updater.stop()
-            await self.app.stop()
-            await self.app.shutdown()
+        self.is_running = False
+        await self._cleanup_polling()
 
     # ───────────────────────────────────────────
     # NOTIFICATION DISPATCHERS
     # ───────────────────────────────────────────
 
     async def send_message(self, text: str, reply_markup=None):
-        """Send a message to the configured admin chat and authorized recipients."""
-        if not self.app:
+        """Send a message to the configured admin chat and authorized recipients.
+        Retries once on transient failures (network blip, rate limit)."""
+        if not self.app or not self._app_initialized:
             logger.warning("⚠️ Telegram app not initialized. Cannot send message.")
             return
         
@@ -157,28 +249,37 @@ class AssassinTelegramBot:
             targets.add(self.chat_id)
 
         for cid in targets:
-            try:
-                await self.app.bot.send_message(
-                    chat_id=cid,
-                    text=text,
-                    parse_mode='HTML',
-                    reply_markup=reply_markup,
-                    disable_web_page_preview=True
-                )
-                logger.info(f"📤 Telegram message delivered to {cid}")
-            except Exception as e:
-                logger.warning(f"Telegram send error to {cid}: {e} | Falling back to plain text send...")
+            for attempt in range(2):  # Retry once on failure
                 try:
-                    plain_text = text.replace('<b>', '').replace('</b>', '').replace('<code>', '').replace('</code>', '')
                     await self.app.bot.send_message(
                         chat_id=cid,
-                        text=plain_text,
-                        parse_mode=None,
+                        text=text,
+                        parse_mode='HTML',
                         reply_markup=reply_markup,
                         disable_web_page_preview=True
                     )
-                except Exception as e2:
-                    logger.error(f"Telegram plain text fallback failed to {cid}: {e2}")
+                    logger.info(f"📤 Telegram message delivered to {cid}")
+                    break  # Success
+                except Exception as e:
+                    if attempt == 0:
+                        # First failure: try plain text fallback
+                        try:
+                            plain_text = text.replace('<b>', '').replace('</b>', '').replace('<code>', '').replace('</code>', '')
+                            plain_text = plain_text.replace('<i>', '').replace('</i>', '')
+                            await self.app.bot.send_message(
+                                chat_id=cid,
+                                text=plain_text,
+                                parse_mode=None,
+                                reply_markup=reply_markup,
+                                disable_web_page_preview=True
+                            )
+                            logger.info(f"📤 Telegram plain text delivered to {cid} (HTML fallback)")
+                            break
+                        except Exception as e2:
+                            logger.warning(f"Telegram send error to {cid} (attempt {attempt+1}): {e2}. Retrying in 3s...")
+                            await asyncio.sleep(3)
+                    else:
+                        logger.error(f"❌ Telegram send FAILED to {cid} after 2 attempts: {e}")
 
     async def send_signal_alert(self, sig):
         """Broadcast signal detection — lean version."""
