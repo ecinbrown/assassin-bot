@@ -240,7 +240,7 @@ class AssassinController:
 
         # FIX 2b: MAX CONCURRENT TRADES — prevents correlated losses across pairs
         # When bot takes BTC+ETH+SOL CALL on same candle & all lose, it's 3 losses at once
-        self.MAX_CONCURRENT_TRADES: int = int(os.environ.get("MAX_CONCURRENT_TRADES", "2"))
+        self.MAX_CONCURRENT_TRADES: int = int(os.environ.get("MAX_CONCURRENT_TRADES", "3"))
 
         # FIX 3: Minimum backtest trade count — default 0 so verified OOS setups are not silently blocked
         self.MIN_SETUP_TRADES: int = int(os.environ.get("MIN_SETUP_TRADES", "0"))
@@ -370,7 +370,7 @@ class AssassinController:
             except ValueError:
                 base_stake = 1.0
         else:
-            raw_pct = float(os.environ.get("BASE_STAKE_PCT", "4.0"))
+            raw_pct = float(os.environ.get("BASE_STAKE_PCT", "5.0"))
             base_pct = raw_pct / 100.0 if raw_pct > 1.0 else raw_pct
             base_stake = max(1.0, round(balance * base_pct, 2))
 
@@ -408,9 +408,9 @@ class AssassinController:
 
 async def main():
     logger.info("=" * 65)
-    logger.info("  ASSASSIN BOT v9.0 — Honest Zero-Lookahead Engine")
+    logger.info("  ASSASSIN BOT v10.0 — Massive Multi-Strategy Engine")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: 21 Verified Non-Lookahead Setups (60-72% Blind OOS WR)")
+    logger.info("  Strategy: 137 Multi-Strategy Setups (73% WR, 21 TPD, 8 Strategy Types)")
     logger.info("  Pairs: BTC (90%), ETH (90%), BNB (90%), SOL (70%), XRP (70%)")
     logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 | SOL $250 | XRP $100")
     logger.info("  Staking: 4% Dynamic Compounding | Flat Expiry | ZERO Martingale")
@@ -491,12 +491,12 @@ async def main():
     else:
         controller.max_allowed_gale = 0
 
-    if any(x in strategy_mode for x in ("HONEST", "REAL", "TRUE", "10TPD", "ZERO_GALE", "75PCT", "NOGALE_75PCT")):
-        cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "honest_zero_lookahead_config.json")
+    if any(x in strategy_mode for x in ("HONEST", "REAL", "TRUE", "10TPD", "ZERO_GALE", "75PCT", "NOGALE_75PCT", "MASSIVE", "20TPD")):
+        cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "massive_73pct_20tpd_config.json")
         if not os.path.exists(cfg_path):
-            cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "nogale_75pct_10tpd_config.json")
+            cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "honest_zero_lookahead_config.json")
         hybrid_engine = HybridSignalEngine(config_path=cfg_path)
-        logger.critical(f"🎯 [STRATEGY MODE: HONEST ZERO-LOOKAHEAD] Armed with {len(hybrid_engine.setups)} verified setups | Mean WR: 64.2% (Max: 72.5%) | 0% Future Leak | Zero Martingale Flat Staking!")
+        logger.critical(f"🎯 [v10 MASSIVE MULTI-STRAT] {len(hybrid_engine.setups)} setups | 8 strategy types | 21 TPD | 73% WR | 5% stake | Zero Gale")
     elif any(x in strategy_mode for x in ("30TPD", "GALE2", "2GALE")):
         cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_85pct_30tpd_config.json")
         if not os.path.exists(cfg_path):

@@ -563,6 +563,146 @@ class HybridSignalEngine:
                         action = "put"
                         trigger_detail = f"MFI={mfi_val:.1f}>={100-mfi_th} | RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th}"
 
+                # ─── VOL_RSI: Volume Spike + RSI Reversal (Massive Hunt v10) ───
+                elif stype == "VOL_RSI":
+                    rsi_period = int(p.get("rsi_period", 9))
+                    rsi_th = float(p.get("rsi_th", 25.0))
+                    vol_th = float(p.get("vol_th", 2.0))
+                    trend_type = p.get("trend", "15m_EMA20")
+
+                    b_bull, b_bear, htf_s, ema_htf = _get_htf_trend_state(trend_type)
+
+                    deltas = np.diff(closes[-(rsi_period + 30):])
+                    gains = np.where(deltas > 0, deltas, 0.0)
+                    losses_arr = np.where(deltas < 0, -deltas, 0.0)
+                    ag = np.mean(gains[:rsi_period])
+                    al = np.mean(losses_arr[:rsi_period])
+                    for j in range(rsi_period, len(deltas)):
+                        ag = (ag * (rsi_period - 1) + gains[j]) / rsi_period
+                        al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
+                    rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+
+                    if b_bull and rsi_val <= rsi_th and vol_ratio_20 >= vol_th:
+                        action = "call"
+                        trigger_detail = f"{htf_s}Bull | RSI{rsi_period}={rsi_val:.1f}<={rsi_th} | Vol={vol_ratio_20:.1f}>={vol_th}"
+                    elif b_bear and rsi_val >= (100.0 - rsi_th) and vol_ratio_20 >= vol_th:
+                        action = "put"
+                        trigger_detail = f"{htf_s}Bear | RSI{rsi_period}={rsi_val:.1f}>={100.0-rsi_th} | Vol={vol_ratio_20:.1f}>={vol_th}"
+
+                # ─── BIG_BODY_RSI: Large Candle Body + RSI Reversal (Massive Hunt v10) ───
+                elif stype == "BIG_BODY_RSI":
+                    rsi_period = int(p.get("rsi_period", 14))
+                    rsi_th = float(p.get("rsi_th", 35.0))
+                    body_pct_th = float(p.get("body_pct", 0.5))
+                    trend_type = p.get("trend", "15m_EMA20")
+
+                    b_bull, b_bear, htf_s, ema_htf = _get_htf_trend_state(trend_type)
+
+                    body = closes[-1] - opens[-1]
+                    body_pct = abs(body) / max(opens[-1], 1e-8) * 100.0
+
+                    deltas = np.diff(closes[-(rsi_period + 30):])
+                    gains = np.where(deltas > 0, deltas, 0.0)
+                    losses_arr = np.where(deltas < 0, -deltas, 0.0)
+                    ag = np.mean(gains[:rsi_period])
+                    al = np.mean(losses_arr[:rsi_period])
+                    for j in range(rsi_period, len(deltas)):
+                        ag = (ag * (rsi_period - 1) + gains[j]) / rsi_period
+                        al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
+                    rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+
+                    if b_bull and body < 0 and body_pct >= body_pct_th and rsi_val <= rsi_th:
+                        action = "call"
+                        trigger_detail = f"{htf_s}Bull | BigRedBody={body_pct:.2f}%>={body_pct_th}% | RSI{rsi_period}={rsi_val:.1f}<={rsi_th}"
+                    elif b_bear and body > 0 and body_pct >= body_pct_th and rsi_val >= (100.0 - rsi_th):
+                        action = "put"
+                        trigger_detail = f"{htf_s}Bear | BigGreenBody={body_pct:.2f}%>={body_pct_th}% | RSI{rsi_period}={rsi_val:.1f}>={100.0-rsi_th}"
+
+                # ─── CONSEC_RSI: Consecutive Candle Streak + RSI Filter (Massive Hunt v10) ───
+                elif stype == "CONSEC_RSI":
+                    min_run = int(p.get("min_run", 5))
+                    rsi_period = int(p.get("rsi_period", 9))
+                    rsi_th = float(p.get("rsi_th", 35.0))
+                    trend_type = p.get("trend", "15m_EMA20")
+
+                    b_bull, b_bear, htf_s, ema_htf = _get_htf_trend_state(trend_type)
+
+                    deltas = np.diff(closes[-(rsi_period + 30):])
+                    gains = np.where(deltas > 0, deltas, 0.0)
+                    losses_arr = np.where(deltas < 0, -deltas, 0.0)
+                    ag = np.mean(gains[:rsi_period])
+                    al = np.mean(losses_arr[:rsi_period])
+                    for j in range(rsi_period, len(deltas)):
+                        ag = (ag * (rsi_period - 1) + gains[j]) / rsi_period
+                        al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
+                    rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+
+                    if b_bull and cr >= min_run and rsi_val <= rsi_th:
+                        action = "call"
+                        trigger_detail = f"{htf_s}Bull | {cr}RedBars>={min_run} | RSI{rsi_period}={rsi_val:.1f}<={rsi_th}"
+                    elif b_bear and cg >= min_run and rsi_val >= (100.0 - rsi_th):
+                        action = "put"
+                        trigger_detail = f"{htf_s}Bear | {cg}GreenBars>={min_run} | RSI{rsi_period}={rsi_val:.1f}>={100.0-rsi_th}"
+
+                # ─── BB_VOL: Bollinger Band Touch + Volume Spike (Massive Hunt v10) ───
+                elif stype == "BB_VOL":
+                    bb_th = float(p.get("bb_th", 2.0))
+                    vol_th = float(p.get("vol_th", 2.0))
+                    trend_type = p.get("trend", "15m_EMA20")
+
+                    b_bull, b_bear, htf_s, ema_htf = _get_htf_trend_state(trend_type)
+
+                    if b_bull and bb_z <= -bb_th and vol_ratio_20 >= vol_th:
+                        action = "call"
+                        trigger_detail = f"{htf_s}Bull | BBz={bb_z:.2f}<=-{bb_th} | Vol={vol_ratio_20:.1f}>={vol_th}"
+                    elif b_bear and bb_z >= bb_th and vol_ratio_20 >= vol_th:
+                        action = "put"
+                        trigger_detail = f"{htf_s}Bear | BBz={bb_z:.2f}>={bb_th} | Vol={vol_ratio_20:.1f}>={vol_th}"
+
+                # ─── TRIPLE_CONF: BB + RSI + Consecutive Candle Triple Confluence (Massive Hunt v10) ───
+                elif stype == "TRIPLE_CONF":
+                    bb_th = float(p.get("bb_th", 1.5))
+                    rsi_period = int(p.get("rsi_period", 9))
+                    rsi_th = float(p.get("rsi_th", 30.0))
+                    min_run = int(p.get("min_run", 2))
+                    trend_type = p.get("trend", "15m_EMA20")
+
+                    b_bull, b_bear, htf_s, ema_htf = _get_htf_trend_state(trend_type)
+
+                    deltas = np.diff(closes[-(rsi_period + 30):])
+                    gains = np.where(deltas > 0, deltas, 0.0)
+                    losses_arr = np.where(deltas < 0, -deltas, 0.0)
+                    ag = np.mean(gains[:rsi_period])
+                    al = np.mean(losses_arr[:rsi_period])
+                    for j in range(rsi_period, len(deltas)):
+                        ag = (ag * (rsi_period - 1) + gains[j]) / rsi_period
+                        al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
+                    rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
+
+                    if b_bull and bb_z <= -bb_th and rsi_val <= rsi_th and cr >= min_run:
+                        action = "call"
+                        trigger_detail = f"{htf_s}Bull | BBz={bb_z:.2f}<=-{bb_th} | RSI{rsi_period}={rsi_val:.1f}<={rsi_th} | {cr}Red>={min_run}"
+                    elif b_bear and bb_z >= bb_th and rsi_val >= (100.0 - rsi_th) and cg >= min_run:
+                        action = "put"
+                        trigger_detail = f"{htf_s}Bear | BBz={bb_z:.2f}>={bb_th} | RSI{rsi_period}={rsi_val:.1f}>={100.0-rsi_th} | {cg}Green>={min_run}"
+
+                # ─── BIG_BODY_REV: Large Body Reversal without RSI (Massive Hunt v10) ───
+                elif stype == "BIG_BODY_REV":
+                    body_pct_th = float(p.get("body_pct", 0.8))
+                    trend_type = p.get("trend", "15m_EMA20")
+
+                    b_bull, b_bear, htf_s, ema_htf = _get_htf_trend_state(trend_type)
+
+                    body = closes[-1] - opens[-1]
+                    body_pct = abs(body) / max(opens[-1], 1e-8) * 100.0
+
+                    if b_bull and body < 0 and body_pct >= body_pct_th:
+                        action = "call"
+                        trigger_detail = f"{htf_s}Bull | BigRedBody={body_pct:.2f}%>={body_pct_th}%"
+                    elif b_bear and body > 0 and body_pct >= body_pct_th:
+                        action = "put"
+                        trigger_detail = f"{htf_s}Bear | BigGreenBody={body_pct:.2f}%>={body_pct_th}%"
+
                 # ─── EXTREME REVERSAL (Strict Zero-Gale Champions: 70-89% WR Verified) ───
                 elif stype in ("EXTREME_REVERSAL", "SNIPER_NO_GALE"):
                     rsi_period = int(p.get("rsi_period", 7))
