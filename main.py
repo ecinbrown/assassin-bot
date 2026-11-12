@@ -408,9 +408,9 @@ class AssassinController:
 
 async def main():
     logger.info("=" * 65)
-    logger.info("  ASSASSIN BOT v10.0 — Massive Multi-Strategy Engine")
+    logger.info("  ASSASSIN BOT v10.1 — Massive Multi-Strategy Engine")
     logger.info("  ─────────────────────────────────────────────────────")
-    logger.info("  Strategy: 137 Multi-Strategy Setups (73% WR, 21 TPD, 8 Strategy Types)")
+    logger.info("  Strategy: 90 Honest Setups (70% WR, 12 TPD, Both Halves Validated)")
     logger.info("  Pairs: BTC (90%), ETH (90%), BNB (90%), SOL (70%), XRP (70%)")
     logger.info("  Platform Caps: BTC $1000 | ETH $250 | BNB $250 | SOL $250 | XRP $100")
     logger.info("  Staking: 4% Dynamic Compounding | Flat Expiry | ZERO Martingale")
@@ -492,11 +492,11 @@ async def main():
         controller.max_allowed_gale = 0
 
     if any(x in strategy_mode for x in ("HONEST", "REAL", "TRUE", "10TPD", "ZERO_GALE", "75PCT", "NOGALE_75PCT", "MASSIVE", "20TPD")):
-        cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "massive_73pct_20tpd_config.json")
+        cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "honest_70pct_12tpd_config.json")
         if not os.path.exists(cfg_path):
             cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "honest_zero_lookahead_config.json")
         hybrid_engine = HybridSignalEngine(config_path=cfg_path)
-        logger.critical(f"🎯 [v10 MASSIVE MULTI-STRAT] {len(hybrid_engine.setups)} setups | 8 strategy types | 21 TPD | 73% WR | 5% stake | Zero Gale")
+        logger.critical(f"🎯 [v10.1 HONEST 70%] {len(hybrid_engine.setups)} setups | 8 strategy types | 12 TPD | 70% real WR | 5% stake | Zero Gale")
     elif any(x in strategy_mode for x in ("30TPD", "GALE2", "2GALE")):
         cfg_path = os.path.join(os.path.dirname(__file__), "assassin_strategy", "oos_85pct_30tpd_config.json")
         if not os.path.exists(cfg_path):
