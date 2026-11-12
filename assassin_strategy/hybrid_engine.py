@@ -486,11 +486,18 @@ class HybridSignalEngine:
                         action = "put"
                         trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th} | BBz={bb_z:.2f}>={bb_th} | Vol={vol_ratio_20:.1f}"
 
-                # ─── RSI ONLY (No-Gale) ───
+                # ─── RSI ONLY + HTF Trend Filter (Fixed v10.1) ───
                 elif stype == "RSI_ONLY":
                     rsi_period = p.get("rsi_period", 2)
                     rsi_th = p.get("rsi_th", 3)
                     min_vol = p.get("min_vol", 0.0)
+                    trend_type = p.get("trend", "")
+
+                    # HTF trend filter (required for v10+ setups)
+                    if trend_type:
+                        b_bull, b_bear, htf_s, ema_htf = _get_htf_trend_state(trend_type)
+                    else:
+                        b_bull, b_bear, htf_s = True, True, "no_htf"
 
                     deltas = np.diff(closes[-(rsi_period + 30):])
                     gains = np.where(deltas > 0, deltas, 0.0)
@@ -502,12 +509,12 @@ class HybridSignalEngine:
                         al = (al * (rsi_period - 1) + losses_arr[j]) / rsi_period
                     rsi_val = 100.0 if al == 0 else 100.0 - 100.0 / (1.0 + ag / al)
 
-                    if rsi_val <= rsi_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                    if b_bull and rsi_val <= rsi_th and (min_vol <= 0 or vol_ratio_20 >= min_vol):
                         action = "call"
-                        trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}<={rsi_th} | Vol={vol_ratio_20:.1f}"
-                    elif rsi_val >= (100 - rsi_th) and (min_vol <= 0 or vol_ratio_20 >= min_vol):
+                        trigger_detail = f"{htf_s}Bull | RSI{rsi_period}={rsi_val:.1f}<={rsi_th} | Vol={vol_ratio_20:.1f}"
+                    elif b_bear and rsi_val >= (100 - rsi_th) and (min_vol <= 0 or vol_ratio_20 >= min_vol):
                         action = "put"
-                        trigger_detail = f"RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th} | Vol={vol_ratio_20:.1f}"
+                        trigger_detail = f"{htf_s}Bear | RSI{rsi_period}={rsi_val:.1f}>={100-rsi_th} | Vol={vol_ratio_20:.1f}"
 
                 # ─── BB + STREAK (No-Gale) ───
                 elif stype == "BB_STREAK":
