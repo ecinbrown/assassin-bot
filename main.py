@@ -453,6 +453,35 @@ async def main():
         simulation_mode=simulation_mode
     )
 
+    # RESET STATS on new config version (prevents old garbage trades from polluting WR display)
+    CONFIG_VERSION = "v10.1-honest-70pct"
+    saved_version = saved.get("config_version", "")
+    if saved_version != CONFIG_VERSION:
+        logger.critical(f"🔄 [CONFIG RESET] New config version {CONFIG_VERSION} detected (was: {saved_version}). Resetting W/L counters.")
+        controller.wins = 0
+        controller.losses = 0
+        controller.marts_since_loss = 0
+        controller.is_in_mart_recovery = False
+        controller.lost_mart_amount = 0.0
+        controller.total_swept_profit = 0.0
+        controller.baseline_balance = float(os.environ.get("INITIAL_BALANCE", "15"))
+        save_state(
+            balance=controller.baseline_balance, wins=0, losses=0,
+            marts_since_loss=0, baseline_balance=controller.baseline_balance,
+            total_swept_profit=0.0, last_sweep_ts=time.time(),
+            active_trades=[], is_in_mart_recovery=False, lost_mart_amount=0.0
+        )
+        # Patch config_version into state file
+        import json as _json
+        try:
+            with open(STATE_FILE, 'r') as _f:
+                _st = _json.load(_f)
+            _st["config_version"] = CONFIG_VERSION
+            with open(STATE_FILE, 'w') as _f:
+                _json.dump(_st, _f, indent=2)
+        except Exception:
+            pass
+
     # FIX 5: Restore active trades from saved state (survives crashes/redeploys)
     saved = load_saved_state()
     saved_trades = saved.get("active_trades", [])
@@ -960,7 +989,7 @@ async def main():
     # 8. Start HTTP Health Server (Required for Render Web Service)
     port = int(os.environ.get("PORT", 8080))
     async def handle_health(request):
-        return web.Response(text="OK - Assassin Bot v2 Running", status=200)
+        return web.Response(text="OK - Assassin Bot v10.1 | 90 setups | 72.7% WR | 12 TPD", status=200)
 
     http_app = web.Application()
     http_app.router.add_get("/", handle_health)
